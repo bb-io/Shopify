@@ -1,22 +1,25 @@
 ﻿using Apps.Shopify.Api;
+using Apps.Shopify.Constants.GraphQL;
 using Blackbird.Applications.Sdk.Common.Authentication;
 using Blackbird.Applications.Sdk.Common.Connections;
-using RestSharp;
+using GraphQL;
 
 namespace Apps.Shopify.Connections;
 
-public class ConnectionValidator: IConnectionValidator
+public class ConnectionValidator : IConnectionValidator
 {
     public async ValueTask<ConnectionValidationResponse> ValidateConnection(
         IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders,
         CancellationToken cancellationToken)
     {
-        var creds = authenticationCredentialsProviders.ToArray();
-        var client = new ShopifyClient(creds);
+        var client = new ShopifyClient(authenticationCredentialsProviders.ToArray());
 
-        var request = new ShopifyRequest("customers.json", Method.Get, creds);
-        await client.ExecuteWithErrorHandling(request);
-        
+        var request = new GraphQLRequest()
+        {
+            Query = GraphQlQueries.Locales
+        }; 
+        await client.ExecuteWithErrorHandling(request, cancellationToken);
+
         return new()
         {
             IsValid = true

@@ -12,6 +12,8 @@
 
     <ItemGroup>
         <PackageReference Include="Blackbird.Applications.Sdk.Utils" Version="1.0.19"/>
+        <PackageReference Include="GraphQL.Client" Version="6.0.2" />
+        <PackageReference Include="GraphQL.Client.Serializer.Newtonsoft" Version="6.0.2" />
     </ItemGroup>
 
     <ItemGroup>
