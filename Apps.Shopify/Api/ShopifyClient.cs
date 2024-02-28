@@ -21,7 +21,7 @@ public class ShopifyClient : GraphQLHttpClient
         HttpClient.DefaultRequestHeaders.Add("X-Shopify-Access-Token", token);
     }
 
-    public async Task<T> ExecuteWithErrorHandling<T>(GraphQLRequest request, CancellationToken cancellationToken)
+    public async Task<T> ExecuteWithErrorHandling<T>(GraphQLRequest request, CancellationToken cancellationToken = default)
     {
         var response = await SendQueryAsync<T>(request, cancellationToken);
 
@@ -32,7 +32,7 @@ public class ShopifyClient : GraphQLHttpClient
     }
 
     public async Task<GraphQLResponse<JObject>> ExecuteWithErrorHandling(GraphQLRequest request,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         var response = await SendQueryAsync<JObject>(request, cancellationToken);
 

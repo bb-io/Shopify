@@ -33,4 +33,27 @@ public static class GraphQlQueries
               }
             }
           }";
+
+    public const string ProductContent =
+        @"query ($resourceId: ID!) {
+          translatableResource(resourceId: $resourceId) {
+            translatableContent {
+              key
+              value
+              digest
+              locale
+              type
+            }
+          }
+        }";
+
+    public const string ProductTranslationContent =
+        @"query ($resourceId: ID!, $locale: String!) {
+          translatableResource(resourceId: $resourceId) {
+               translations(locale: $locale) {
+                  key
+                  value
+                }
+          }
+        }";
 }
