@@ -14,6 +14,7 @@ using GraphQL;
 
 namespace Apps.Shopify.Actions;
 
+[ActionList]
 public class ProductActions : ShopifyInvocable
 {
     private readonly IFileManagementClient _fileManagementClient;
