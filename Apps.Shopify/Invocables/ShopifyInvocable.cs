@@ -1,18 +1,18 @@
-using Apps.App.Api;
+using Apps.Shopify.Api;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Authentication;
 using Blackbird.Applications.Sdk.Common.Invocation;
 
-namespace Apps.App.Invocables;
+namespace Apps.Shopify.Invocables;
 
-public class AppInvocable : BaseInvocable
+public class ShopifyInvocable : BaseInvocable
 {
     protected AuthenticationCredentialsProvider[] Creds =>
         InvocationContext.AuthenticationCredentialsProviders.ToArray();
 
-    protected AppClient Client { get; }
-    public AppInvocable(InvocationContext invocationContext) : base(invocationContext)
+    protected ShopifyClient Client { get; }
+    public ShopifyInvocable(InvocationContext invocationContext) : base(invocationContext)
     {
-        Client = new();
+        Client = new(Creds);
     }
 }
