@@ -15,4 +15,25 @@ public static class GraphQlMutations
                   }
                 }
               }";
+
+    public const string SubscribeEvent =
+      @"mutation webhookSubscriptionCreate($topic: WebhookSubscriptionTopic!, $webhookSubscription: WebhookSubscriptionInput!) {
+          webhookSubscriptionCreate(topic: $topic, webhookSubscription: $webhookSubscription) {
+            userErrors {
+              field
+              message
+            }
+          }
+        }";
+
+    public const string UnsubscribeEvent =
+      @"mutation webhookSubscriptionDelete($id: ID!) {
+          webhookSubscriptionDelete(id: $id) {
+            deletedWebhookSubscriptionId
+            userErrors {
+              field
+              message
+            }
+          }
+        }";
 }
