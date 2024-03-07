@@ -10,10 +10,10 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 
 ## Connecting
 
-1. Navigate to apps and search for Shopify. If you cannot find Shopify then click _Add App_ in the top right corner, select Shopify and add the app to your Blackbird environment.
+1. In Blackbird, navigate to 'Apps' and search for Shopify. If you cannot find Shopify then click _Add App_ in the top right corner, select Shopify and add the app to your Blackbird environment.
 2. Click _Add Connection_.
 3. Name your connection for future reference e.g. 'My Shopify connection'.
-4. Go to `Store settings -> Apps and sales channels -> Develop apps`.
+4. In Shopify, go to `Store settings -> Apps and sales channels -> Develop apps`.
 5. Create the develop app.
 6. Click `Configure Admin API scopes` to select the scopes you want to provide Blackbird with.
 7. After selecting the scopes click `Save` and go to `API credentials` and install the newly created app.
