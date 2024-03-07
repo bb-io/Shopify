@@ -19,7 +19,7 @@ public class ProductEntity
     public string ProductType { get; set; }   
     
     [Display("Online store URL")]
-    public string onlineStoreUrl { get; set; }   
+    public string OnlineStoreUrl { get; set; }   
     
     [Display("Created at")]
     public DateTime CreatedAt { get; set; }   
