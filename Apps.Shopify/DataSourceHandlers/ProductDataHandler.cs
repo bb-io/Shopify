@@ -16,11 +16,11 @@ public class ProductDataHandler : ShopifyInvocable, IAsyncDataSourceHandler
     public async Task<Dictionary<string, string>> GetDataAsync(DataSourceContext context,
         CancellationToken cancellationToken)
     {
-        var variables = new Dictionary<string, object>()
+       var variables = new Dictionary<string, object>()
         {
             ["query"] = $"title:{context.SearchString}*"
         };
-        var response = await Client
+        var response =  await Client
             .Paginate<ProductEntity, ProductsPaginationResponse>(GraphQlQueries.Products, variables, cancellationToken);
 
         return response
