@@ -22,18 +22,7 @@ public class TranslatableResourceActions : ShopifyInvocable
         FileManagementClient = fileManagementClient;
     }
 
-    protected async Task<FileResponse> GetResourceContent(string resourceId)
-    {
-        var response = await GetResourceSourceContent(resourceId);
-        var html = ShopifyHtmlConverter.ToHtml(response.TranslatableResource.TranslatableContent);
-
-        return new()
-        {
-            File = await FileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html, $"{resourceId}.html")
-        };
-    }
-    
-    protected async Task<FileResponse> GetResourceTranslationContent(string resourceId, string locale)
+    protected async Task<FileResponse> GetResourceContent(string resourceId, string locale)
     {
         var request = new GraphQLRequest()
         {
@@ -44,7 +33,9 @@ public class TranslatableResourceActions : ShopifyInvocable
             }
         };
         var response = await Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
-        var html = ShopifyHtmlConverter.ToHtml(response.TranslatableResource.Translations);
+        var html = ShopifyHtmlConverter.ToHtml(response.TranslatableResource.Translations.Any()
+            ? response.TranslatableResource.Translations
+            : response.TranslatableResource.TranslatableContent);
 
         return new()
         {
@@ -55,13 +46,14 @@ public class TranslatableResourceActions : ShopifyInvocable
     protected async Task UpdateResourceContent(string resourceId, string locale, FileReference file)
     {
         var fileStream = await FileManagementClient.DownloadAsync(file);
-        var translations = ShopifyHtmlConverter.ToJson(fileStream, locale).ToArray();
+        var translations = ShopifyHtmlConverter.ToJson(fileStream, locale).ToList();
 
         if (translations.Any(x => string.IsNullOrWhiteSpace(x.TranslatableContentDigest)))
         {
             var sourceContent = await GetResourceSourceContent(resourceId);
-            sourceContent.TranslatableResource.TranslatableContent.ToList()
-                .ForEach(x => translations.First(y => y.Key == x.Key).TranslatableContentDigest = x.Digest);
+            translations.ForEach(x =>
+                x.TranslatableContentDigest = sourceContent.TranslatableResource.TranslatableContent
+                    .First(y => y.Key == x.Key).Digest);
         }
 
         var request = new GraphQLRequest()
@@ -84,7 +76,7 @@ public class TranslatableResourceActions : ShopifyInvocable
             Query = GraphQlQueries.TranslatableResourceContent,
             Variables = new
             {
-                resourceId = resourceId
+                resourceId
             }
         };
         return Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);

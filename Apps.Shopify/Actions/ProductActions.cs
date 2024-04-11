@@ -42,15 +42,11 @@ public class ProductActions : TranslatableResourceActions
         return new(response);
     }
 
-    [Action("Get product content as HTML", Description = "Get content of a specific product in HTML format")]
-    public Task<FileResponse> GetProductContent([ActionParameter] ProductRequest input)
-        => GetResourceContent(input.ProductId);
-
-    [Action("Get product translation content as HTML",
-        Description = "Get content of a specific product translation in HTML format")]
+    [Action("Get product content as HTML",
+        Description = "Get content of a specific product in HTML format")]
     public Task<FileResponse> GetProductTranslationContent([ActionParameter] ProductRequest resourceRequest,
         [ActionParameter] LocaleRequest locale)
-        => GetResourceTranslationContent(resourceRequest.ProductId, locale.Locale);
+        => GetResourceContent(resourceRequest.ProductId, locale.Locale);
 
     [Action("Update product content from HTML", Description = "Update content of a specific product from HTML file")]
     public Task UpdateProductContent([ActionParameter] ProductRequest resourceRequest,

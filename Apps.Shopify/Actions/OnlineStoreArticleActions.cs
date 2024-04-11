@@ -17,16 +17,11 @@ public class OnlineStoreArticleActions : TranslatableResourceActions
     {
     }
 
-    [Action("Get online store article content as HTML",
+    [Action("Get online store article translation as HTML",
         Description = "Get content of a specific online store article in HTML format")]
-    public Task<FileResponse> GetOnlineStoreArticleContent([ActionParameter] OnlineStoreArticleRequest input)
-        => GetResourceContent(input.OnlineStoreArticleId);
-
-    [Action("Get online store article translation content as HTML",
-        Description = "Get content of a specific online store article translation in HTML format")]
     public Task<FileResponse> GetOnlineStoreArticleTranslationContent(
         [ActionParameter] OnlineStoreArticleRequest input, [ActionParameter] LocaleRequest locale)
-        => GetResourceTranslationContent(input.OnlineStoreArticleId, locale.Locale);
+        => GetResourceContent(input.OnlineStoreArticleId, locale.Locale);
 
     [Action("Update online store article content from HTML",
         Description = "Update content of a specific online store article from HTML file")]

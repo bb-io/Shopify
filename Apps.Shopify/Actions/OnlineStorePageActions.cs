@@ -19,14 +19,9 @@ public class OnlineStorePageActions : TranslatableResourceActions
 
     [Action("Get online store page content as HTML",
         Description = "Get content of a specific online store page in HTML format")]
-    public Task<FileResponse> GetOnlineStorePageContent([ActionParameter] OnlineStorePageRequest input)
-        => GetResourceContent(input.OnlineStorePageId);
-
-    [Action("Get online store page translation content as HTML",
-        Description = "Get content of a specific online store page translation in HTML format")]
     public Task<FileResponse> GetOnlineStorePageTranslationContent(
         [ActionParameter] OnlineStorePageRequest input, [ActionParameter] LocaleRequest locale)
-        => GetResourceTranslationContent(input.OnlineStorePageId, locale.Locale);
+        => GetResourceContent(input.OnlineStorePageId, locale.Locale);
 
     [Action("Update online store page content from HTML",
         Description = "Update content of a specific online store page from HTML file")]
