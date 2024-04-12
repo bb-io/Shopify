@@ -39,7 +39,7 @@ public class TranslatableResourceActions : ShopifyInvocable
 
         return new()
         {
-            File = await FileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html, $"{resourceId}.html")
+            File = await FileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html, $"{resourceId.Split('/').Last()}.html")
         };
     }
 
