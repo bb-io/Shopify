@@ -50,6 +50,6 @@ public class ProductActions : TranslatableResourceActions
 
     [Action("Update product content from HTML", Description = "Update content of a specific product from HTML file")]
     public Task UpdateProductContent([ActionParameter] ProductRequest resourceRequest,
-        [ActionParameter] LocaleRequest locale, [ActionParameter] FileRequest file)
+        [ActionParameter] NonPrimaryLocaleRequest locale, [ActionParameter] FileRequest file)
         => UpdateResourceContent(resourceRequest.ProductId, locale.Locale, file.File);
 }

@@ -26,6 +26,6 @@ public class OnlineStoreBlogActions : TranslatableResourceActions
     [Action("Update online store blog content from HTML",
         Description = "Update content of a specific online store blog from HTML file")]
     public Task UpdateOnlineStoreBlogContent([ActionParameter] OnlineStoreBlogRequest resourceRequest,
-        [ActionParameter] LocaleRequest locale, [ActionParameter] FileRequest file)
+        [ActionParameter] NonPrimaryLocaleRequest locale, [ActionParameter] FileRequest file)
         => UpdateResourceContent(resourceRequest.OnlineStoreBlogId, locale.Locale, file.File);
 }

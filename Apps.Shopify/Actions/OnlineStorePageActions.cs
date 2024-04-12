@@ -26,6 +26,6 @@ public class OnlineStorePageActions : TranslatableResourceActions
     [Action("Update online store page content from HTML",
         Description = "Update content of a specific online store page from HTML file")]
     public Task UpdateOnlineStorePageContent([ActionParameter] OnlineStorePageRequest resourceRequest,
-        [ActionParameter] LocaleRequest locale, [ActionParameter] FileRequest file)
+        [ActionParameter] NonPrimaryLocaleRequest locale, [ActionParameter] FileRequest file)
         => UpdateResourceContent(resourceRequest.OnlineStorePageId, locale.Locale, file.File);
 }
