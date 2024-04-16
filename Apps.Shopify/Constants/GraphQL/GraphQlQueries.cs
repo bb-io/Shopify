@@ -34,7 +34,25 @@ public static class GraphQlQueries
             }
           }";
 
-    public const string ProductContent =
+    public const string TranslatableResources =
+        @"query ($resourceType: TranslatableResourceType!, $after: String, $limit: Int!) {
+          translatableResources(first: $limit, after: $after, resourceType: $resourceType) {
+              nodes {
+                 resourceId
+                 translatableContent {
+                    key
+                    value
+                 }
+               }
+              pageInfo {
+                 endCursor
+                 hasNextPage
+                 startCursor
+              }
+          }
+        }";
+
+    public const string TranslatableResourceContent =
         @"query ($resourceId: ID!) {
           translatableResource(resourceId: $resourceId) {
             translatableContent {
@@ -47,18 +65,25 @@ public static class GraphQlQueries
           }
         }";
 
-    public const string ProductTranslationContent =
+    public const string TranslatableResourceTranslations =
         @"query ($resourceId: ID!, $locale: String!) {
           translatableResource(resourceId: $resourceId) {
                translations(locale: $locale) {
                   key
                   value
                 }
+                translatableContent {
+                  key
+                  value
+                  digest
+                  locale
+                  type
+                }
           }
         }";
 
     public const string Events =
-      @"query ($url: URL, $after: String, $limit: Int!) {
+        @"query ($url: URL, $after: String, $limit: Int!) {
           webhookSubscriptions(first: $limit, after: $after, callbackUrl: $url) {
               nodes {
                  id

@@ -1,10 +1,10 @@
-using Blackbird.Applications.Sdk.Utils.Sdk.DataSourceHandlers;
+using Blackbird.Applications.Sdk.Common.Dictionaries;
 
 namespace Apps.Shopify.DataSourceHandlers.DictionaryHandlers;
 
-public class ProductStatusHandler : EnumDataHandler
+public class ProductStatusHandler : IStaticDataSourceHandler
 {
-    protected override Dictionary<string, string> EnumValues => new()
+    public Dictionary<string, string> GetData() => new()
     {
         { "ACTIVE", "Active" },
         { "ARCHIVED", "Archived" },

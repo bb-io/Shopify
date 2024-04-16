@@ -1,6 +1,6 @@
-namespace Apps.Shopify.Models.Request.Product;
+namespace Apps.Shopify.Models.Request.TranslatableResource;
 
-public class ProductContentRequest
+public class TranslatableResourceContentRequest
 {
     public string Key { get; set; }
     
