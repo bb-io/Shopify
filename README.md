@@ -10,7 +10,7 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 
 ## Connecting
 
-1. In Blackbird, navigate to 'Apps' and search for Shopify. If you cannot find Shopify then click _Add App_ in the top right corner, select Shopify and add the app to your Blackbird environment.
+1. In Blackbird, navigate to 'Apps' and search for Shopify.
 2. Click _Add Connection_.
 3. Name your connection for future reference e.g. 'My Shopify connection'.
 4. In Shopify, go to `Store settings -> Apps and sales channels -> Develop apps`.
@@ -24,12 +24,26 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 
 ## Actions
 
+### Articles
+
+- **Get online store article translation as HTML** Get content of a specific online store article in HTML format
+- **Update online store article content from HTML** Update content of a specific online store article from HTML file
+
+### Blogs
+
+- **Get online store blog content as HTML** Get content of a specific online store blog in HTML format
+- **Update online store blog content from HTML** Update content of a specific online store blog from HTML file
+
+### Pages
+
+- **Get online store page content as HTML** Get content of a specific online store page in HTML format
+- **Update online store page content from HTML** Update content of a specific online store page from HTML file
+
 ### Products
 
-- **Search products** returns the list of products filtered by provided criterias.
-- **Get product content as HTML** returns source product content in an HTML format.
-- **Get product translation content as HTML** returns translated product content in an HTML format.
-- **Update product content from HTML** updates content of the specified product from an HTML file.
+- **Get product content as HTML** Get content of a specific product in HTML format
+- **Search products** Search for products based on provided criterias
+- **Update product content from HTML** Update content of a specific product from HTML file
 
 ## Events
 
