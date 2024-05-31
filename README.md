@@ -59,6 +59,12 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 - **On product publications added**
 - **On product publications deleted**
 
+## Example
+
+The following example shows how a bird can be setup so that anytime a Shopify product is updated, we get the locale setup of the online store, download the source content for the updated product as an HTML file, translate the file into all target locales using GlobalLink NOW MT solution and update all target products.
+
+![Sample Bird](image/README/ShopifySampleBird.png)
+
 ## Feedback
 
 Do you want to use this app or do you have feedback on our implementation? Reach out to us using the [established channels](https://www.blackbird.io/) or create an issue.
