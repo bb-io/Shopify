@@ -47,7 +47,7 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 
 ### Products
 
-- **Search products** Search for products based on provided criterias
+- **Search products** Search for products based on provided criteria
 - **Get product content as HTML** Get content of a specific product in HTML format
 - **Update product content from HTML** Update content of a specific product from HTML file
 
