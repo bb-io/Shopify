@@ -24,25 +24,31 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 
 ## Actions
 
+### Store
+- **Get store locales information** Get primary and other locales setup in the store
+
 ### Articles
 
+- **List online store articles** List all articles in the online store
 - **Get online store article translation as HTML** Get content of a specific online store article in HTML format
 - **Update online store article content from HTML** Update content of a specific online store article from HTML file
 
 ### Blogs
 
+- **List online store blogs** List all blogs in the online store
 - **Get online store blog content as HTML** Get content of a specific online store blog in HTML format
 - **Update online store blog content from HTML** Update content of a specific online store blog from HTML file
 
 ### Pages
 
+- **List online store pages** List all pages in the online store
 - **Get online store page content as HTML** Get content of a specific online store page in HTML format
 - **Update online store page content from HTML** Update content of a specific online store page from HTML file
 
 ### Products
 
+- **Search products** Search for products based on provided criteria
 - **Get product content as HTML** Get content of a specific product in HTML format
-- **Search products** Search for products based on provided criterias
 - **Update product content from HTML** Update content of a specific product from HTML file
 
 ## Events

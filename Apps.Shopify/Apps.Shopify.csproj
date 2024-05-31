@@ -6,20 +6,20 @@
         <Nullable>enable</Nullable>
         <Product>Shopify</Product>
         <Description>E-commerce platform that enables individuals and businesses to create and manage online stores.</Description>
-        <Version>1.0.4</Version>
+        <Version>1.0.5</Version>
         <AssemblyName>Apps.Shopify</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Blackbird.Applications.Sdk.Common" Version="2.6.0"/>
-        <PackageReference Include="Blackbird.Applications.Sdk.Utils" Version="1.0.19"/>
+        <PackageReference Include="Blackbird.Applications.Sdk.Common" Version="2.6.0" />
+        <PackageReference Include="Blackbird.Applications.Sdk.Utils" Version="1.0.19" />
         <PackageReference Include="GraphQL.Client" Version="6.0.2" />
         <PackageReference Include="GraphQL.Client.Serializer.Newtonsoft" Version="6.0.2" />
         <PackageReference Include="HtmlAgilityPack" Version="1.11.59" />
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource CopyToOutputDirectory="Always" Include="image\icon.png"/>
+        <EmbeddedResource CopyToOutputDirectory="Always" Include="image\icon.png" />
     </ItemGroup>
 
 </Project>
