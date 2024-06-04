@@ -38,8 +38,8 @@ public abstract class ShopifyWebhookHandler : ShopifyInvocable, IWebhookEventHan
 
     public async Task UnsubscribeAsync(IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProvider, Dictionary<string, string> values)
     {
-        var allWebhooks = await GetAllWebhooks(values["payloadUrl"]);
-        var webhookToDelete = allWebhooks.FirstOrDefault();
+        var allWebhooks = await GetAllWebhooks();
+        var webhookToDelete = allWebhooks.FirstOrDefault(x => x.CallbackUrl == values["payloadUrl"]);
 
         if (webhookToDelete is null)
             return;
@@ -56,11 +56,8 @@ public abstract class ShopifyWebhookHandler : ShopifyInvocable, IWebhookEventHan
         await Client.ExecuteWithErrorHandling(request);
     }
 
-    private Task<List<EventEntity>> GetAllWebhooks(string subscriptionUrl)
+    private Task<List<EventEntity>> GetAllWebhooks()
     {
-        return Client.Paginate<EventEntity, EventPaginationResponse>(GraphQlQueries.Events, new()
-        {
-            ["url"] = subscriptionUrl.TrimEnd('/') + "/"
-        });
+        return Client.Paginate<EventEntity, EventPaginationResponse>(GraphQlQueries.Events, new());
     }
 }
