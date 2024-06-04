@@ -83,8 +83,8 @@ public static class GraphQlQueries
         }";
 
     public const string Events =
-        @"query ($url: URL, $after: String, $limit: Int!) {
-          webhookSubscriptions(first: $limit, after: $after, callbackUrl: $url) {
+        @"query ($after: String, $limit: Int!) {
+          webhookSubscriptions(first: $limit, after: $after) {
               nodes {
                  id
                  topic
