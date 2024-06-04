@@ -10,7 +10,7 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 
 ## Connecting
 
-1. In Blackbird, navigate to 'Apps' and search for Shopify. If you cannot find Shopify then click _Add App_ in the top right corner, select Shopify and add the app to your Blackbird environment.
+1. In Blackbird, navigate to 'Apps' and search for Shopify.
 2. Click _Add Connection_.
 3. Name your connection for future reference e.g. 'My Shopify connection'.
 4. In Shopify, go to `Store settings -> Apps and sales channels -> Develop apps`.
@@ -24,12 +24,32 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 
 ## Actions
 
+### Store
+- **Get store locales information** Get primary and other locales setup in the store
+
+### Articles
+
+- **List online store articles** List all articles in the online store
+- **Get online store article translation as HTML** Get content of a specific online store article in HTML format
+- **Update online store article content from HTML** Update content of a specific online store article from HTML file
+
+### Blogs
+
+- **List online store blogs** List all blogs in the online store
+- **Get online store blog content as HTML** Get content of a specific online store blog in HTML format
+- **Update online store blog content from HTML** Update content of a specific online store blog from HTML file
+
+### Pages
+
+- **List online store pages** List all pages in the online store
+- **Get online store page content as HTML** Get content of a specific online store page in HTML format
+- **Update online store page content from HTML** Update content of a specific online store page from HTML file
+
 ### Products
 
-- **Search products** returns the list of products filtered by provided criterias.
-- **Get product content as HTML** returns source product content in an HTML format.
-- **Get product translation content as HTML** returns translated product content in an HTML format.
-- **Update product content from HTML** updates content of the specified product from an HTML file.
+- **Search products** Search for products based on provided criteria
+- **Get product content as HTML** Get content of a specific product in HTML format
+- **Update product content from HTML** Update content of a specific product from HTML file
 
 ## Events
 
@@ -38,6 +58,12 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 - **On product updated**
 - **On product publications added**
 - **On product publications deleted**
+
+## Example
+
+The following example shows how a bird can be setup so that anytime a Shopify product is updated, we get the locale setup of the online store, download the source content for the updated product as an HTML file, translate the file into all target locales using GlobalLink NOW MT solution and update all target products.
+
+![Sample Bird](image/README/ShopifySampleBird.png)
 
 ## Feedback
 
