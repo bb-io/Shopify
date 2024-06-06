@@ -6,5 +6,4 @@ public enum TranslatableResource
     ONLINE_STORE_BLOG,
     ONLINE_STORE_ARTICLE,
     METAFIELD,
-    ONLINE_STORE_THEME
 }

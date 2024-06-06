@@ -2,6 +2,7 @@ using System.Net.Mime;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.Invocables;
+using Apps.Shopify.Models.Entities;
 using Apps.Shopify.Models.Response;
 using Apps.Shopify.Models.Response.TranslatableResource;
 using Blackbird.Applications.Sdk.Common.Files;
@@ -69,7 +70,20 @@ public class TranslatableResourceActions : ShopifyInvocable
         await Client.ExecuteWithErrorHandling(request);
     }
 
-    private Task<TranslatableResourceResponse> GetResourceSourceContent(string resourceId)
+    protected async Task<ICollection<TranslatableResourceEntity>> ListTranslatableResources(TranslatableResource resourceType, string? locale = default)
+    {
+        var variables = new Dictionary<string, object>()
+        {
+            ["resourceType"] = resourceType,
+            ["locale"] = locale ?? string.Empty
+        };
+        return await Client
+            .Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
+                GraphQlQueries.TranslatableResourcesWithTranslations,
+                variables, default);
+    }
+
+    protected Task<TranslatableResourceResponse> GetResourceSourceContent(string resourceId)
     {
         var request = new GraphQLRequest()
         {

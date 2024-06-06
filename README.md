@@ -15,7 +15,7 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 3. Name your connection for future reference e.g. 'My Shopify connection'.
 4. In Shopify, go to `Store settings -> Apps and sales channels -> Develop apps`.
 5. Create the develop app.
-6. Click `Configure Admin API scopes` to select the scopes you want to provide Blackbird with. Make sure to provide `read_locales` access scope. Other scopes that may be needed depending on desired actions are: `write_products`, `read_products`, `write_publications`, `read_publications`, `write_translations`, `read_translations`.
+6. Click `Configure Admin API scopes` to select the scopes you want to provide Blackbird with. Make sure to provide `read_locales` access scope. Other scopes that may be needed depending on desired actions are: `write_products`, `read_products`, `write_publications`, `read_publications`, `write_translations`, `read_translations`, `read_themes`.
 7. After selecting the scopes click `Save` and go to `API credentials` and install the newly created app.
 8. It will create the `Admin API access token` that you need to copy and paste it to the appropriate field in Blackbird.
 9. Next in store settings click `Domains` and copy the name of the store from the domain and paste it to the appropriate field in Blackbird. F.E. if your domain is `mystore.myshopify.com`, you need to take `mystore`
@@ -50,6 +50,16 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 - **Search products** Search for products based on provided criteria
 - **Get product content as HTML** Get content of a specific product in HTML format
 - **Update product content from HTML** Update content of a specific product from HTML file
+
+### Metafields
+
+- **Get metafield content as HTML** returns product metafield contents in HTML format
+- **Update metafield content from HTML** updates product metafield contents from the HTML file
+
+### Themes
+
+- **Get online store theme content as HTML** returns specific theme's contents in HTML format
+- **Update online store theme content from HTML** updates specific theme's contents from the HTML file
 
 ## Events
 
