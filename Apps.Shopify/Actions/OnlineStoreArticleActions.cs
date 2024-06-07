@@ -5,15 +5,11 @@ using Apps.Shopify.Models.Request;
 using Apps.Shopify.Models.Request.OnlineStoreArticle;
 using Apps.Shopify.Models.Response;
 using Apps.Shopify.Models.Response.Article;
-using Apps.Shopify.Models.Response.Page;
 using Apps.Shopify.Models.Response.TranslatableResource;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
-using System.ComponentModel;
-using System.Security.AccessControl;
-using System.Threading;
 
 namespace Apps.Shopify.Actions;
 

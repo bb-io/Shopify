@@ -11,17 +11,16 @@ namespace Apps.Shopify.Api;
 
 public class ShopifyClient : GraphQLHttpClient
 {
-    private const string ApiVersion = "2024-01";
-
-    public ShopifyClient(AuthenticationCredentialsProvider[] creds) : base(
-        $"https://{creds.Get(CredsNames.StoreName).Value}.myshopify.com/admin/api/{ApiVersion}/graphql.json",
+    public ShopifyClient(AuthenticationCredentialsProvider[] creds, string? endpoint = default) : base(
+        endpoint ?? GenerateApiUrl(creds, ApiConstants.ApiVersion),
         new NewtonsoftJsonSerializer())
     {
         var token = creds.Get(CredsNames.Token).Value;
         HttpClient.DefaultRequestHeaders.Add("X-Shopify-Access-Token", token);
     }
 
-    public async Task<T> ExecuteWithErrorHandling<T>(GraphQLRequest request, CancellationToken cancellationToken = default)
+    public async Task<T> ExecuteWithErrorHandling<T>(GraphQLRequest request,
+        CancellationToken cancellationToken = default)
     {
         var response = await SendQueryAsync<T>(request, cancellationToken);
 
@@ -69,4 +68,7 @@ public class ShopifyClient : GraphQLHttpClient
 
         return result;
     }
+
+    public static string GenerateApiUrl(AuthenticationCredentialsProvider[] creds, string apiVersion) =>
+        $"https://{creds.Get(CredsNames.StoreName).Value}.myshopify.com/admin/api/{apiVersion}/graphql.json";
 }

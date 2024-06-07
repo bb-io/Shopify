@@ -51,6 +51,29 @@ public static class GraphQlQueries
               }
           }
         }";
+    
+    public const string TranslatableResourcesWithTranslations =
+        @"query ($resourceType: TranslatableResourceType!, $after: String, $limit: Int!, $locale: String!) {
+          translatableResources(first: $limit, after: $after, resourceType: $resourceType) {
+              nodes {
+                 resourceId
+                 translations(locale: $locale) {
+                    key
+                    value
+                 }
+                 translatableContent {
+                    key
+                    value
+                    digest
+                 }
+               }
+              pageInfo {
+                 endCursor
+                 hasNextPage
+                 startCursor
+              }
+          }
+        }";
 
     public const string TranslatableResourceContent =
         @"query ($resourceId: ID!) {
@@ -95,6 +118,24 @@ public static class GraphQlQueries
                  hasNextPage
                  startCursor
               }
+          }
+        }";
+    
+    public const string ProductMetaFields =
+        @"query ($resourceId: ID!, $after: String, $limit: Int!) {
+          metafields(first: $limit, after: $after, owner: $resourceId) {
+            nodes {
+              id
+              namespace
+              key
+              value
+              compareDigest
+            },
+            pageInfo {
+               endCursor
+               hasNextPage
+               startCursor
+            }
           }
         }";
 }
