@@ -73,6 +73,29 @@ public static class GraphQlQueries
                  startCursor
               }
           }
+        }";   
+    
+    public const string TranslatableResourcesByIds =
+        @"query ($resourceIds: [ID!]!, $after: String, $limit: Int!, $locale: String!) {
+          translatableResourcesByIds(first: $limit, after: $after, resourceIds: $resourceIds) {
+              nodes {
+                 resourceId
+                 translations(locale: $locale) {
+                    key
+                    value
+                 }
+                 translatableContent {
+                    key
+                    value
+                    digest
+                 }
+               }
+              pageInfo {
+                 endCursor
+                 hasNextPage
+                 startCursor
+              }
+          }
         }";
 
     public const string TranslatableResourceContent =

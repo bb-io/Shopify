@@ -10,25 +10,12 @@ public static class ShopifyHtmlConverter
 {
     private const string ResourceAttr = "resource";
     private const string KeyAttr = "key";
+    private const string TypeAttr = "type";
     private const string DigestAttr = "digest";
 
-    public static MemoryStream ToHtml(IEnumerable<ContentEntity> contentEntities)
-    {
-        var (doc, body) = PrepareEmptyHtmlDocument();
+    private const string BlogPostType = "blogPost";
 
-        contentEntities.ToList().ForEach(x =>
-        {
-            var node = doc.CreateElement(HtmlConstants.Div);
-
-            node.InnerHtml = x.Value;
-            node.SetAttributeValue(KeyAttr, x.Key);
-            node.SetAttributeValue(DigestAttr, x.Digest);
-
-            body.AppendChild(node);
-        });
-
-        return GetMemoryStream(doc);
-    }
+    #region Metafield
 
     public static MemoryStream MetaFieldsToHtml(IEnumerable<(string ResourceId, ContentEntity)> metafields)
     {
@@ -49,31 +36,67 @@ public static class ShopifyHtmlConverter
         return GetMemoryStream(doc);
     }
 
+    public static IEnumerable<IdentifiedContentRequest> MetaFieldsToJson(Stream file, string locale)
+    {
+        var contentNodes = GetContentNodes(file);
+        return GetIdentifiedResourceContent(contentNodes, locale);
+    }
+
+    #endregion
+
+    #region Blog
+
+    public static MemoryStream BlogToHtml(IEnumerable<IdentifiedContentEntity> contentEntities,
+        ICollection<IdentifiedContentEntity> blogPostsEntities)
+    {
+        var (doc, body) = PrepareEmptyHtmlDocument();
+        FillInIdentifiedContentEntities(doc, body, contentEntities);
+
+        if (blogPostsEntities.Any())
+        {
+            var node = doc.CreateElement(HtmlConstants.Div);
+            node.SetAttributeValue(TypeAttr, BlogPostType);
+            body.AppendChild(node);
+
+            FillInIdentifiedContentEntities(doc, node, blogPostsEntities);
+        }
+
+        return GetMemoryStream(doc);
+    }
+
+    public static (IEnumerable<IdentifiedContentRequest> blog,
+        IEnumerable<IdentifiedContentRequest> blogPosts) BlogToJson(Stream file, string locale)
+    {
+        var doc = new HtmlDocument();
+        doc.Load(file);
+
+        var blogContentNodes = doc.DocumentNode.Descendants()
+            .Where(x => x.Attributes[KeyAttr]?.Value != null && x.ParentNode.Name == "body");
+
+        var blogPostsContentNodes = doc.DocumentNode.Descendants()
+            .FirstOrDefault(x => x.Attributes[TypeAttr]?.Value == BlogPostType)?
+            .ChildNodes.Where(x => x.Attributes[KeyAttr]?.Value != null);
+
+        var blog = GetIdentifiedResourceContent(blogContentNodes, locale);
+        var blogPosts = GetIdentifiedResourceContent(blogPostsContentNodes, locale);
+
+        return (blog, blogPosts);
+    }
+
+    #endregion
+
+    public static MemoryStream ToHtml(IEnumerable<ContentEntity> contentEntities)
+    {
+        var (doc, body) = PrepareEmptyHtmlDocument();
+        FillInContentEntities(doc, body, contentEntities);
+
+        return GetMemoryStream(doc);
+    }
+
     public static IEnumerable<TranslatableResourceContentRequest> ToJson(Stream file, string locale)
     {
         var contentNodes = GetContentNodes(file);
-
-        return contentNodes.Select(x => new TranslatableResourceContentRequest()
-        {
-            Key = x.Attributes[KeyAttr].Value,
-            TranslatableContentDigest = x.Attributes[DigestAttr]?.Value,
-            Value = HttpUtility.HtmlDecode(x.InnerHtml),
-            Locale = locale
-        });
-    }
-
-    public static IEnumerable<TranslatableMetaFieldContentRequest> MetaFieldsToJson(Stream file, string locale)
-    {
-        var contentNodes = GetContentNodes(file);
-
-        return contentNodes.Select(x => new TranslatableMetaFieldContentRequest()
-        {
-            ResourceId = x.Attributes[ResourceAttr].Value,
-            Key = x.Attributes[KeyAttr].Value,
-            TranslatableContentDigest = x.Attributes[DigestAttr]?.Value,
-            Value = HttpUtility.HtmlDecode(x.InnerHtml),
-            Locale = locale
-        });
+        return GetResourceContent(contentNodes, locale);
     }
 
     private static (HtmlDocument document, HtmlNode bodyNode) PrepareEmptyHtmlDocument()
@@ -106,4 +129,56 @@ public static class ShopifyHtmlConverter
         return doc.DocumentNode.Descendants()
             .Where(x => x.Attributes[KeyAttr]?.Value != null);
     }
+
+    private static void FillInContentEntities(HtmlDocument doc, HtmlNode body,
+        IEnumerable<ContentEntity> contentEntities)
+    {
+        contentEntities.ToList().ForEach(x =>
+        {
+            var node = doc.CreateElement(HtmlConstants.Div);
+
+            node.InnerHtml = x.Value;
+            node.SetAttributeValue(KeyAttr, x.Key);
+            node.SetAttributeValue(DigestAttr, x.Digest);
+
+            body.AppendChild(node);
+        });
+    }   
+    
+    private static void FillInIdentifiedContentEntities(HtmlDocument doc, HtmlNode body,
+        IEnumerable<IdentifiedContentEntity> contentEntities)
+    {
+        contentEntities.ToList().ForEach(x =>
+        {
+            var node = doc.CreateElement(HtmlConstants.Div);
+
+            node.InnerHtml = x.Value;
+            node.SetAttributeValue(KeyAttr, x.Key);
+            node.SetAttributeValue(DigestAttr, x.Digest);
+            node.SetAttributeValue(ResourceAttr, x.Id);
+
+            body.AppendChild(node);
+        });
+    }
+
+    private static IEnumerable<TranslatableResourceContentRequest> GetResourceContent(IEnumerable<HtmlNode>? nodes,
+        string locale) =>
+        nodes?.Select(x => new TranslatableResourceContentRequest()
+        {
+            Key = x.Attributes[KeyAttr].Value,
+            TranslatableContentDigest = x.Attributes[DigestAttr]?.Value,
+            Value = HttpUtility.HtmlDecode(x.InnerHtml),
+            Locale = locale
+        }) ?? [];
+
+    private static IEnumerable<IdentifiedContentRequest> GetIdentifiedResourceContent(IEnumerable<HtmlNode>? nodes,
+        string locale) =>
+        nodes?.Select(x => new IdentifiedContentRequest()
+        {
+            ResourceId = x.Attributes[ResourceAttr]?.Value,
+            Key = x.Attributes[KeyAttr].Value,
+            TranslatableContentDigest = x.Attributes[DigestAttr]?.Value,
+            Value = HttpUtility.HtmlDecode(x.InnerHtml),
+            Locale = locale
+        }) ?? [];
 }

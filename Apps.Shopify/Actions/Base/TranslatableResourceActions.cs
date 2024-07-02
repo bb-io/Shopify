@@ -1,5 +1,6 @@
 using System.Net.Mime;
 using Apps.Shopify.Constants.GraphQL;
+using Apps.Shopify.Extensions;
 using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities;
@@ -40,7 +41,7 @@ public class TranslatableResourceActions : ShopifyInvocable
 
         return new()
         {
-            File = await FileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html, $"{resourceId.Split('/').Last()}.html")
+            File = await FileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html, $"{resourceId.GetShopifyItemId()}.html")
         };
     }
 
