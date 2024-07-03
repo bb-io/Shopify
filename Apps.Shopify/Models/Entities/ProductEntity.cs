@@ -25,5 +25,7 @@ public class ProductEntity
     public DateTime CreatedAt { get; set; }   
     
     [Display("Published at")]
-    public DateTime? PublishedAt { get; set; }   
+    public DateTime? PublishedAt { get; set; }
+
+    public IEnumerable<OptionsEntity>? Options { get; set; }
 }

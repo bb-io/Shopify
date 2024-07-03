@@ -1,5 +1,6 @@
 using System.Web;
 using Apps.Shopify.HtmlConversion.Constants;
+using Apps.Shopify.Models.Dto;
 using Apps.Shopify.Models.Entities;
 using Apps.Shopify.Models.Request.TranslatableResource;
 using HtmlAgilityPack;
@@ -14,6 +15,9 @@ public static class ShopifyHtmlConverter
     private const string DigestAttr = "digest";
 
     private const string BlogPostType = "blogPost";
+    private const string MetafieldType = "metafield";
+    private const string OptionType = "option";
+    private const string OptionValueType = "optionValue";
 
     #region Metafield
 
@@ -81,6 +85,79 @@ public static class ShopifyHtmlConverter
         var blogPosts = GetIdentifiedResourceContent(blogPostsContentNodes, locale);
 
         return (blog, blogPosts);
+    }
+
+    #endregion
+
+    #region Product
+
+    public static MemoryStream ProductToHtml(ProductContentDto contentDto)
+    {
+        var (doc, body) = PrepareEmptyHtmlDocument();
+        FillInContentEntities(doc, body, contentDto.ProductContentEntities);
+
+        if (contentDto.MetafieldsContentEntities is not null && contentDto.MetafieldsContentEntities.Any())
+        {
+            var node = doc.CreateElement(HtmlConstants.Div);
+            node.SetAttributeValue(TypeAttr, MetafieldType);
+            body.AppendChild(node);
+
+            FillInIdentifiedContentEntities(doc, node, contentDto.MetafieldsContentEntities);
+        }      
+        
+        if (contentDto.OptionsContentEntities is not null && contentDto.OptionsContentEntities.Any())
+        {
+            var node = doc.CreateElement(HtmlConstants.Div);
+            node.SetAttributeValue(TypeAttr, OptionType);
+            body.AppendChild(node);
+
+            FillInIdentifiedContentEntities(doc, node, contentDto.OptionsContentEntities);
+        }      
+        
+        if (contentDto.OptionValuesContentEntities is not null && contentDto.OptionValuesContentEntities.Any())
+        {
+            var node = doc.CreateElement(HtmlConstants.Div);
+            node.SetAttributeValue(TypeAttr, OptionValueType);
+            body.AppendChild(node);
+
+            FillInIdentifiedContentEntities(doc, node, contentDto.OptionValuesContentEntities);
+        }
+
+        return GetMemoryStream(doc);
+    }
+
+    public static ProductTranslatableResourceDto ProductToJson(Stream file, string locale)
+    {
+        var doc = new HtmlDocument();
+        doc.Load(file);
+
+        var productContentNodes = doc.DocumentNode.Descendants()
+            .Where(x => x.Attributes[KeyAttr]?.Value != null && x.ParentNode.Name == "body");
+
+        var metafieldContentNodes = doc.DocumentNode.Descendants()
+            .FirstOrDefault(x => x.Attributes[TypeAttr]?.Value == MetafieldType)?
+            .ChildNodes.Where(x => x.Attributes[KeyAttr]?.Value != null);
+        
+        var optionContentNodes = doc.DocumentNode.Descendants()
+            .FirstOrDefault(x => x.Attributes[TypeAttr]?.Value == OptionType)?
+            .ChildNodes.Where(x => x.Attributes[KeyAttr]?.Value != null);
+        
+        var optionValuesContentNodes = doc.DocumentNode.Descendants()
+            .FirstOrDefault(x => x.Attributes[TypeAttr]?.Value == OptionValueType)?
+            .ChildNodes.Where(x => x.Attributes[KeyAttr]?.Value != null);
+
+        var product = GetIdentifiedResourceContent(productContentNodes, locale);
+        var metafields = GetIdentifiedResourceContent(metafieldContentNodes, locale);
+        var options = GetIdentifiedResourceContent(optionContentNodes, locale);
+        var optionValues = GetIdentifiedResourceContent(optionValuesContentNodes, locale);
+
+        return new()
+        {
+            ProductContentEntities = product,
+            MetafieldsContentEntities = metafields,
+            OptionsContentEntities = options,
+            OptionValuesContentEntities = optionValues
+        };
     }
 
     #endregion

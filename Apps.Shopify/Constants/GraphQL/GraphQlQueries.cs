@@ -160,5 +160,34 @@ public static class GraphQlQueries
                startCursor
             }
           }
+        }";    
+    
+    public const string Product =
+        @"query ($resourceId: ID!, $locale: String!) {
+          product(id: $resourceId) {
+            id
+            title
+            handle
+            options{
+             id            
+             name            
+             optionValues {
+               id
+               name
+               translations(locale: $locale){
+                key
+                value
+               }  
+             }            
+             translations(locale: $locale){
+                key
+                value
+             }            
+            }
+            translations(locale: $locale){
+                key
+                value
+             }  
+          }
         }";
 }
