@@ -54,7 +54,8 @@ public class ProductActions : TranslatableResourceActions
         Description = "Get content of a specific product in HTML format")]
     public async Task<FileResponse> GetProductTranslationContent([ActionParameter] ProductRequest resourceRequest,
         [ActionParameter] LocaleRequest locale,
-        [ActionParameter] GetProductContentRequest input)
+        [ActionParameter] GetProductContentRequest input,
+        [ActionParameter] GetContentRequest getContentRequest)
     {
         var request = new GraphQLRequest()
         {
@@ -62,7 +63,8 @@ public class ProductActions : TranslatableResourceActions
             Variables = new
             {
                 resourceId = resourceRequest.ProductId,
-                locale = locale.Locale
+                locale = locale.Locale,
+                outdated = getContentRequest.Outdated ?? false
             }
         };
         var productContent = await Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
@@ -73,11 +75,10 @@ public class ProductActions : TranslatableResourceActions
 
         var html = ShopifyHtmlConverter.ProductToHtml(new()
         {
-            ProductContentEntities = productContent.TranslatableResource.Translations.Any()
-                ? productContent.TranslatableResource.Translations
-                : productContent.TranslatableResource.TranslatableContent,
+            ProductContentEntities = productContent.TranslatableResource.GetTranslatableContent(),
             MetafieldsContentEntities = input.IncludeMetafields is true
-                ? await GetProductMetafields(resourceRequest.ProductId, locale.Locale)
+                ? await GetProductMetafields(resourceRequest.ProductId, locale.Locale,
+                    getContentRequest.Outdated ?? default)
                 : [],
             OptionsContentEntities = input.IncludeOptions is true
                 ? GetProductOptions(productInfo)
@@ -104,15 +105,15 @@ public class ProductActions : TranslatableResourceActions
         await UpdateProductContent(resourceRequest.ProductId, translations.ProductContentEntities.ToList());
 
         if (translations.MetafieldsContentEntities != null && translations.MetafieldsContentEntities.Any())
-            await UpdateProductAdditionalContents(translations.MetafieldsContentEntities.ToList());
-        
+            await UpdateIdentifiedContent(translations.MetafieldsContentEntities.ToList());
+
         if (translations.OptionsContentEntities != null && translations.OptionsContentEntities.Any())
-            await UpdateProductAdditionalContents(translations.OptionsContentEntities.ToList());
-        
+            await UpdateIdentifiedContent(translations.OptionsContentEntities.ToList());
+
         if (translations.OptionValuesContentEntities != null && translations.OptionValuesContentEntities.Any())
-            await UpdateProductAdditionalContents(translations.OptionValuesContentEntities.ToList());
+            await UpdateIdentifiedContent(translations.OptionValuesContentEntities.ToList());
     }
-    
+
     private async Task UpdateProductContent(string productId,
         ICollection<TranslatableResourceContentRequest> productContents)
     {
@@ -135,39 +136,6 @@ public class ProductActions : TranslatableResourceActions
         };
 
         await Client.ExecuteWithErrorHandling(request);
-    }
-    
-    private async Task UpdateProductAdditionalContents(ICollection<IdentifiedContentRequest> contents)
-    {
-        var groupedContentRequests = contents
-            .GroupBy(x => x.ResourceId)
-            .ToArray();
-
-        if (groupedContentRequests.Any(x => x.Any(x => string.IsNullOrWhiteSpace(x.TranslatableContentDigest))))
-        {
-            foreach (var contentRequest in groupedContentRequests)
-            {
-                var sourceContent = await GetResourceSourceContent(contentRequest.Key);
-                contentRequest.ToList().ForEach(x =>
-                    x.TranslatableContentDigest = sourceContent.TranslatableResource.TranslatableContent
-                        .First(y => y.Key == x.Key).Digest);
-            }
-        }
-
-        foreach (var contentRequest in groupedContentRequests)
-        {
-            var request = new GraphQLRequest()
-            {
-                Query = GraphQlMutations.TranslationsRegister,
-                Variables = new
-                {
-                    resourceId = contentRequest.Key,
-                    translations = contentRequest.Select(x => new TranslatableResourceContentRequest(x))
-                }
-            };
-
-            await Client.ExecuteWithErrorHandling(request);
-        }
     }
 
     private IEnumerable<IdentifiedContentEntity> GetProductOptions(ProductEntity product)
@@ -205,10 +173,11 @@ public class ProductActions : TranslatableResourceActions
             }));
     }
 
-    private async Task<IEnumerable<IdentifiedContentEntity>?> GetProductMetafields(string productId, string locale)
+    private async Task<IEnumerable<IdentifiedContentEntity>?> GetProductMetafields(string productId, string locale,
+        bool outdated = false)
     {
         var productMetaFields = await GetProductMetafields(productId);
-        var metaFields = await ListTranslatableResources(TranslatableResource.METAFIELD, locale);
+        var metaFields = await ListTranslatableResources(TranslatableResource.METAFIELD, locale, outdated);
 
         var resources = metaFields
             .Where(x => productMetaFields.Any(y => x.ResourceId == y.Id))
@@ -244,8 +213,7 @@ public class ProductActions : TranslatableResourceActions
             Query = GraphQlQueries.Product,
             Variables = new
             {
-                resourceId = productId,
-                locale = locale
+                resourceId = productId, locale
             }
         };
 

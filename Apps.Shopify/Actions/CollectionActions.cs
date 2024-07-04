@@ -16,12 +16,13 @@ public class CollectionActions : TranslatableResourceActions
         : base(invocationContext, fileManagementClient)
     {
     }
-    
+
     [Action("Get collection translation as HTML",
         Description = "Get content of a specific collection in HTML format")]
     public Task<FileResponse> GetCollectionContent(
-        [ActionParameter] CollectionRequest input, [ActionParameter] LocaleRequest locale)
-        => GetResourceContent(input.CollectionId, locale.Locale);
+        [ActionParameter] CollectionRequest input, [ActionParameter] LocaleRequest locale,
+        [ActionParameter] GetContentRequest getContentRequest)
+        => GetResourceContent(input.CollectionId, locale.Locale, getContentRequest.Outdated ?? default);
 
     [Action("Update collection content from HTML",
         Description = "Update content of a specific collection from HTML file")]

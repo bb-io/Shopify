@@ -55,7 +55,8 @@ public class OnlineStoreBlogActions : TranslatableResourceActions
     public async Task<FileResponse> GetOnlineStoreBlogTranslationContent(
         [ActionParameter] OnlineStoreBlogRequest input, [ActionParameter] LocaleRequest locale,
         [ActionParameter, Display("Include articles")]
-        bool? includeBlogsPosts)
+        bool? includeBlogsPosts,
+        [ActionParameter] GetContentRequest getContentRequest)
     {
         var request = new GraphQLRequest()
         {
@@ -63,16 +64,16 @@ public class OnlineStoreBlogActions : TranslatableResourceActions
             Variables = new
             {
                 resourceId = input.OnlineStoreBlogId,
-                locale = locale.Locale
+                locale = locale.Locale,
+                outdated = getContentRequest.Outdated ?? false
             }
         };
         var blog = await Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
-        var blogTranslations = blog.TranslatableResource.Translations.Any()
-            ? blog.TranslatableResource.Translations
-            : blog.TranslatableResource.TranslatableContent;
+        var blogTranslations = blog.TranslatableResource.GetTranslatableContent();
 
         var blogPostTranslations = includeBlogsPosts is true
-            ? await GetBlogPostTranslations(input.OnlineStoreBlogId, locale.Locale)
+            ? await GetBlogPostTranslations(input.OnlineStoreBlogId, locale.Locale,
+                getContentRequest.Outdated ?? default)
             : [];
 
         var html = ShopifyHtmlConverter.BlogToHtml(blogTranslations.Select(x => new IdentifiedContentEntity(x)
@@ -99,40 +100,7 @@ public class OnlineStoreBlogActions : TranslatableResourceActions
 
         var blogPostsContent = blogPosts.ToList();
         if (blogPostsContent.Any())
-            await UpdateBlogPostsContent(blogPostsContent);
-    }
-
-    private async Task UpdateBlogPostsContent(ICollection<IdentifiedContentRequest> blogPosts)
-    {
-        var groupedBlogPosts = blogPosts
-            .GroupBy(x => x.ResourceId)
-            .ToArray();
-
-        if (groupedBlogPosts.Any(x => x.Any(x => string.IsNullOrWhiteSpace(x.TranslatableContentDigest))))
-        {
-            foreach (var blogPost in groupedBlogPosts)
-            {
-                var sourceContent = await GetResourceSourceContent(blogPost.Key);
-                blogPost.ToList().ForEach(x =>
-                    x.TranslatableContentDigest = sourceContent.TranslatableResource.TranslatableContent
-                        .First(y => y.Key == x.Key).Digest);
-            }
-        }
-
-        foreach (var blogPost in groupedBlogPosts)
-        {
-            var request = new GraphQLRequest()
-            {
-                Query = GraphQlMutations.TranslationsRegister,
-                Variables = new
-                {
-                    resourceId = blogPost.Key,
-                    translations = blogPost.Select(x => new TranslatableResourceContentRequest(x))
-                }
-            };
-
-            await Client.ExecuteWithErrorHandling(request);
-        }
+            await UpdateIdentifiedContent(blogPostsContent);
     }
 
     private async Task UpdateBlogContent(string blogId, ICollection<IdentifiedContentRequest> blogContents)
@@ -158,7 +126,8 @@ public class OnlineStoreBlogActions : TranslatableResourceActions
         await Client.ExecuteWithErrorHandling(request);
     }
 
-    private async Task<ICollection<IdentifiedContentEntity>> GetBlogPostTranslations(string blogId, string locale)
+    private async Task<ICollection<IdentifiedContentEntity>> GetBlogPostTranslations(string blogId, string locale,
+        bool outdated = false)
     {
         var request = new ShopifyRestRequest($"blogs/{blogId.GetShopifyItemId()}/articles.json?limit=250", Method.Get,
             Creds);
@@ -169,7 +138,8 @@ public class OnlineStoreBlogActions : TranslatableResourceActions
         var variables = new Dictionary<string, object>()
         {
             ["resourceIds"] = ids,
-            ["locale"] = locale
+            ["locale"] = locale,
+            ["outdated"] = outdated
         };
 
         var content = await Client.Paginate<TranslatableResourceEntity, TranslatableResourcesByIdsPaginationResponse>(
@@ -177,7 +147,7 @@ public class OnlineStoreBlogActions : TranslatableResourceActions
             variables);
 
         return content
-            .Select(x => (x.ResourceId, x.Translations.Any() ? x.Translations : x.TranslatableContent))
+            .Select(x => (x.ResourceId, x.GetTranslatableContent()))
             .SelectMany(x => x.Item2.Select(y => new IdentifiedContentEntity(y)
             {
                 Id = x.ResourceId

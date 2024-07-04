@@ -53,11 +53,11 @@ public static class GraphQlQueries
         }";
     
     public const string TranslatableResourcesWithTranslations =
-        @"query ($resourceType: TranslatableResourceType!, $after: String, $limit: Int!, $locale: String!) {
+        @"query ($outdated: Boolean, $resourceType: TranslatableResourceType!, $after: String, $limit: Int!, $locale: String!) {
           translatableResources(first: $limit, after: $after, resourceType: $resourceType) {
               nodes {
                  resourceId
-                 translations(locale: $locale) {
+                 translations(locale: $locale, outdated: $outdated) {
                     key
                     value
                  }
@@ -76,11 +76,11 @@ public static class GraphQlQueries
         }";   
     
     public const string TranslatableResourcesByIds =
-        @"query ($resourceIds: [ID!]!, $after: String, $limit: Int!, $locale: String!) {
+        @"query ($outdated: Boolean, $resourceIds: [ID!]!, $after: String, $limit: Int!, $locale: String!) {
           translatableResourcesByIds(first: $limit, after: $after, resourceIds: $resourceIds) {
               nodes {
                  resourceId
-                 translations(locale: $locale) {
+                 translations(locale: $locale, outdated: $outdated) {
                     key
                     value
                  }
@@ -112,9 +112,9 @@ public static class GraphQlQueries
         }";
 
     public const string TranslatableResourceTranslations =
-        @"query ($resourceId: ID!, $locale: String!) {
+        @"query ($outdated: Boolean, $resourceId: ID!, $locale: String!) {
           translatableResource(resourceId: $resourceId) {
-               translations(locale: $locale) {
+               translations(locale: $locale, outdated: $outdated) {
                   key
                   value
                 }

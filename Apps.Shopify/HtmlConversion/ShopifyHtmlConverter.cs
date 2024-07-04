@@ -168,12 +168,26 @@ public static class ShopifyHtmlConverter
         FillInContentEntities(doc, body, contentEntities);
 
         return GetMemoryStream(doc);
+    }    
+    
+    public static MemoryStream ToHtml(IEnumerable<IdentifiedContentEntity> contentEntities)
+    {
+        var (doc, body) = PrepareEmptyHtmlDocument();
+        FillInIdentifiedContentEntities(doc, body, contentEntities);
+
+        return GetMemoryStream(doc);
     }
 
     public static IEnumerable<TranslatableResourceContentRequest> ToJson(Stream file, string locale)
     {
         var contentNodes = GetContentNodes(file);
         return GetResourceContent(contentNodes, locale);
+    }    
+    
+    public static IEnumerable<IdentifiedContentRequest> ToJsonIdentified(Stream file, string locale)
+    {
+        var contentNodes = GetContentNodes(file);
+        return GetIdentifiedResourceContent(contentNodes, locale);
     }
 
     private static (HtmlDocument document, HtmlNode bodyNode) PrepareEmptyHtmlDocument()

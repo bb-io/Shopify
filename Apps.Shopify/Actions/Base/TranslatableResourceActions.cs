@@ -4,6 +4,7 @@ using Apps.Shopify.Extensions;
 using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities;
+using Apps.Shopify.Models.Request.TranslatableResource;
 using Apps.Shopify.Models.Response;
 using Apps.Shopify.Models.Response.TranslatableResource;
 using Blackbird.Applications.Sdk.Common.Files;
@@ -24,24 +25,23 @@ public class TranslatableResourceActions : ShopifyInvocable
         FileManagementClient = fileManagementClient;
     }
 
-    protected async Task<FileResponse> GetResourceContent(string resourceId, string locale)
+    protected async Task<FileResponse> GetResourceContent(string resourceId, string locale, bool outdated)
     {
         var request = new GraphQLRequest()
         {
             Query = GraphQlQueries.TranslatableResourceTranslations,
             Variables = new
             {
-                resourceId, locale
+                resourceId, locale, outdated
             }
         };
         var response = await Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
-        var html = ShopifyHtmlConverter.ToHtml(response.TranslatableResource.Translations.Any()
-            ? response.TranslatableResource.Translations
-            : response.TranslatableResource.TranslatableContent);
+        var html = ShopifyHtmlConverter.ToHtml(response.TranslatableResource.GetTranslatableContent());
 
         return new()
         {
-            File = await FileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html, $"{resourceId.GetShopifyItemId()}.html")
+            File = await FileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html,
+                $"{resourceId.GetShopifyItemId()}.html")
         };
     }
 
@@ -71,12 +71,14 @@ public class TranslatableResourceActions : ShopifyInvocable
         await Client.ExecuteWithErrorHandling(request);
     }
 
-    protected async Task<ICollection<TranslatableResourceEntity>> ListTranslatableResources(TranslatableResource resourceType, string? locale = default)
+    protected async Task<ICollection<TranslatableResourceEntity>> ListTranslatableResources(
+        TranslatableResource resourceType, string? locale = default, bool outdated = false)
     {
         var variables = new Dictionary<string, object>()
         {
             ["resourceType"] = resourceType,
-            ["locale"] = locale ?? string.Empty
+            ["locale"] = locale ?? string.Empty,
+            ["outdated"] = outdated
         };
         return await Client
             .Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
@@ -95,5 +97,38 @@ public class TranslatableResourceActions : ShopifyInvocable
             }
         };
         return Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
+    }
+
+    protected async Task UpdateIdentifiedContent(ICollection<IdentifiedContentRequest> blogPosts)
+    {
+        var groupedItems = blogPosts
+            .GroupBy(x => x.ResourceId)
+            .ToArray();
+
+        if (groupedItems.Any(x => x.Any(x => string.IsNullOrWhiteSpace(x.TranslatableContentDigest))))
+        {
+            foreach (var item in groupedItems)
+            {
+                var sourceContent = await GetResourceSourceContent(item.Key);
+                item.ToList().ForEach(x =>
+                    x.TranslatableContentDigest = sourceContent.TranslatableResource.TranslatableContent
+                        .First(y => y.Key == x.Key).Digest);
+            }
+        }
+
+        foreach (var item in groupedItems)
+        {
+            var request = new GraphQLRequest()
+            {
+                Query = GraphQlMutations.TranslationsRegister,
+                Variables = new
+                {
+                    resourceId = item.Key,
+                    translations = item.Select(x => new TranslatableResourceContentRequest(x))
+                }
+            };
+
+            await Client.ExecuteWithErrorHandling(request);
+        }
     }
 }

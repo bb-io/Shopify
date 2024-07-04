@@ -29,10 +29,11 @@ public class MetafieldActions : TranslatableResourceActions
     [Action("Get metafield content as HTML",
         Description = "Get metafield content of a specific product in HTML format")]
     public async Task<FileResponse> GetMetafieldContent([ActionParameter] ProductRequest resourceRequest,
-        [ActionParameter] LocaleRequest locale)
+        [ActionParameter] LocaleRequest locale, [ActionParameter] GetContentRequest getContentRequest)
     {
         var productMetaFields = await GetProductMetafields(resourceRequest.ProductId);
-        var metaFields = await ListTranslatableResources(TranslatableResource.METAFIELD, locale.Locale);
+        var metaFields = await ListTranslatableResources(TranslatableResource.METAFIELD, locale.Locale,
+            getContentRequest.Outdated ?? default);
 
         var resources = metaFields
             .Where(x => productMetaFields.Any(y => x.ResourceId == y.Id))
