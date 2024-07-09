@@ -129,11 +129,11 @@ public class OnlineStoreBlogActions : TranslatableResourceActions
     private async Task<ICollection<IdentifiedContentEntity>> GetBlogPostTranslations(string blogId, string locale,
         bool outdated = false)
     {
-        var request = new ShopifyRestRequest($"blogs/{blogId.GetShopifyItemId()}/articles.json?limit=250", Method.Get,
-            Creds);
-        var response = await RestClient.ExecuteWithErrorHandling<ArticlesPaginationResponse>(request);
+        var request = new ShopifyRestRequest($"blogs/{blogId.GetShopifyItemId()}/articles.json", Method.Get, Creds);
+        var response = await new ShopifyRestClient(Creds)
+            .Paginate<OnlineStoreArticleEntity, ArticlesPaginationResponse>(request);
 
-        var ids = response.Articles.Select(x => x.AdminGraphqlApiId).ToArray();
+        var ids = response.Select(x => x.Id).ToArray();
 
         var variables = new Dictionary<string, object>()
         {

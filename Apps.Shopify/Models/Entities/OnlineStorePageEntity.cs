@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Apps.Shopify.Models.Entities;
 
-public class OnlineStoreArticleEntity : IRestPaginationEntity
+public class OnlineStorePageEntity : IRestPaginationEntity
 {
     [Display("Article ID")]
     [JsonProperty("admin_graphql_api_id")]
@@ -16,9 +16,10 @@ public class OnlineStoreArticleEntity : IRestPaginationEntity
 
     [Display("Updated at")] public DateTime UpdatedAt { get; set; }
 
-    public string Author { get; set; }
-
-    [Display("Blog ID")] public string BlogId { get; set; }
-
+    public string? Author { get; set; }
+    
+    [Display("Shop ID")]
+    public string ShopId { get; set; }
+    
     public string Handle { get; set; }
 }

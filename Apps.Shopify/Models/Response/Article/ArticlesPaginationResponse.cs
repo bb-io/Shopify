@@ -1,8 +1,11 @@
 using Apps.Shopify.Models.Entities;
+using Apps.Shopify.Models.Response.Pagination;
+using Newtonsoft.Json;
 
 namespace Apps.Shopify.Models.Response.Article;
 
-public class ArticlesPaginationResponse
+public class ArticlesPaginationResponse : IRestPaginationResponse<OnlineStoreArticleEntity>
 {
-    public IEnumerable<OnlineStoreArticleEntity> Articles { get; set; }
+    [JsonProperty("articles")]
+    public IEnumerable<OnlineStoreArticleEntity> Items { get; set; }
 }
