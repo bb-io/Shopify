@@ -71,8 +71,7 @@ public static class ShopifyHtmlConverter
     public static (IEnumerable<IdentifiedContentRequest> blog,
         IEnumerable<IdentifiedContentRequest> blogPosts) BlogToJson(Stream file, string locale)
     {
-        var doc = new HtmlDocument();
-        doc.Load(file);
+        var contentNodes = GetContentNodes(file);
 
         var blogContentNodes = doc.DocumentNode.Descendants()
             .Where(x => x.Attributes[KeyAttr]?.Value != null && x.ParentNode.Name == "body");
