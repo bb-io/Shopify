@@ -1,5 +1,7 @@
 using Apps.Shopify.Constants;
+using Apps.Shopify.Extensions;
 using Apps.Shopify.Models.Response;
+using Apps.Shopify.Models.Response.Pagination;
 using Blackbird.Applications.Sdk.Common.Authentication;
 using Blackbird.Applications.Sdk.Utils.Extensions.Sdk;
 using Blackbird.Applications.Sdk.Utils.Extensions.String;
@@ -18,6 +20,33 @@ public class ShopifyRestClient : BlackBirdRestClient
         BaseUrl = GenerateApiUrl(creds, ApiConstants.ApiVersion).ToUri()
     })
     {
+    }
+
+    public async Task<List<T>> Paginate<T, TV>(RestRequest request) where TV : IRestPaginationResponse<T>
+        where T : IRestPaginationEntity
+    {
+        var limit = 250;
+        var lastId = string.Empty;
+        var baseUrl = request.Resource;
+
+        IRestPaginationResponse<T> response;
+        var result = new List<T>();
+
+        do
+        {
+            request.Resource = baseUrl
+                .SetQueryParameter("limit", limit.ToString());
+            
+            if(!string.IsNullOrWhiteSpace(lastId))
+                request.Resource = request.Resource.SetQueryParameter("since_id", lastId);
+
+            response = await ExecuteWithErrorHandling<TV>(request);
+            result.AddRange(response.Items);
+
+            lastId = response.Items.OrderByDescending(x => long.Parse(x.Id.GetShopifyItemId())).FirstOrDefault()?.Id.GetShopifyItemId();
+        } while (response.Items.Any());
+
+        return result;
     }
 
     protected override Exception ConfigureErrorException(RestResponse response)

@@ -2,6 +2,7 @@ using System.Net.Mime;
 using Apps.Shopify.Actions.Base;
 using Apps.Shopify.Api;
 using Apps.Shopify.Constants.GraphQL;
+using Apps.Shopify.Extensions;
 using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.Models.Entities;
 using Apps.Shopify.Models.Request;
@@ -28,10 +29,11 @@ public class MetafieldActions : TranslatableResourceActions
     [Action("Get metafield content as HTML",
         Description = "Get metafield content of a specific product in HTML format")]
     public async Task<FileResponse> GetMetafieldContent([ActionParameter] ProductRequest resourceRequest,
-        [ActionParameter] LocaleRequest locale)
+        [ActionParameter] LocaleRequest locale, [ActionParameter] GetContentRequest getContentRequest)
     {
         var productMetaFields = await GetProductMetafields(resourceRequest.ProductId);
-        var metaFields = await ListTranslatableResources(TranslatableResource.METAFIELD, locale.Locale);
+        var metaFields = await ListTranslatableResources(TranslatableResource.METAFIELD, locale.Locale,
+            getContentRequest.Outdated ?? default);
 
         var resources = metaFields
             .Where(x => productMetaFields.Any(y => x.ResourceId == y.Id))
@@ -46,7 +48,7 @@ public class MetafieldActions : TranslatableResourceActions
         return new()
         {
             File = await FileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html,
-                $"{resourceRequest.ProductId.Split('/').Last()}-metafields.html")
+                $"{resourceRequest.ProductId.GetShopifyItemId()}-metafields.html")
         };
     }
 
@@ -85,7 +87,7 @@ public class MetafieldActions : TranslatableResourceActions
             variables);
     }
 
-    private async Task UpdateMetaFieldContent(TranslatableMetaFieldContentRequest contentRequest)
+    private async Task UpdateMetaFieldContent(IdentifiedContentRequest contentRequest)
     {
         var request = new GraphQLRequest()
         {
@@ -109,7 +111,7 @@ public class MetafieldActions : TranslatableResourceActions
         await Client.ExecuteWithErrorHandling(request);
     }
 
-    private async Task FillDigests(List<TranslatableMetaFieldContentRequest> translations,
+    private async Task FillDigests(List<IdentifiedContentRequest> translations,
         string productId)
     {
         if (translations.All(x => !string.IsNullOrWhiteSpace(x.TranslatableContentDigest)))

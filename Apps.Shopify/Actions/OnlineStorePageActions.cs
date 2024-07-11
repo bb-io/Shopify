@@ -22,7 +22,7 @@ public class OnlineStorePageActions : TranslatableResourceActions
     }
 
     [Action("List online store pages", Description = "List all pages in the online store")]
-    public async Task<ListPagesResponse> ListPages() 
+    public async Task<ListPagesResponse> ListPages()
     {
         var variables = new Dictionary<string, object>()
         {
@@ -45,8 +45,9 @@ public class OnlineStorePageActions : TranslatableResourceActions
     [Action("Get online store page content as HTML",
         Description = "Get content of a specific online store page in HTML format")]
     public Task<FileResponse> GetOnlineStorePageTranslationContent(
-        [ActionParameter] OnlineStorePageRequest input, [ActionParameter] LocaleRequest locale)
-        => GetResourceContent(input.OnlineStorePageId, locale.Locale);
+        [ActionParameter] OnlineStorePageRequest input, [ActionParameter] LocaleRequest locale,
+        [ActionParameter] GetContentRequest getContentRequest)
+        => GetResourceContent(input.OnlineStorePageId, locale.Locale, getContentRequest.Outdated ?? default);
 
     [Action("Update online store page content from HTML",
         Description = "Update content of a specific online store page from HTML file")]

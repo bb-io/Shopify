@@ -36,6 +36,16 @@ public class WebhookList
     public Task<WebhookResponse<ProductPayload>> OnProductUnpublished(WebhookRequest request)
         => HandleWebhookRequest<ProductPayload>(request);
 
+    [Webhook("On locale created", typeof(LocaleCreatedHandler),
+        Description = "On a new locale added to the store")]
+    public Task<WebhookResponse<LocalePayload>> OnLocaleCreated(WebhookRequest request)
+        => HandleWebhookRequest<LocalePayload>(request);
+
+    [Webhook("On locale updated", typeof(LocaleUpdatedHandler),
+        Description = "On specific locale published or unpublished")]
+    public Task<WebhookResponse<LocalePayload>> OnLocaleUpdated(WebhookRequest request)
+        => HandleWebhookRequest<LocalePayload>(request);
+
     private Task<WebhookResponse<T>> HandleWebhookRequest<T>(WebhookRequest request) where T : class
     {
         var payload = request.Body.ToString();

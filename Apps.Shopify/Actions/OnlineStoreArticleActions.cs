@@ -22,7 +22,7 @@ public class OnlineStoreArticleActions : TranslatableResourceActions
     }
 
     [Action("List online store articles", Description = "List all aricles for the online store")]
-    public async Task<ListArticlesResponse> ListArticles() 
+    public async Task<ListArticlesResponse> ListArticles()
     {
         var variables = new Dictionary<string, object>()
         {
@@ -45,8 +45,9 @@ public class OnlineStoreArticleActions : TranslatableResourceActions
     [Action("Get online store article translation as HTML",
         Description = "Get content of a specific online store article in HTML format")]
     public Task<FileResponse> GetOnlineStoreArticleTranslationContent(
-        [ActionParameter] OnlineStoreArticleRequest input, [ActionParameter] LocaleRequest locale)
-        => GetResourceContent(input.OnlineStoreArticleId, locale.Locale);
+        [ActionParameter] OnlineStoreArticleRequest input, [ActionParameter] LocaleRequest locale,
+        [ActionParameter] GetContentRequest getContentRequest)
+        => GetResourceContent(input.OnlineStoreArticleId, locale.Locale, getContentRequest.Outdated ?? default);
 
     [Action("Update online store article content from HTML",
         Description = "Update content of a specific online store article from HTML file")]
