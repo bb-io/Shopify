@@ -26,6 +26,8 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 
 ### Store
 - **Get store locales information** Get primary and other locales setup in the store
+- **Get store resources content as HTML** returns content of all store resource type items in HTML format.
+- **Update store resources content from HTML** updates content of all store resource type items from an HTML file.
 
 ### Articles
 
@@ -36,7 +38,7 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 ### Blogs
 
 - **List online store blogs** List all blogs in the online store
-- **Get online store blog content as HTML** Get content of a specific online store blog in HTML format
+- **Get online store blog content as HTML** Get content of a specific online store blog in HTML format. You can also specify `Include articles` to True to export all blog post's articles as well.
 - **Update online store blog content from HTML** Update content of a specific online store blog from HTML file
 
 ### Pages
@@ -48,7 +50,7 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 ### Products
 
 - **Search products** Search for products based on provided criteria
-- **Get product content as HTML** Get content of a specific product in HTML format
+- **Get product content as HTML** Get content of a specific product in HTML format. You can also optionally specify more entities to export, f.e. metafields, options, option values.
 - **Update product content from HTML** Update content of a specific product from HTML file
 
 ### Metafields
