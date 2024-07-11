@@ -70,6 +70,12 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 - **On product updated**
 - **On product publications added**
 - **On product publications deleted**
+- **On locale created**
+- **On locale updated**
+- **On articles created**
+- **On articles updated**
+- **On pages created**
+- **On pages updated**
 
 ## Example
 
