@@ -86,6 +86,18 @@ public class TranslatableResourceActions : ShopifyInvocable
                 variables, default);
     }
 
+    protected async Task<ICollection<IdentifiedContentEntity>> ListIdentifiedTranslatableResources(
+        TranslatableResource resourceType, string? locale = default, bool outdated = false)
+    {
+        var entities = await ListTranslatableResources(resourceType, locale, outdated);
+        return entities
+            .SelectMany(x => x.GetTranslatableContent().Select(y => new IdentifiedContentEntity(y)
+            {
+                Id = x.ResourceId
+            }))
+            .ToList();
+    }
+
     protected Task<TranslatableResourceResponse> GetResourceSourceContent(string resourceId)
     {
         var request = new GraphQLRequest()
@@ -99,9 +111,12 @@ public class TranslatableResourceActions : ShopifyInvocable
         return Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
     }
 
-    protected async Task UpdateIdentifiedContent(ICollection<IdentifiedContentRequest> blogPosts)
+    protected async Task UpdateIdentifiedContent(ICollection<IdentifiedContentRequest>? items)
     {
-        var groupedItems = blogPosts
+        if (items is null || !items.Any())
+            return;
+        
+        var groupedItems = items
             .GroupBy(x => x.ResourceId)
             .ToArray();
 

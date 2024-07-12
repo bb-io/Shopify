@@ -18,6 +18,10 @@ public static class ShopifyHtmlConverter
     private const string MetafieldType = "metafield";
     private const string OptionType = "option";
     private const string OptionValueType = "optionValue";
+    private const string ThemeType = "theme";
+    private const string MenuType = "storeMenu";
+    private const string ShopType = "shop";
+    private const string ShopPolicyType = "shopPolicy";
 
     #region Metafield
 
@@ -157,6 +161,88 @@ public static class ShopifyHtmlConverter
             MetafieldsContentEntities = metafields,
             OptionsContentEntities = options,
             OptionValuesContentEntities = optionValues
+        };
+    }
+
+    #endregion
+
+    #region Store
+
+    public static MemoryStream StoreToHtml(StoreContentDto contentDto)
+    {
+        var (doc, body) = PrepareEmptyHtmlDocument();
+
+        if (contentDto.ThemesContentEntities is not null && contentDto.ThemesContentEntities.Any())
+        {
+            var node = doc.CreateElement(HtmlConstants.Div);
+            node.SetAttributeValue(TypeAttr, ThemeType);
+            body.AppendChild(node);
+
+            FillInIdentifiedContentEntities(doc, node, contentDto.ThemesContentEntities);
+        }      
+        
+        if (contentDto.MenuContentEntities is not null && contentDto.MenuContentEntities.Any())
+        {
+            var node = doc.CreateElement(HtmlConstants.Div);
+            node.SetAttributeValue(TypeAttr, MenuType);
+            body.AppendChild(node);
+
+            FillInIdentifiedContentEntities(doc, node, contentDto.MenuContentEntities);
+        }      
+        
+        if (contentDto.ShopContentEntities is not null && contentDto.ShopContentEntities.Any())
+        {
+            var node = doc.CreateElement(HtmlConstants.Div);
+            node.SetAttributeValue(TypeAttr, ShopType);
+            body.AppendChild(node);
+
+            FillInIdentifiedContentEntities(doc, node, contentDto.ShopContentEntities);
+        }      
+        
+        if (contentDto.ShopPolicyContentEntities is not null && contentDto.ShopPolicyContentEntities.Any())
+        {
+            var node = doc.CreateElement(HtmlConstants.Div);
+            node.SetAttributeValue(TypeAttr, ShopPolicyType);
+            body.AppendChild(node);
+
+            FillInIdentifiedContentEntities(doc, node, contentDto.ShopPolicyContentEntities);
+        }
+
+        return GetMemoryStream(doc);
+    }
+
+    public static ShopTranslatableResourceDto StoreToJson(Stream file, string locale)
+    {
+        var doc = new HtmlDocument();
+        doc.Load(file);
+
+        var themeContentNodes = doc.DocumentNode.Descendants()
+            .FirstOrDefault(x => x.Attributes[TypeAttr]?.Value == ThemeType)?
+            .ChildNodes.Where(x => x.Attributes[KeyAttr]?.Value != null);
+        
+        var menuContentNodes = doc.DocumentNode.Descendants()
+            .FirstOrDefault(x => x.Attributes[TypeAttr]?.Value == MenuType)?
+            .ChildNodes.Where(x => x.Attributes[KeyAttr]?.Value != null);
+        
+        var shopContentNodes = doc.DocumentNode.Descendants()
+            .FirstOrDefault(x => x.Attributes[TypeAttr]?.Value == ShopType)?
+            .ChildNodes.Where(x => x.Attributes[KeyAttr]?.Value != null);
+        
+        var shopPolicyContentNodes = doc.DocumentNode.Descendants()
+            .FirstOrDefault(x => x.Attributes[TypeAttr]?.Value == ShopPolicyType)?
+            .ChildNodes.Where(x => x.Attributes[KeyAttr]?.Value != null);
+
+        var themes = GetIdentifiedResourceContent(themeContentNodes, locale);
+        var menu = GetIdentifiedResourceContent(menuContentNodes, locale);
+        var shop = GetIdentifiedResourceContent(shopContentNodes, locale);
+        var shopPolicy = GetIdentifiedResourceContent(shopPolicyContentNodes, locale);
+
+        return new()
+        {
+            ThemesContentEntities = themes,
+            MenuContentEntities = menu,
+            ShopContentEntities = shop,
+            ShopPolicyContentEntities = shopPolicy
         };
     }
 
