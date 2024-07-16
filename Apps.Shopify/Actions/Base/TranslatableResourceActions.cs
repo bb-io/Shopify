@@ -18,6 +18,8 @@ public class TranslatableResourceActions : ShopifyInvocable
 {
     protected readonly IFileManagementClient FileManagementClient;
 
+    private const int MaxUpdateChunkSize = 250;
+
     protected TranslatableResourceActions(InvocationContext invocationContext,
         IFileManagementClient fileManagementClient)
         : base(invocationContext)
@@ -55,20 +57,25 @@ public class TranslatableResourceActions : ShopifyInvocable
             var sourceContent = await GetResourceSourceContent(resourceId);
             translations.ForEach(x =>
                 x.TranslatableContentDigest = sourceContent.TranslatableResource.TranslatableContent
-                    .First(y => y.Key == x.Key).Digest);
+                    .FirstOrDefault(y => y.Key == x.Key)?.Digest ?? string.Empty);
         }
 
-        var request = new GraphQLRequest()
-        {
-            Query = GraphQlMutations.TranslationsRegister,
-            Variables = new
-            {
-                resourceId,
-                translations
-            }
-        };
+        var translationChunks = translations.Chunk(MaxUpdateChunkSize).ToArray();
 
-        await Client.ExecuteWithErrorHandling(request);
+        foreach (var chunk in translationChunks)
+        {
+            var request = new GraphQLRequest()
+            {
+                Query = GraphQlMutations.TranslationsRegister,
+                Variables = new
+                {
+                    resourceId,
+                    translations = chunk
+                }
+            };
+
+            await Client.ExecuteWithErrorHandling(request);
+        }
     }
 
     protected async Task<ICollection<TranslatableResourceEntity>> ListTranslatableResources(
@@ -115,7 +122,7 @@ public class TranslatableResourceActions : ShopifyInvocable
     {
         if (items is null || !items.Any())
             return;
-        
+
         var groupedItems = items
             .GroupBy(x => x.ResourceId)
             .ToArray();
@@ -127,23 +134,32 @@ public class TranslatableResourceActions : ShopifyInvocable
                 var sourceContent = await GetResourceSourceContent(item.Key);
                 item.ToList().ForEach(x =>
                     x.TranslatableContentDigest = sourceContent.TranslatableResource.TranslatableContent
-                        .First(y => y.Key == x.Key).Digest);
+                        .FirstOrDefault(y => y.Key == x.Key)?.Digest ?? string.Empty);
             }
         }
 
         foreach (var item in groupedItems)
         {
-            var request = new GraphQLRequest()
-            {
-                Query = GraphQlMutations.TranslationsRegister,
-                Variables = new
-                {
-                    resourceId = item.Key,
-                    translations = item.Select(x => new TranslatableResourceContentRequest(x))
-                }
-            };
+            var translations = item
+                .Where(x => !string.IsNullOrWhiteSpace(x.TranslatableContentDigest))
+                .Select(x => new TranslatableResourceContentRequest(x))
+                .Chunk(MaxUpdateChunkSize)
+                .ToArray();
 
-            await Client.ExecuteWithErrorHandling(request);
+            foreach (var translationsChunk in translations)
+            {
+                var request = new GraphQLRequest()
+                {
+                    Query = GraphQlMutations.TranslationsRegister,
+                    Variables = new
+                    {
+                        resourceId = item.Key,
+                        translations = translationsChunk
+                    }
+                };
+
+                await Client.ExecuteWithErrorHandling(request);
+            }
         }
     }
 }

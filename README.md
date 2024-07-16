@@ -28,6 +28,8 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 - **Get store locales information** Get primary and other locales setup in the store
 - **Get store resources content as HTML** returns content of all store resource type items in HTML format.
 - **Update store resources content from HTML** updates content of all store resource type items from an HTML file.
+- **Get store content as HTML** returns content of the store in HTML format. You should specify what resources you want to export: theme, menu, shop or shop policy.
+- **Update store content from HTML** updates content of the store from an HTML file.
 
 ### Articles
 
