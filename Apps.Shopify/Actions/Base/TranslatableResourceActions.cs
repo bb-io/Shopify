@@ -18,6 +18,8 @@ public class TranslatableResourceActions : ShopifyInvocable
 {
     protected readonly IFileManagementClient FileManagementClient;
 
+    private const int MaxUpdateChunkSize = 250;
+
     protected TranslatableResourceActions(InvocationContext invocationContext,
         IFileManagementClient fileManagementClient)
         : base(invocationContext)
@@ -55,20 +57,25 @@ public class TranslatableResourceActions : ShopifyInvocable
             var sourceContent = await GetResourceSourceContent(resourceId);
             translations.ForEach(x =>
                 x.TranslatableContentDigest = sourceContent.TranslatableResource.TranslatableContent
-                    .First(y => y.Key == x.Key).Digest);
+                    .FirstOrDefault(y => y.Key == x.Key)?.Digest ?? string.Empty);
         }
 
-        var request = new GraphQLRequest()
-        {
-            Query = GraphQlMutations.TranslationsRegister,
-            Variables = new
-            {
-                resourceId,
-                translations
-            }
-        };
+        var translationChunks = translations.Chunk(MaxUpdateChunkSize).ToArray();
 
-        await Client.ExecuteWithErrorHandling(request);
+        foreach (var chunk in translationChunks)
+        {
+            var request = new GraphQLRequest()
+            {
+                Query = GraphQlMutations.TranslationsRegister,
+                Variables = new
+                {
+                    resourceId,
+                    translations = chunk
+                }
+            };
+
+            await Client.ExecuteWithErrorHandling(request);
+        }
     }
 
     protected async Task<ICollection<TranslatableResourceEntity>> ListTranslatableResources(
@@ -86,6 +93,18 @@ public class TranslatableResourceActions : ShopifyInvocable
                 variables, default);
     }
 
+    protected async Task<ICollection<IdentifiedContentEntity>> ListIdentifiedTranslatableResources(
+        TranslatableResource resourceType, string? locale = default, bool outdated = false)
+    {
+        var entities = await ListTranslatableResources(resourceType, locale, outdated);
+        return entities
+            .SelectMany(x => x.GetTranslatableContent().Select(y => new IdentifiedContentEntity(y)
+            {
+                Id = x.ResourceId
+            }))
+            .ToList();
+    }
+
     protected Task<TranslatableResourceResponse> GetResourceSourceContent(string resourceId)
     {
         var request = new GraphQLRequest()
@@ -99,9 +118,12 @@ public class TranslatableResourceActions : ShopifyInvocable
         return Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
     }
 
-    protected async Task UpdateIdentifiedContent(ICollection<IdentifiedContentRequest> blogPosts)
+    protected async Task UpdateIdentifiedContent(ICollection<IdentifiedContentRequest>? items)
     {
-        var groupedItems = blogPosts
+        if (items is null || !items.Any())
+            return;
+
+        var groupedItems = items
             .GroupBy(x => x.ResourceId)
             .ToArray();
 
@@ -112,23 +134,32 @@ public class TranslatableResourceActions : ShopifyInvocable
                 var sourceContent = await GetResourceSourceContent(item.Key);
                 item.ToList().ForEach(x =>
                     x.TranslatableContentDigest = sourceContent.TranslatableResource.TranslatableContent
-                        .First(y => y.Key == x.Key).Digest);
+                        .FirstOrDefault(y => y.Key == x.Key)?.Digest ?? string.Empty);
             }
         }
 
         foreach (var item in groupedItems)
         {
-            var request = new GraphQLRequest()
-            {
-                Query = GraphQlMutations.TranslationsRegister,
-                Variables = new
-                {
-                    resourceId = item.Key,
-                    translations = item.Select(x => new TranslatableResourceContentRequest(x))
-                }
-            };
+            var translations = item
+                .Where(x => !string.IsNullOrWhiteSpace(x.TranslatableContentDigest))
+                .Select(x => new TranslatableResourceContentRequest(x))
+                .Chunk(MaxUpdateChunkSize)
+                .ToArray();
 
-            await Client.ExecuteWithErrorHandling(request);
+            foreach (var translationsChunk in translations)
+            {
+                var request = new GraphQLRequest()
+                {
+                    Query = GraphQlMutations.TranslationsRegister,
+                    Variables = new
+                    {
+                        resourceId = item.Key,
+                        translations = translationsChunk
+                    }
+                };
+
+                await Client.ExecuteWithErrorHandling(request);
+            }
         }
     }
 }
