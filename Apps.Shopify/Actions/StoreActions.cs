@@ -34,8 +34,8 @@ public class StoreActions : TranslatableResourceActions
 
         return new StoreLocalesResponse
         {
-            Primary = response.ShopLocales.First(x => x.Primary),
-            OtherLocales = response.ShopLocales.Where(x => x.Primary is false)
+            Primary = response.ShopLocales.First(x => x.Primary).Locale,
+            OtherLocales = response.ShopLocales.Where(x => x.Primary is false).Select(x => x.Locale)
         };
     }
 
