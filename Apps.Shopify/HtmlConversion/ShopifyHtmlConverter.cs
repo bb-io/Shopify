@@ -44,7 +44,8 @@ public static class ShopifyHtmlConverter
         return GetMemoryStream(doc);
     }
 
-    public static IEnumerable<IdentifiedContentRequest> MetaFieldsToJson(Stream file, string locale)
+    public static IEnumerable<IdentifiedContentRequest> MetaFieldsToJson(Stream file,
+        string locale)
     {
         var contentNodes = GetContentNodes(file);
         return GetIdentifiedResourceContent(contentNodes, locale);
@@ -98,7 +99,7 @@ public static class ShopifyHtmlConverter
     public static MemoryStream ProductToHtml(ProductContentDto contentDto)
     {
         var (doc, body) = PrepareEmptyHtmlDocument();
-        FillInContentEntities(doc, body, contentDto.ProductContentEntities);
+        FillInIdentifiedContentEntities(doc, body, contentDto.ProductContentEntities);
 
         if (contentDto.MetafieldsContentEntities is not null && contentDto.MetafieldsContentEntities.Any())
         {
@@ -247,14 +248,6 @@ public static class ShopifyHtmlConverter
     }
 
     #endregion
-
-    public static MemoryStream ToHtml(IEnumerable<ContentEntity> contentEntities)
-    {
-        var (doc, body) = PrepareEmptyHtmlDocument();
-        FillInContentEntities(doc, body, contentEntities);
-
-        return GetMemoryStream(doc);
-    }    
     
     public static MemoryStream ToHtml(IEnumerable<IdentifiedContentEntity> contentEntities)
     {
@@ -263,14 +256,8 @@ public static class ShopifyHtmlConverter
 
         return GetMemoryStream(doc);
     }
-
-    public static IEnumerable<TranslatableResourceContentRequest> ToJson(Stream file, string locale)
-    {
-        var contentNodes = GetContentNodes(file);
-        return GetResourceContent(contentNodes, locale);
-    }    
     
-    public static IEnumerable<IdentifiedContentRequest> ToJsonIdentified(Stream file, string locale)
+    public static IEnumerable<IdentifiedContentRequest> ToJson(Stream file, string locale)
     {
         var contentNodes = GetContentNodes(file);
         return GetIdentifiedResourceContent(contentNodes, locale);
@@ -306,21 +293,6 @@ public static class ShopifyHtmlConverter
         return doc.DocumentNode.Descendants()
             .Where(x => x.Attributes[KeyAttr]?.Value != null);
     }
-
-    private static void FillInContentEntities(HtmlDocument doc, HtmlNode body,
-        IEnumerable<ContentEntity> contentEntities)
-    {
-        contentEntities.ToList().ForEach(x =>
-        {
-            var node = doc.CreateElement(HtmlConstants.Div);
-
-            node.InnerHtml = x.Value;
-            node.SetAttributeValue(KeyAttr, x.Key);
-            node.SetAttributeValue(DigestAttr, x.Digest);
-
-            body.AppendChild(node);
-        });
-    }   
     
     private static void FillInIdentifiedContentEntities(HtmlDocument doc, HtmlNode body,
         IEnumerable<IdentifiedContentEntity> contentEntities)

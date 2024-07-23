@@ -75,7 +75,11 @@ public class ProductActions : TranslatableResourceActions
 
         var html = ShopifyHtmlConverter.ProductToHtml(new()
         {
-            ProductContentEntities = productContent.TranslatableResource.GetTranslatableContent(),
+            ProductContentEntities = productContent.TranslatableResource.GetTranslatableContent()
+                .Select(x => new IdentifiedContentEntity(x)
+                {
+                    Id = resourceRequest.ProductId
+                }),
             MetafieldsContentEntities = input.IncludeMetafields is true
                 ? await GetProductMetafields(resourceRequest.ProductId, locale.Locale,
                     getContentRequest.Outdated ?? default)
@@ -96,26 +100,22 @@ public class ProductActions : TranslatableResourceActions
     }
 
     [Action("Update product content from HTML", Description = "Update content of a specific product from HTML file")]
-    public async Task UpdateProductContent([ActionParameter] ProductRequest resourceRequest,
-        [ActionParameter] NonPrimaryLocaleRequest locale, [ActionParameter] FileRequest file)
+    public async Task UpdateProductContent([ActionParameter] NonPrimaryLocaleRequest locale, [ActionParameter] FileRequest file)
     {
         var fileStream = await FileManagementClient.DownloadAsync(file.File);
         var translations = ShopifyHtmlConverter.ProductToJson(fileStream, locale.Locale);
 
-        await UpdateProductContent(resourceRequest.ProductId, translations.ProductContentEntities.ToList());
+        var productContent = translations.ProductContentEntities.ToList();
 
-        if (translations.MetafieldsContentEntities != null && translations.MetafieldsContentEntities.Any())
-            await UpdateIdentifiedContent(translations.MetafieldsContentEntities.ToList());
+        await UpdateProductContent(productContent.First().ResourceId, productContent);
 
-        if (translations.OptionsContentEntities != null && translations.OptionsContentEntities.Any())
-            await UpdateIdentifiedContent(translations.OptionsContentEntities.ToList());
-
-        if (translations.OptionValuesContentEntities != null && translations.OptionValuesContentEntities.Any())
-            await UpdateIdentifiedContent(translations.OptionValuesContentEntities.ToList());
+        await UpdateIdentifiedContent(translations.MetafieldsContentEntities?.ToList());
+        await UpdateIdentifiedContent(translations.OptionsContentEntities?.ToList());
+        await UpdateIdentifiedContent(translations.OptionValuesContentEntities?.ToList());
     }
 
     private async Task UpdateProductContent(string productId,
-        ICollection<TranslatableResourceContentRequest> productContents)
+        ICollection<IdentifiedContentRequest> productContents)
     {
         if (productContents.Any(x => string.IsNullOrWhiteSpace(x.TranslatableContentDigest)))
         {
