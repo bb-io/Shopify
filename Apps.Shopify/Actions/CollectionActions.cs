@@ -26,7 +26,7 @@ public class CollectionActions : TranslatableResourceActions
 
     [Action("Update collection content from HTML",
         Description = "Update content of a specific collection from HTML file")]
-    public Task UpdateCollectionContent([ActionParameter] CollectionRequest resourceRequest,
+    public Task UpdateCollectionContent([ActionParameter] CollectionRequest? resourceRequest,
         [ActionParameter] NonPrimaryLocaleRequest locale, [ActionParameter] FileRequest file)
         => UpdateResourceContent(resourceRequest.CollectionId, locale.Locale, file.File);
 }
