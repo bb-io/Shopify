@@ -54,25 +54,13 @@ public class MetafieldActions : TranslatableResourceActions
 
     [Action("Update metafield content from HTML",
         Description = "Update metafield content of a specific product from HTML file")]
-    public async Task UpdateMetaFieldContent([ActionParameter] ProductRequest resourceRequest,
-        [ActionParameter] NonPrimaryLocaleRequest locale, [ActionParameter] FileRequest file)
+    public async Task UpdateMetaFieldContent([ActionParameter] NonPrimaryLocaleRequest locale,
+        [ActionParameter] FileRequest file)
     {
         var fileStream = await FileManagementClient.DownloadAsync(file.File);
-        var translations = ShopifyHtmlConverter.MetaFieldsToJson(fileStream, locale.Locale).ToList();
+        var translations = ShopifyHtmlConverter.MetaFieldsToJson(fileStream, locale.Locale);
 
-        await FillDigests(translations, resourceRequest.ProductId);
-
-        foreach (var translatableMetaFieldContentRequest in translations)
-        {
-            try
-            {
-                await UpdateMetaFieldContent(translatableMetaFieldContentRequest);
-            }
-            catch (Exception ex)
-            {
-                InvocationContext.Logger?.LogError(ex.ToString(), null);
-            }
-        }
+        await UpdateIdentifiedContent(translations.ToList());
     }
 
     private async Task<ICollection<MetafieldEntity>> GetProductMetafields(string productId)

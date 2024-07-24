@@ -1,5 +1,6 @@
 using Apps.Shopify.Actions.Base;
 using Apps.Shopify.Constants.GraphQL;
+using Apps.Shopify.DataSourceHandlers;
 using Apps.Shopify.Models.Entities;
 using Apps.Shopify.Models.Request;
 using Apps.Shopify.Models.Request.OnlineStoreArticle;
@@ -8,6 +9,7 @@ using Apps.Shopify.Models.Response.Article;
 using Apps.Shopify.Models.Response.TranslatableResource;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
+using Blackbird.Applications.Sdk.Common.Dynamic;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
@@ -51,7 +53,9 @@ public class OnlineStoreArticleActions : TranslatableResourceActions
 
     [Action("Update online store article content from HTML",
         Description = "Update content of a specific online store article from HTML file")]
-    public Task UpdateOnlineStoreArticleContent([ActionParameter] OnlineStoreArticleRequest resourceRequest,
+    public Task UpdateOnlineStoreArticleContent(
+        [ActionParameter, DataSource(typeof(OnlineStoreArticleHandler)), Display("Online store article ID")]
+        string? onlineStoreArticleId,
         [ActionParameter] NonPrimaryLocaleRequest locale, [ActionParameter] FileRequest file)
-        => UpdateResourceContent(resourceRequest.OnlineStoreArticleId, locale.Locale, file.File);
+        => UpdateResourceContent(onlineStoreArticleId, locale.Locale, file.File);
 }

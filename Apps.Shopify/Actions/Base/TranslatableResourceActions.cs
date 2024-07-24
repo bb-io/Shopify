@@ -38,7 +38,11 @@ public class TranslatableResourceActions : ShopifyInvocable
             }
         };
         var response = await Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
-        var html = ShopifyHtmlConverter.ToHtml(response.TranslatableResource.GetTranslatableContent());
+        var html = ShopifyHtmlConverter.ToHtml(response.TranslatableResource.GetTranslatableContent()
+            .Select(x => new IdentifiedContentEntity(x)
+            {
+                Id = resourceId
+            }));
 
         return new()
         {
@@ -47,10 +51,12 @@ public class TranslatableResourceActions : ShopifyInvocable
         };
     }
 
-    protected async Task UpdateResourceContent(string resourceId, string locale, FileReference file)
+    protected async Task UpdateResourceContent(string? resourceId, string locale, FileReference file)
     {
         var fileStream = await FileManagementClient.DownloadAsync(file);
         var translations = ShopifyHtmlConverter.ToJson(fileStream, locale).ToList();
+
+        resourceId = string.IsNullOrWhiteSpace(resourceId) ? translations.First().ResourceId : resourceId;
 
         if (translations.Any(x => string.IsNullOrWhiteSpace(x.TranslatableContentDigest)))
         {
@@ -70,7 +76,7 @@ public class TranslatableResourceActions : ShopifyInvocable
                 Variables = new
                 {
                     resourceId,
-                    translations = chunk
+                    translations = chunk.Select(x => new TranslatableResourceContentRequest(x))
                 }
             };
 

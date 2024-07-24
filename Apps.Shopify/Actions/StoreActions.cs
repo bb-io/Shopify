@@ -73,7 +73,7 @@ public class StoreActions : TranslatableResourceActions
 
     {
         var fileStream = await FileManagementClient.DownloadAsync(file.File);
-        var content = ShopifyHtmlConverter.ToJsonIdentified(fileStream, locale.Locale).ToList();
+        var content = ShopifyHtmlConverter.ToJson(fileStream, locale.Locale).ToList();
         await UpdateIdentifiedContent(content);
     }
 
@@ -86,7 +86,6 @@ public class StoreActions : TranslatableResourceActions
     {
         if (NoneItemsIncluded(input))
             throw new("You should include at least one content type");
-
 
         var html = ShopifyHtmlConverter.StoreToHtml(new()
         {
