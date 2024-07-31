@@ -51,7 +51,7 @@ public static class GraphQlQueries
               }
           }
         }";
-    
+
     public const string TranslatableResourcesWithTranslations =
         @"query ($outdated: Boolean, $resourceType: TranslatableResourceType!, $after: String, $limit: Int!, $locale: String!) {
           translatableResources(first: $limit, after: $after, resourceType: $resourceType) {
@@ -73,8 +73,8 @@ public static class GraphQlQueries
                  startCursor
               }
           }
-        }";   
-    
+        }";
+
     public const string TranslatableResourcesByIds =
         @"query ($outdated: Boolean, $resourceIds: [ID!]!, $after: String, $limit: Int!, $locale: String!) {
           translatableResourcesByIds(first: $limit, after: $after, resourceIds: $resourceIds) {
@@ -143,7 +143,7 @@ public static class GraphQlQueries
               }
           }
         }";
-    
+
     public const string ProductMetaFields =
         @"query ($resourceId: ID!, $after: String, $limit: Int!) {
           metafields(first: $limit, after: $after, owner: $resourceId) {
@@ -160,8 +160,8 @@ public static class GraphQlQueries
                startCursor
             }
           }
-        }";    
-    
+        }";
+
     public const string Product =
         @"query ($resourceId: ID!, $locale: String!) {
           product(id: $resourceId) {
@@ -188,6 +188,35 @@ public static class GraphQlQueries
                 key
                 value
              }  
+          }
+        }";
+
+    public const string MetafieldDefinitions =
+        @"query ($limit: Int!, $after: String, $ownerType: MetafieldOwnerType!) {
+            metafieldDefinitions (first: $limit, after: $after, ownerType: $ownerType){
+              nodes {
+                 id
+                 key
+                 name
+               }
+              pageInfo {
+                 endCursor
+                 hasNextPage
+                 startCursor
+              }
+            }
+          }";
+
+    public const string MetafieldDefinition =
+        @"query ($id: ID!) {
+          metafieldDefinition(id: $id) {
+            id
+            name
+            key
+            namespace
+            type{
+              name
+            }
           }
         }";
 }

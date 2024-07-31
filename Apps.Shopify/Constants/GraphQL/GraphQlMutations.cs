@@ -17,7 +17,7 @@ public static class GraphQlMutations
               }";
 
     public const string SubscribeEvent =
-      @"mutation webhookSubscriptionCreate($topic: WebhookSubscriptionTopic!, $webhookSubscription: WebhookSubscriptionInput!) {
+        @"mutation webhookSubscriptionCreate($topic: WebhookSubscriptionTopic!, $webhookSubscription: WebhookSubscriptionInput!) {
           webhookSubscriptionCreate(topic: $topic, webhookSubscription: $webhookSubscription) {
             userErrors {
               field
@@ -27,12 +27,27 @@ public static class GraphQlMutations
         }";
 
     public const string UnsubscribeEvent =
-      @"mutation webhookSubscriptionDelete($id: ID!) {
+        @"mutation webhookSubscriptionDelete($id: ID!) {
           webhookSubscriptionDelete(id: $id) {
             deletedWebhookSubscriptionId
             userErrors {
               field
               message
+            }
+          }
+        }";
+
+    public const string MetafieldsSet =
+        @"mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
+          metafieldsSet(metafields: $metafields) {
+            metafields {
+              key
+              value
+            }
+            userErrors {
+              field
+              message
+              code
             }
           }
         }";

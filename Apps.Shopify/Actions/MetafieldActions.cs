@@ -1,20 +1,25 @@
 using System.Net.Mime;
 using Apps.Shopify.Actions.Base;
 using Apps.Shopify.Api;
+using Apps.Shopify.Api.Rest;
 using Apps.Shopify.Constants.GraphQL;
+using Apps.Shopify.DataSourceHandlers;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.Models.Entities;
 using Apps.Shopify.Models.Request;
+using Apps.Shopify.Models.Request.Metafield;
 using Apps.Shopify.Models.Request.Product;
-using Apps.Shopify.Models.Request.TranslatableResource;
 using Apps.Shopify.Models.Response;
 using Apps.Shopify.Models.Response.Metafield;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
+using Blackbird.Applications.Sdk.Common.Dynamic;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
+using Blackbird.Applications.Sdk.Utils.Extensions.Http;
 using GraphQL;
+using RestSharp;
 
 namespace Apps.Shopify.Actions;
 
@@ -63,6 +68,54 @@ public class MetafieldActions : TranslatableResourceActions
         await UpdateIdentifiedContent(translations.ToList());
     }
 
+    [Action("Get metafield",
+        Description = "Get metafield details of a specific product")]
+    public async Task<MetafieldEntity> GetMetafield(
+        [ActionParameter, Display("Metafield"), DataSource(typeof(ProductMetafieldDataHandler))] string metafieldKey,
+        [ActionParameter] ProductRequest product)
+    {
+        var productMetaFields = await GetProductMetafields(product.ProductId);
+        return productMetaFields.FirstOrDefault(x => x.Key == metafieldKey) ??
+               throw new("No metafield with the provided key found for the project");
+    }
+
+    [Action("Update metafield",
+        Description = "Update metafield value of a specific product")]
+    public async Task UpdateMetafield([ActionParameter] MetafieldRequest metafield,
+        [ActionParameter] ProductRequest product, [ActionParameter, Display("New value")] string value)
+    {
+        var metafieldDefinition = await GetMetafieldDefinitin(metafield.MetafieldDefinitionId);
+        var request = new ShopifyRestRequest($"/products/{product.ProductId.GetShopifyItemId()}/metafields.json",
+                Method.Post, Creds)
+            .WithJsonBody(new
+            {
+                metafield = new
+                {
+                    value,
+                    key = metafieldDefinition.Key,
+                    @namespace = metafieldDefinition.Namespace,
+                    type = metafieldDefinition.Type.Name,
+                }
+            });
+
+        await RestClient.ExecuteWithErrorHandling(request);
+    }
+
+    private async Task<MetafieldDefinitionEntity> GetMetafieldDefinitin(string metafieldDefinitionId)
+    {
+        var request = new GraphQLRequest()
+        {
+            Query = GraphQlQueries.MetafieldDefinition,
+            Variables = new
+            {
+                id = metafieldDefinitionId
+            }
+        };
+
+        var response = await Client.ExecuteWithErrorHandling<MetafieldDefinitionResponse>(request);
+        return response.MetafieldDefinition;
+    }
+
     private async Task<ICollection<MetafieldEntity>> GetProductMetafields(string productId)
     {
         var variables = new Dictionary<string, object>()
@@ -73,43 +126,5 @@ public class MetafieldActions : TranslatableResourceActions
         var client = new ShopifyClient(Creds, ShopifyClient.GenerateApiUrl(Creds, "unstable"));
         return await client.Paginate<MetafieldEntity, MetafieldPaginationResponse>(GraphQlQueries.ProductMetaFields,
             variables);
-    }
-
-    private async Task UpdateMetaFieldContent(IdentifiedContentRequest contentRequest)
-    {
-        var request = new GraphQLRequest()
-        {
-            Query = GraphQlMutations.TranslationsRegister,
-            Variables = new
-            {
-                resourceId = contentRequest.ResourceId,
-                translations = new List<TranslatableResourceContentRequest>()
-                {
-                    new()
-                    {
-                        Key = contentRequest.Key,
-                        TranslatableContentDigest = contentRequest.TranslatableContentDigest,
-                        Value = contentRequest.Value,
-                        Locale = contentRequest.Locale
-                    }
-                }
-            }
-        };
-
-        await Client.ExecuteWithErrorHandling(request);
-    }
-
-    private async Task FillDigests(List<IdentifiedContentRequest> translations,
-        string productId)
-    {
-        if (translations.All(x => !string.IsNullOrWhiteSpace(x.TranslatableContentDigest)))
-            return;
-
-        var metaFields = await GetProductMetafields(productId);
-
-        translations.ForEach(x =>
-            x.TranslatableContentDigest = metaFields.FirstOrDefault(y => y.Id == x.ResourceId)?.CompareDigest ??
-                                          throw new ArgumentException(
-                                              "Provided Product ID does not correspond to the metafields specified in the HTML file"));
     }
 }
