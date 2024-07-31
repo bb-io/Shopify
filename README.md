@@ -59,6 +59,8 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 
 - **Get metafield content as HTML** returns product metafield contents in HTML format
 - **Update metafield content from HTML** updates product metafield contents from the HTML file
+- **Get metafield** returns metafield details of a specific product
+- **Update metafield** updates metafield value of a specific product
 
 ### Themes
 

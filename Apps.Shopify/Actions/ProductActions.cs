@@ -31,6 +31,9 @@ public class ProductActions : TranslatableResourceActions
     [Action("Search products", Description = "Search for products based on provided criterias")]
     public async Task<ListProductsResponse> SearchProducts([ActionParameter] SearchProductsRequest input)
     {
+        if ((input.MetafieldKey == null) ^ (input.MetafieldValue == null))
+            throw new("Metafield and Metafield value should be both either filled or empty");
+        
         var variables = new Dictionary<string, object>();
 
         var query = new List<string>();
@@ -46,6 +49,9 @@ public class ProductActions : TranslatableResourceActions
 
         var response = await Client
             .Paginate<ProductEntity, ProductsPaginationResponse>(GraphQlQueries.Products, variables);
+
+        if (input.MetafieldKey is not null)
+            await FilterProductsByMetafields(response, input.MetafieldKey, input.MetafieldValue!);
 
         return new(response);
     }
@@ -219,5 +225,18 @@ public class ProductActions : TranslatableResourceActions
 
         var response = await Client.ExecuteWithErrorHandling<ProductResponse>(request);
         return response.Product;
+    }
+    
+    private async Task FilterProductsByMetafields(List<ProductEntity> response, string metafieldKey, string metafieldValue)
+    {
+        foreach (var product in response.ToArray())
+        {
+            var metafields = await GetProductMetafields(product.Id);
+            
+            if(metafields.Any(x => x.Key == metafieldKey && x.Value == metafieldValue))
+                continue;
+
+            response.Remove(product);
+        }
     }
 }
