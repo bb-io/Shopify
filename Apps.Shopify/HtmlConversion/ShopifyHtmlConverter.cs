@@ -24,6 +24,22 @@ public static class ShopifyHtmlConverter
     private const string ShopType = "shop";
     private const string ShopPolicyType = "shopPolicy";
 
+    #region Generic
+
+    public static string? ExtractContentTypeFromHtml(Stream file)
+    {
+        var doc = new HtmlDocument();
+        doc.Load(file);
+
+        var contentType = doc.DocumentNode
+            .SelectSingleNode("//meta[@name='blackbird-content-type']")
+            ?.GetAttributeValue("content", null);
+
+        return contentType;
+    }
+
+    #endregion
+
     #region Metafield
 
     public static MemoryStream MetaFieldsToHtml(IEnumerable<(string ResourceId, ContentEntity)> metafields, string contentType)
