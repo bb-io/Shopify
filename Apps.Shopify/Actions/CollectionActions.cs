@@ -1,4 +1,5 @@
 using Apps.Shopify.Actions.Base;
+using Apps.Shopify.Constants;
 using Apps.Shopify.DataSourceHandlers;
 using Apps.Shopify.Models.Request;
 using Apps.Shopify.Models.Request.Collection;
@@ -24,7 +25,7 @@ public class CollectionActions : TranslatableResourceActions
     public Task<FileResponse> GetCollectionContent(
         [ActionParameter] CollectionRequest input, [ActionParameter] LocaleRequest locale,
         [ActionParameter] GetContentRequest getContentRequest)
-        => GetResourceContent(input.CollectionId, locale.Locale, getContentRequest.Outdated ?? default);
+        => GetResourceContent(input.CollectionId, locale.Locale, getContentRequest.Outdated ?? default, HtmlContentTypes.Collection);
 
     [Action("Update collection content from HTML",
         Description = "Update content of a specific collection from HTML file")]

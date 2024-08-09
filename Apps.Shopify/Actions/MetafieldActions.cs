@@ -2,6 +2,7 @@ using System.Net.Mime;
 using Apps.Shopify.Actions.Base;
 using Apps.Shopify.Api;
 using Apps.Shopify.Api.Rest;
+using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.DataSourceHandlers;
 using Apps.Shopify.Extensions;
@@ -48,8 +49,7 @@ public class MetafieldActions : TranslatableResourceActions
             ? resources.Select(x => (x.ResourceId, x.TranslatableContent.FirstOrDefault())).ToArray()
             : resources.Select(x => (x.ResourceId, x.Translations.FirstOrDefault())).ToArray();
 
-        var html = ShopifyHtmlConverter.MetaFieldsToHtml(contents.Where(x => x.Item2 is not null));
-
+        var html = ShopifyHtmlConverter.MetaFieldsToHtml(contents.Where(x => x.Item2 is not null), HtmlContentTypes.MetafieldContent);
         return new()
         {
             File = await FileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html,

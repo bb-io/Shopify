@@ -27,7 +27,7 @@ public class TranslatableResourceActions : ShopifyInvocable
         FileManagementClient = fileManagementClient;
     }
 
-    protected async Task<FileResponse> GetResourceContent(string resourceId, string locale, bool outdated)
+    protected async Task<FileResponse> GetResourceContent(string resourceId, string locale, bool outdated, string contentType)
     {
         var request = new GraphQLRequest()
         {
@@ -42,7 +42,7 @@ public class TranslatableResourceActions : ShopifyInvocable
             .Select(x => new IdentifiedContentEntity(x)
             {
                 Id = resourceId
-            }));
+            }), contentType);
 
         return new()
         {

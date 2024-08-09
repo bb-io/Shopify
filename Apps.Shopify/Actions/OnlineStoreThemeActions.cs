@@ -1,4 +1,5 @@
 using Apps.Shopify.Actions.Base;
+using Apps.Shopify.Constants;
 using Apps.Shopify.DataSourceHandlers;
 using Apps.Shopify.Models.Request;
 using Apps.Shopify.Models.Request.OnlineStoreTheme;
@@ -24,7 +25,7 @@ public class OnlineStoreThemeActions : TranslatableResourceActions
     public Task<FileResponse> GetOnlineStoreThemeTranslationContent(
         [ActionParameter] OnlineStoreThemeRequest input, [ActionParameter] LocaleRequest locale,
         [ActionParameter] GetContentRequest getContentRequest)
-        => GetResourceContent(input.OnlineStoreThemeId, locale.Locale, getContentRequest.Outdated ?? default);
+        => GetResourceContent(input.OnlineStoreThemeId, locale.Locale, getContentRequest.Outdated ?? default, HtmlContentTypes.OnlineStoreThemeContent);
 
     [Action("Update online store theme content from HTML",
         Description = "Update content of a specific online store theme from HTML file")]

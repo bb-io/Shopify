@@ -1,5 +1,6 @@
 ﻿using System.Net.Mime;
 using Apps.Shopify.Actions.Base;
+using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.Models.Entities;
@@ -58,8 +59,8 @@ public class StoreActions : TranslatableResourceActions
                 Id = x.ResourceId
             });
         });
-        var html = ShopifyHtmlConverter.ToHtml(contentEntities);
-
+        
+        var html = ShopifyHtmlConverter.ToHtml(contentEntities, HtmlContentTypes.StoreResourcesContent);
         return new()
         {
             File = await FileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html,

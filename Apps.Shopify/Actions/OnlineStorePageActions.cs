@@ -1,4 +1,5 @@
 using Apps.Shopify.Actions.Base;
+using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.DataSourceHandlers;
 using Apps.Shopify.Models.Entities;
@@ -49,7 +50,7 @@ public class OnlineStorePageActions : TranslatableResourceActions
     public Task<FileResponse> GetOnlineStorePageTranslationContent(
         [ActionParameter] OnlineStorePageRequest input, [ActionParameter] LocaleRequest locale,
         [ActionParameter] GetContentRequest getContentRequest)
-        => GetResourceContent(input.OnlineStorePageId, locale.Locale, getContentRequest.Outdated ?? default);
+        => GetResourceContent(input.OnlineStorePageId, locale.Locale, getContentRequest.Outdated ?? default, HtmlContentTypes.OnlineStorePageContent);
 
     [Action("Update online store page content from HTML",
         Description = "Update content of a specific online store page from HTML file")]
