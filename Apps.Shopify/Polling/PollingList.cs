@@ -39,16 +39,6 @@ public class PollingList(InvocationContext invocationContext) : ShopifyInvocable
         var pagesResponse = (await pagesCreatedTask).Result?.Items.Select(x => x.Id).ToList() ?? new List<string>();
         pagesResponse.AddRange((await pagesUpdatedTask).Result?.Items.Select(x => x.Id).ToList() ?? new List<string>());
         pagesResponse = pagesResponse.Distinct().ToList();
-        
-        await ShopifyLogger.LogAsync(new
-        {
-            Articles = articlesResponse,
-            Pages = pagesResponse,
-            Memory = new
-            {
-                LastInteractionDate = DateTime.UtcNow
-            }
-        });
 
         var response = new ContentCreatedOrUpdatedResponse
         {
