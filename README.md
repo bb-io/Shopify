@@ -67,6 +67,10 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 - **Get online store theme content as HTML** returns specific theme's contents in HTML format
 - **Update online store theme content from HTML** updates specific theme's contents from the HTML file
 
+### General
+
+- **Update content from HTML** updates content of a specific content from HTML file. You can specify the content type manually by using optional input;
+
 ## Events
 
 - **On product created**
@@ -80,6 +84,7 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 - **On articles updated**
 - **On pages created**
 - **On pages updated**
+- **On content created or updated** (for article and pages)
 
 ## Example
 

@@ -1,4 +1,5 @@
 using System.Web;
+using Apps.Shopify.Constants;
 using Apps.Shopify.HtmlConversion.Constants;
 using Apps.Shopify.Models.Dto;
 using Apps.Shopify.Models.Entities;
@@ -23,11 +24,27 @@ public static class ShopifyHtmlConverter
     private const string ShopType = "shop";
     private const string ShopPolicyType = "shopPolicy";
 
+    #region Generic
+
+    public static string? ExtractContentTypeFromHtml(Stream file)
+    {
+        var doc = new HtmlDocument();
+        doc.Load(file);
+
+        var contentType = doc.DocumentNode
+            .SelectSingleNode("//meta[@name='blackbird-content-type']")
+            ?.GetAttributeValue("content", null);
+
+        return contentType;
+    }
+
+    #endregion
+
     #region Metafield
 
-    public static MemoryStream MetaFieldsToHtml(IEnumerable<(string ResourceId, ContentEntity)> metafields)
+    public static MemoryStream MetaFieldsToHtml(IEnumerable<(string ResourceId, ContentEntity)> metafields, string contentType)
     {
-        var (doc, body) = PrepareEmptyHtmlDocument();
+        var (doc, body) = PrepareEmptyHtmlDocument(contentType);
 
         metafields.ToList().ForEach(x =>
         {
@@ -56,9 +73,9 @@ public static class ShopifyHtmlConverter
     #region Blog
 
     public static MemoryStream BlogToHtml(IEnumerable<IdentifiedContentEntity> contentEntities,
-        ICollection<IdentifiedContentEntity> blogPostsEntities)
+        ICollection<IdentifiedContentEntity> blogPostsEntities, string contentType)
     {
-        var (doc, body) = PrepareEmptyHtmlDocument();
+        var (doc, body) = PrepareEmptyHtmlDocument(contentType);
         FillInIdentifiedContentEntities(doc, body, contentEntities);
 
         if (blogPostsEntities.Any())
@@ -98,7 +115,7 @@ public static class ShopifyHtmlConverter
 
     public static MemoryStream ProductToHtml(ProductContentDto contentDto)
     {
-        var (doc, body) = PrepareEmptyHtmlDocument();
+        var (doc, body) = PrepareEmptyHtmlDocument(HtmlContentTypes.ProductContent);
         FillInIdentifiedContentEntities(doc, body, contentDto.ProductContentEntities);
 
         if (contentDto.MetafieldsContentEntities is not null && contentDto.MetafieldsContentEntities.Any())
@@ -171,7 +188,7 @@ public static class ShopifyHtmlConverter
 
     public static MemoryStream StoreToHtml(StoreContentDto contentDto)
     {
-        var (doc, body) = PrepareEmptyHtmlDocument();
+        var (doc, body) = PrepareEmptyHtmlDocument(HtmlContentTypes.StoreContent);
 
         if (contentDto.ThemesContentEntities is not null && contentDto.ThemesContentEntities.Any())
         {
@@ -249,9 +266,9 @@ public static class ShopifyHtmlConverter
 
     #endregion
     
-    public static MemoryStream ToHtml(IEnumerable<IdentifiedContentEntity> contentEntities)
+    public static MemoryStream ToHtml(IEnumerable<IdentifiedContentEntity> contentEntities, string contentType)
     {
-        var (doc, body) = PrepareEmptyHtmlDocument();
+        var (doc, body) = PrepareEmptyHtmlDocument(contentType);
         FillInIdentifiedContentEntities(doc, body, contentEntities);
 
         return GetMemoryStream(doc);
@@ -263,12 +280,19 @@ public static class ShopifyHtmlConverter
         return GetIdentifiedResourceContent(contentNodes, locale);
     }
 
-    private static (HtmlDocument document, HtmlNode bodyNode) PrepareEmptyHtmlDocument()
+    private static (HtmlDocument document, HtmlNode bodyNode) PrepareEmptyHtmlDocument(string contentType)
     {
         var htmlDoc = new HtmlDocument();
         var htmlNode = htmlDoc.CreateElement(HtmlConstants.Html);
         htmlDoc.DocumentNode.AppendChild(htmlNode);
-        htmlNode.AppendChild(htmlDoc.CreateElement(HtmlConstants.Head));
+
+        var headNode = htmlDoc.CreateElement(HtmlConstants.Head);
+        htmlNode.AppendChild(headNode);
+
+        var contentTypeMetaNode = htmlDoc.CreateElement("meta");
+        contentTypeMetaNode.SetAttributeValue("name", "blackbird-content-type");
+        contentTypeMetaNode.SetAttributeValue("content", contentType);
+        headNode.AppendChild(contentTypeMetaNode);
 
         var bodyNode = htmlDoc.CreateElement(HtmlConstants.Body);
         htmlNode.AppendChild(bodyNode);

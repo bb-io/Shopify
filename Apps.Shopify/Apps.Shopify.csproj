@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <Product>Shopify</Product>
         <Description>E-commerce platform that enables individuals and businesses to create and manage online stores.</Description>
-        <Version>1.5.0</Version>
+        <Version>1.5.2</Version>
         <AssemblyName>Apps.Shopify</AssemblyName>
     </PropertyGroup>
 
@@ -20,6 +20,12 @@
 
     <ItemGroup>
         <EmbeddedResource CopyToOutputDirectory="Always" Include="image\icon.png" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\README.md">
+        <Link>README.md</Link>
+      </Content>
     </ItemGroup>
 
 </Project>

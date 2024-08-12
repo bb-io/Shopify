@@ -1,6 +1,7 @@
 using System.Net.Mime;
 using Apps.Shopify.Actions.Base;
 using Apps.Shopify.Api.Rest;
+using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.HtmlConversion;
@@ -79,7 +80,7 @@ public class OnlineStoreBlogActions : TranslatableResourceActions
         var html = ShopifyHtmlConverter.BlogToHtml(blogTranslations.Select(x => new IdentifiedContentEntity(x)
         {
             Id = input.OnlineStoreBlogId
-        }), blogPostTranslations);
+        }), blogPostTranslations, HtmlContentTypes.OnlineStoreBlogContent);
 
         return new()
         {
