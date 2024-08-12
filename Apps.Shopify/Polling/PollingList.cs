@@ -21,19 +21,39 @@ public class PollingList(InvocationContext invocationContext) : ShopifyInvocable
         PollingEventRequest<DateMemory> request,
         [PollingEventParameter] OnlineStoreBlogRequest blog)
     {
-        var createdUpdatedDate = request.Memory?.LastInteractionDate.ToString("yyyy-MM-ddTHH:mm:sszzz");
+        var lastInteractionDate = request.Memory?.LastInteractionDate.ToString("yyyy-MM-ddTHH:mm:sszzz");
 
-        var articlesTask = HandleArticlePolling(request, blog, $"created_at_min={createdUpdatedDate}&updated_at_min={createdUpdatedDate}");
-        var pagesTask = HandlePagesPolling(request, $"created_at_min={createdUpdatedDate}&updated_at_min={createdUpdatedDate}");
+        var articlesCreatedTask = HandleArticlePolling(request, blog, $"created_at_min={lastInteractionDate}");
+        var articlesUpdatedTask = HandleArticlePolling(request, blog, $"updated_at_min={lastInteractionDate}");
+        var pagesCreatedTask = HandlePagesPolling(request, $"created_at_min={lastInteractionDate}");
+        var pagesUpdatedTask = HandlePagesPolling(request, $"updated_at_min={lastInteractionDate}");
 
-        await Task.WhenAll(articlesTask, pagesTask);
-        var articlesResponse = await articlesTask;
-        var pagesResponse = await pagesTask;
+        await Task.WhenAll(articlesCreatedTask, articlesUpdatedTask, pagesCreatedTask, pagesUpdatedTask);
+
+        var articlesResponse =
+            (await articlesCreatedTask).Result?.Items.Select(x => x.Id).ToList() ?? new List<string>();
+        articlesResponse.AddRange((await articlesUpdatedTask).Result?.Items.Select(x => x.Id).ToList() ??
+                                  new List<string>());
+        articlesResponse = articlesResponse.Distinct().ToList();
+
+        var pagesResponse = (await pagesCreatedTask).Result?.Items.Select(x => x.Id).ToList() ?? new List<string>();
+        pagesResponse.AddRange((await pagesUpdatedTask).Result?.Items.Select(x => x.Id).ToList() ?? new List<string>());
+        pagesResponse = pagesResponse.Distinct().ToList();
+        
+        await ShopifyLogger.LogAsync(new
+        {
+            Articles = articlesResponse,
+            Pages = pagesResponse,
+            Memory = new
+            {
+                LastInteractionDate = DateTime.UtcNow
+            }
+        });
 
         var response = new ContentCreatedOrUpdatedResponse
         {
-            ArticleIds = articlesResponse.Result?.Items.Select(x => x.Id).ToList() ?? new List<string>(),
-            PageIds = pagesResponse.Result?.Items.Select(x => x.Id).ToList() ?? new List<string>(),
+            ArticleIds = articlesResponse,
+            PageIds = pagesResponse,
         };
 
         return new PollingEventResponse<DateMemory, ContentCreatedOrUpdatedResponse>
@@ -43,7 +63,7 @@ public class PollingList(InvocationContext invocationContext) : ShopifyInvocable
             Memory = new DateMemory { LastInteractionDate = DateTime.UtcNow }
         };
     }
-    
+
     [PollingEvent("On articles created", "On new articles are created")]
     public Task<PollingEventResponse<DateMemory, ArticlesPaginationResponse>> OnArticlesCreated(
         PollingEventRequest<DateMemory> request,

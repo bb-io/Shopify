@@ -84,7 +84,7 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 - **On articles updated**
 - **On pages created**
 - **On pages updated**
-- **On content created or updated** (for article and pages content types)
+- **On content created or updated** (for article and pages)
 
 ## Example
 
