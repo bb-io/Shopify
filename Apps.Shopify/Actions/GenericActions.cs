@@ -44,7 +44,7 @@ public class GenericActions : TranslatableResourceActions
         var contentType = request.ContentType ?? ShopifyHtmlConverter.ExtractContentTypeFromHtml(stream) ?? throw new ArgumentException("Content type does not exist in the HTML file and must be provided in the optional input");
         if (!_contentUpdateActions.TryGetValue(contentType, out var action))
         {
-            throw new($"Content type '{contentType}' is not supported for updating content");
+            throw new($"Content type '{contentType}' is not supported for updating content.");
         }
         
         await action(locale, file);
