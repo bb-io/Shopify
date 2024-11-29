@@ -29,7 +29,7 @@ public class TranslatableResourceActions : ShopifyInvocable
 
     protected async Task<FileResponse> GetResourceContent(string resourceId, string locale, bool outdated, string contentType)
     {
-        var request = new GraphQLRequest()
+        var request = new GraphQLRequest
         {
             Query = GraphQlQueries.TranslatableResourceTranslations,
             Variables = new
