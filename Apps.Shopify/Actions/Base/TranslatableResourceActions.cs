@@ -29,7 +29,19 @@ public class TranslatableResourceActions : ShopifyInvocable
 
     protected async Task<FileResponse> GetResourceContent(string resourceId, string locale, bool outdated, string contentType)
     {
-        var request = new GraphQLRequest()
+        var translatableContent = await GetTranslatableContent(resourceId, locale, outdated);
+        var html = ShopifyHtmlConverter.ToHtml(translatableContent, contentType);
+
+        return new()
+        {
+            File = await FileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html,
+                $"{resourceId.GetShopifyItemId()}.html")
+        };
+    }
+    
+    protected async Task<List<IdentifiedContentEntity>> GetTranslatableContent(string resourceId, string locale, bool outdated)
+    {
+        var request = new GraphQLRequest
         {
             Query = GraphQlQueries.TranslatableResourceTranslations,
             Variables = new
@@ -38,17 +50,11 @@ public class TranslatableResourceActions : ShopifyInvocable
             }
         };
         var response = await Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
-        var html = ShopifyHtmlConverter.ToHtml(response.TranslatableResource.GetTranslatableContent()
+        return response.TranslatableResource.GetTranslatableContent()
             .Select(x => new IdentifiedContentEntity(x)
             {
                 Id = resourceId
-            }), contentType);
-
-        return new()
-        {
-            File = await FileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html,
-                $"{resourceId.GetShopifyItemId()}.html")
-        };
+            }).ToList();
     }
 
     protected async Task UpdateResourceContent(string? resourceId, string locale, FileReference file)

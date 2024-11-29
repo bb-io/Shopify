@@ -8,5 +8,5 @@ public class OnlineStoreThemeRequest
 {
     [Display("Online store theme ID")]
     [DataSource(typeof(OnlineStoreThemeDataSourceHandler))]
-    public string OnlineStoreThemeId { get; set; }
+    public string OnlineStoreThemeId { get; set; } = default!;
 }
