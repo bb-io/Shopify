@@ -127,6 +127,18 @@ public static class GraphQlQueries
                 }
           }
         }";
+    
+    public const string TranslatableResourceTranslationKeys =
+        @"query ($outdated: Boolean, $resourceId: ID!, $locale: String!) {
+          translatableResource(resourceId: $resourceId) {
+               translations(locale: $locale, outdated: $outdated) {
+                  key
+                }
+                translatableContent {
+                  key
+                }
+          }
+        }";
 
     public const string Events =
         @"query ($after: String, $limit: Int!) {
