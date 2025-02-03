@@ -87,7 +87,7 @@ public class StoreActions : TranslatableResourceActions
 
     {
         if (NoneItemsIncluded(input))
-            throw new PluginMisconfigurationException("You should include at least one content type");
+            throw new PluginMisconfigurationException("You should include at least one content type. Please check your input and try again");
 
         var html = ShopifyHtmlConverter.StoreToHtml(new()
         {
