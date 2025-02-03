@@ -5,6 +5,7 @@ using Apps.Shopify.Models;
 using Apps.Shopify.Models.Request;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
+using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
@@ -41,10 +42,10 @@ public class GenericActions : TranslatableResourceActions
         [ActionParameter] FileRequest file)
     {
         var stream = await _fileManagementClient.DownloadAsync(file.File);
-        var contentType = request.ContentType ?? ShopifyHtmlConverter.ExtractContentTypeFromHtml(stream) ?? throw new ArgumentException("Content type does not exist in the HTML file and must be provided in the optional input");
+        var contentType = request.ContentType ?? ShopifyHtmlConverter.ExtractContentTypeFromHtml(stream) ?? throw new PluginMisconfigurationException("Content type does not exist in the HTML file and must be provided in the optional input");
         if (!_contentUpdateActions.TryGetValue(contentType, out var action))
         {
-            throw new($"Content type '{contentType}' is not supported for updating content.");
+            throw new PluginMisconfigurationException($"Content type '{contentType}' is not supported for updating content.");
         }
         
         await action(locale, file);
@@ -96,7 +97,7 @@ public class GenericActions : TranslatableResourceActions
     {
         if (string.IsNullOrEmpty(locale.Locale))
         {
-            throw new("Locale is required for updating store resources content");
+            throw new PluginMisconfigurationException("Locale is required for updating store resources content");
         }
         
         var storeResourcesActions = new StoreActions(_invocationContext, _fileManagementClient);
@@ -107,7 +108,7 @@ public class GenericActions : TranslatableResourceActions
     {
         if (string.IsNullOrEmpty(locale.Locale))
         {
-            throw new("Locale is required for updating store content");
+            throw new PluginMisconfigurationException("Locale is required for updating store content");
         }
         
         var storeActions = new StoreActions(_invocationContext, _fileManagementClient);

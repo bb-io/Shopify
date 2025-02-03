@@ -10,6 +10,7 @@ using Apps.Shopify.Models.Response;
 using Apps.Shopify.Models.Response.Locale;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
+using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using GraphQL;
@@ -47,7 +48,7 @@ public class StoreActions : TranslatableResourceActions
 
     {
         if (!Enum.TryParse(input.ResourceType, ignoreCase: true, out TranslatableResource resourceType))
-            throw new("Invalid resource type value specified");
+            throw new PluginMisconfigurationException("Invalid resource type value specified. Please check the input");
 
         var resources =
             await ListTranslatableResources(resourceType, locale.Locale, getContentRequest.Outdated ?? default);
@@ -86,7 +87,7 @@ public class StoreActions : TranslatableResourceActions
 
     {
         if (NoneItemsIncluded(input))
-            throw new("You should include at least one content type");
+            throw new PluginMisconfigurationException("You should include at least one content type. Please check your input and try again");
 
         var html = ShopifyHtmlConverter.StoreToHtml(new()
         {
