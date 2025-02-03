@@ -1,6 +1,7 @@
 using Apps.Shopify.Constants;
 using Apps.Shopify.Models.Response.Pagination;
 using Blackbird.Applications.Sdk.Common.Authentication;
+using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Utils.Extensions.Sdk;
 using GraphQL;
 using GraphQL.Client.Http;
@@ -25,7 +26,7 @@ public class ShopifyClient : GraphQLHttpClient
         var response = await SendQueryAsync<T>(request, cancellationToken);
 
         if (response.Errors is not null && response.Errors.Any())
-            throw new(string.Join(';', response.Errors.Select(x => x.Message)));
+            throw new PluginApplicationException(string.Join(';', response.Errors.Select(x => x.Message)));
 
         return response.Data;
     }
@@ -36,7 +37,7 @@ public class ShopifyClient : GraphQLHttpClient
         var response = await SendQueryAsync<JObject>(request, cancellationToken);
 
         if (response.Errors is not null && response.Errors.Any())
-            throw new(string.Join(';', response.Errors.Select(x => x.Message)));
+            throw new PluginApplicationException(string.Join(';', response.Errors.Select(x => x.Message)));
 
         return response;
     }

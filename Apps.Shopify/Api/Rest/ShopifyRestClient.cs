@@ -3,6 +3,7 @@ using Apps.Shopify.Extensions;
 using Apps.Shopify.Models.Response;
 using Apps.Shopify.Models.Response.Pagination;
 using Blackbird.Applications.Sdk.Common.Authentication;
+using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Utils.Extensions.Sdk;
 using Blackbird.Applications.Sdk.Utils.Extensions.String;
 using Blackbird.Applications.Sdk.Utils.RestSharp;
@@ -52,7 +53,7 @@ public class ShopifyRestClient : BlackBirdRestClient
     protected override Exception ConfigureErrorException(RestResponse response)
     {
         var error = JsonConvert.DeserializeObject<RestErrorResponse>(response.Content!)!;
-        return new(error.Errors);
+        return new PluginApplicationException(error.Errors);
     }
 
     public static string GenerateApiUrl(AuthenticationCredentialsProvider[] creds, string apiVersion) =>
