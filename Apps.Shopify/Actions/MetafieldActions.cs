@@ -21,6 +21,7 @@ using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using Blackbird.Applications.Sdk.Utils.Extensions.Http;
 using GraphQL;
 using RestSharp;
+using Blackbird.Applications.Sdk.Common.Exceptions;
 
 namespace Apps.Shopify.Actions;
 
@@ -85,6 +86,12 @@ public class MetafieldActions : TranslatableResourceActions
         [ActionParameter] ProductRequest product, [ActionParameter, Display("New value")] string value)
     {
         var metafieldDefinition = await GetMetafieldDefinitin(metafield.MetafieldDefinitionId);
+
+        if (metafieldDefinition == null)
+        {
+            throw new PluginApplicationException($"Metafield definition not found for ID:  + {metafield.MetafieldDefinitionId}. Please check the input and try again");
+        }
+
         var request = new ShopifyRestRequest($"/products/{product.ProductId.GetShopifyItemId()}/metafields.json",
                 Method.Post, Creds)
             .WithJsonBody(new
