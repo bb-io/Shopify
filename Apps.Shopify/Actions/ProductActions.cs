@@ -14,6 +14,7 @@ using Apps.Shopify.Models.Response.Product;
 using Apps.Shopify.Models.Response.TranslatableResource;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
+using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using GraphQL;
@@ -32,7 +33,7 @@ public class ProductActions : TranslatableResourceActions
     public async Task<ListProductsResponse> SearchProducts([ActionParameter] SearchProductsRequest input)
     {
         if ((input.MetafieldKey == null) ^ (input.MetafieldValue == null))
-            throw new("Metafield and Metafield value should be both either filled or empty");
+            throw new PluginMisconfigurationException("Metafield and Metafield value should be both either filled or empty");
         
         var variables = new Dictionary<string, object>();
 

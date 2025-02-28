@@ -23,12 +23,24 @@ public class ShopifyClient : GraphQLHttpClient
     public async Task<T> ExecuteWithErrorHandling<T>(GraphQLRequest request,
         CancellationToken cancellationToken = default)
     {
-        var response = await SendQueryAsync<T>(request, cancellationToken);
+        GraphQLResponse<T>? response = null;
 
-        if (response.Errors is not null && response.Errors.Any())
-            throw new PluginApplicationException(string.Join(';', response.Errors.Select(x => x.Message)));
+        try
+        {
+            response = await SendQueryAsync<T>(request, cancellationToken);
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new PluginApplicationException($"HTTP error during GraphQL request: {ex.Message}");
+        }
 
-        return response.Data;
+        if (response?.Errors is not null && response.Errors.Any())
+        {
+            var combinedErrorMessage = string.Join("; ", response.Errors.Select(x => x.Message));
+            throw new PluginApplicationException(combinedErrorMessage);
+        }
+
+        return response!.Data;
     }
 
     public async Task<GraphQLResponse<JObject>> ExecuteWithErrorHandling(GraphQLRequest request,
