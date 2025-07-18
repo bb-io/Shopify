@@ -1,4 +1,5 @@
 using System.Net.Mime;
+using System.Text;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.HtmlConversion;
@@ -7,9 +8,13 @@ using Apps.Shopify.Models.Entities;
 using Apps.Shopify.Models.Request.TranslatableResource;
 using Apps.Shopify.Models.Response;
 using Apps.Shopify.Models.Response.TranslatableResource;
+using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Common.Files;
 using Blackbird.Applications.Sdk.Common.Invocation;
+using Blackbird.Applications.Sdk.Utils.Extensions.Files;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
+using Blackbird.Filters.Transformations;
+using Blackbird.Filters.Xliff.Xliff2;
 using GraphQL;
 
 namespace Apps.Shopify.Actions.Base;
@@ -25,6 +30,18 @@ public class TranslatableResourceActions : ShopifyInvocable
         : base(invocationContext)
     {
         FileManagementClient = fileManagementClient;
+    }
+
+    protected async Task<string> GetHtmlFromFile(FileReference reference)
+    {
+        var file = await FileManagementClient.DownloadAsync(reference);
+        var html = Encoding.UTF8.GetString(await file.GetByteData());
+        if (Xliff2Serializer.IsXliff2(html))
+        {
+            html = Transformation.Parse(html, reference.Name).Target().Serialize();
+            if (html == null) throw new PluginMisconfigurationException("XLIFF did not contain any files");
+        }
+        return html;
     }
 
     protected async Task<FileResponse> GetResourceContent(string resourceId, string locale, bool outdated, string contentType)
@@ -59,8 +76,8 @@ public class TranslatableResourceActions : ShopifyInvocable
 
     protected async Task UpdateResourceContent(string? resourceId, string locale, FileReference file)
     {
-        var fileStream = await FileManagementClient.DownloadAsync(file);
-        var translations = ShopifyHtmlConverter.ToJson(fileStream, locale).ToList();
+        var html = await GetHtmlFromFile(file);
+        var translations = ShopifyHtmlConverter.ToJson(html, locale).ToList();
 
         resourceId = string.IsNullOrWhiteSpace(resourceId) ? translations.First().ResourceId : resourceId;
 

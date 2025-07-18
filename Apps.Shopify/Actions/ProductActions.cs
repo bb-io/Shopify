@@ -109,8 +109,8 @@ public class ProductActions : TranslatableResourceActions
     [Action("Update product content from HTML", Description = "Update content of a specific product from HTML file")]
     public async Task UpdateProductContent([ActionParameter] NonPrimaryLocaleRequest locale, [ActionParameter] FileRequest file)
     {
-        var fileStream = await FileManagementClient.DownloadAsync(file.File);
-        var translations = ShopifyHtmlConverter.ProductToJson(fileStream, locale.Locale);
+        var html = await GetHtmlFromFile(file.File);
+        var translations = ShopifyHtmlConverter.ProductToJson(html, locale.Locale);
 
         var productContent = translations.ProductContentEntities.ToList();
 

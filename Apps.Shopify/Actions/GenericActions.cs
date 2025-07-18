@@ -41,8 +41,8 @@ public class GenericActions : TranslatableResourceActions
         [ActionParameter] NonPrimaryLocaleRequest locale, 
         [ActionParameter] FileRequest file)
     {
-        var stream = await _fileManagementClient.DownloadAsync(file.File);
-        var contentType = request.ContentType ?? ShopifyHtmlConverter.ExtractContentTypeFromHtml(stream) ?? throw new PluginMisconfigurationException("Content type does not exist in the HTML file and must be provided in the optional input");
+        var html = await GetHtmlFromFile(file.File);
+        var contentType = request.ContentType ?? ShopifyHtmlConverter.ExtractContentTypeFromHtml(html) ?? throw new PluginMisconfigurationException("Content type does not exist in the HTML file and must be provided in the optional input");
         if (!_contentUpdateActions.TryGetValue(contentType, out var action))
         {
             throw new PluginMisconfigurationException($"Content type '{contentType}' is not supported for updating content.");

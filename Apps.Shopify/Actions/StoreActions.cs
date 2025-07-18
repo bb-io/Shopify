@@ -74,8 +74,8 @@ public class StoreActions : TranslatableResourceActions
     public async Task UpdateStoreResourcesContent([ActionParameter] LocaleRequest locale, FileRequest file)
 
     {
-        var fileStream = await FileManagementClient.DownloadAsync(file.File);
-        var content = ShopifyHtmlConverter.ToJson(fileStream, locale.Locale).ToList();
+        var html = await GetHtmlFromFile(file.File);
+        var content = ShopifyHtmlConverter.ToJson(html, locale.Locale).ToList();
         await UpdateIdentifiedContent(content);
     }
 
@@ -121,8 +121,8 @@ public class StoreActions : TranslatableResourceActions
     public async Task UpdateStoreContent([ActionParameter] LocaleRequest locale, FileRequest file)
 
     {
-        var fileStream = await FileManagementClient.DownloadAsync(file.File);
-        var content = ShopifyHtmlConverter.StoreToJson(fileStream, locale.Locale);
+        var html = await GetHtmlFromFile(file.File);
+        var content = ShopifyHtmlConverter.StoreToJson(html, locale.Locale);
 
         await UpdateIdentifiedContent(content.ThemesContentEntities?.ToList());
         await UpdateIdentifiedContent(content.MenuContentEntities?.ToList());

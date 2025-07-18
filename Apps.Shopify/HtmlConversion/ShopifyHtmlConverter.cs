@@ -26,7 +26,7 @@ public static class ShopifyHtmlConverter
 
     #region Generic
 
-    public static string? ExtractContentTypeFromHtml(Stream file)
+    public static string? ExtractContentTypeFromHtml(string file)
     {
         var doc = new HtmlDocument();
         doc.Load(file);
@@ -61,7 +61,7 @@ public static class ShopifyHtmlConverter
         return GetMemoryStream(doc);
     }
 
-    public static IEnumerable<IdentifiedContentRequest> MetaFieldsToJson(Stream file,
+    public static IEnumerable<IdentifiedContentRequest> MetaFieldsToJson(string file,
         string locale)
     {
         var contentNodes = GetContentNodes(file);
@@ -91,7 +91,7 @@ public static class ShopifyHtmlConverter
     }
 
     public static (IEnumerable<IdentifiedContentRequest> blog,
-        IEnumerable<IdentifiedContentRequest> blogPosts) BlogToJson(Stream file, string locale)
+        IEnumerable<IdentifiedContentRequest> blogPosts) BlogToJson(string file, string locale)
     {
         var doc = new HtmlDocument();
         doc.Load(file);
@@ -148,7 +148,7 @@ public static class ShopifyHtmlConverter
         return GetMemoryStream(doc);
     }
 
-    public static ProductTranslatableResourceDto ProductToJson(Stream file, string locale)
+    public static ProductTranslatableResourceDto ProductToJson(string file, string locale)
     {
         var doc = new HtmlDocument();
         doc.Load(file);
@@ -229,7 +229,7 @@ public static class ShopifyHtmlConverter
         return GetMemoryStream(doc);
     }
 
-    public static ShopTranslatableResourceDto StoreToJson(Stream file, string locale)
+    public static ShopTranslatableResourceDto StoreToJson(string file, string locale)
     {
         var doc = new HtmlDocument();
         doc.Load(file);
@@ -274,7 +274,7 @@ public static class ShopifyHtmlConverter
         return GetMemoryStream(doc);
     }
     
-    public static IEnumerable<IdentifiedContentRequest> ToJson(Stream file, string locale)
+    public static IEnumerable<IdentifiedContentRequest> ToJson(string file, string locale)
     {
         var contentNodes = GetContentNodes(file);
         return GetIdentifiedResourceContent(contentNodes, locale);
@@ -309,7 +309,7 @@ public static class ShopifyHtmlConverter
         return result;
     }
 
-    private static IEnumerable<HtmlNode> GetContentNodes(Stream file)
+    private static IEnumerable<HtmlNode> GetContentNodes(string file)
     {
         var doc = new HtmlDocument();
         doc.Load(file);

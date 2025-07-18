@@ -93,8 +93,8 @@ public class OnlineStoreBlogActions : TranslatableResourceActions
         Description = "Update content of a specific online store blog from HTML file")]
     public async Task UpdateOnlineStoreBlogContent([ActionParameter] NonPrimaryLocaleRequest locale, [ActionParameter] FileRequest file)
     {
-        var fileStream = await FileManagementClient.DownloadAsync(file.File);
-        var (blog, blogPosts) = ShopifyHtmlConverter.BlogToJson(fileStream, locale.Locale);
+        var html = await GetHtmlFromFile(file.File);
+        var (blog, blogPosts) = ShopifyHtmlConverter.BlogToJson(html, locale.Locale);
 
         var blogContent = blog.ToList();
         await UpdateBlogContent(blogContent.First().ResourceId, blogContent);

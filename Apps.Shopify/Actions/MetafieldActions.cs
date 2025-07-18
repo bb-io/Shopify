@@ -63,8 +63,8 @@ public class MetafieldActions : TranslatableResourceActions
     public async Task UpdateMetaFieldContent([ActionParameter] NonPrimaryLocaleRequest locale,
         [ActionParameter] FileRequest file)
     {
-        var fileStream = await FileManagementClient.DownloadAsync(file.File);
-        var translations = ShopifyHtmlConverter.MetaFieldsToJson(fileStream, locale.Locale);
+        var html = await GetHtmlFromFile(file.File);
+        var translations = ShopifyHtmlConverter.MetaFieldsToJson(html, locale.Locale);
 
         await UpdateIdentifiedContent(translations.ToList());
     }
