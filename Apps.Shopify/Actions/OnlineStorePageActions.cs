@@ -45,15 +45,15 @@ public class OnlineStorePageActions : TranslatableResourceActions
         };
     }
 
-    [Action("Get online store page content as HTML",
-        Description = "Get content of a specific online store page in HTML format")]
+    [Action("Download online store page",
+        Description = "Get content of a specific online store page")]
     public Task<FileResponse> GetOnlineStorePageTranslationContent(
         [ActionParameter] OnlineStorePageRequest input, [ActionParameter] LocaleRequest locale,
         [ActionParameter] GetContentRequest getContentRequest)
         => GetResourceContent(input.OnlineStorePageId, locale.Locale, getContentRequest.Outdated ?? default, HtmlContentTypes.OnlineStorePageContent);
 
-    [Action("Update online store page content from HTML",
-        Description = "Update content of a specific online store page from HTML file")]
+    [Action("Upload online store page",
+        Description = "Update content of a specific online store page")]
     public Task UpdateOnlineStorePageContent(
         [ActionParameter, DataSource(typeof(OnlineStorePageHandler)), Display("Online store page ID")]
         string? onlineStorePageId,

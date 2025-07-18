@@ -51,8 +51,8 @@ public class OnlineStoreBlogActions : TranslatableResourceActions
         };
     }
 
-    [Action("Get online store blog content as HTML",
-        Description = "Get content of a specific online store blog in HTML format")]
+    [Action("Download online store blog",
+        Description = "Get content of a specific online store blog")]
     public async Task<FileResponse> GetOnlineStoreBlogTranslationContent(
         [ActionParameter] OnlineStoreBlogRequest input, [ActionParameter] LocaleRequest locale,
         [ActionParameter, Display("Include articles")]
@@ -89,12 +89,12 @@ public class OnlineStoreBlogActions : TranslatableResourceActions
         };
     }
 
-    [Action("Update online store blog content from HTML",
-        Description = "Update content of a specific online store blog from HTML file")]
+    [Action("Upload online store blog",
+        Description = "Upload content of a specific online store blog")]
     public async Task UpdateOnlineStoreBlogContent([ActionParameter] NonPrimaryLocaleRequest locale, [ActionParameter] FileRequest file)
     {
-        var fileStream = await FileManagementClient.DownloadAsync(file.File);
-        var (blog, blogPosts) = ShopifyHtmlConverter.BlogToJson(fileStream, locale.Locale);
+        var html = await GetHtmlFromFile(file.File);
+        var (blog, blogPosts) = ShopifyHtmlConverter.BlogToJson(html, locale.Locale);
 
         var blogContent = blog.ToList();
         await UpdateBlogContent(blogContent.First().ResourceId, blogContent);

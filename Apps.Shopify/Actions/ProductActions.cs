@@ -57,8 +57,8 @@ public class ProductActions : TranslatableResourceActions
         return new(response);
     }
 
-    [Action("Get product content as HTML",
-        Description = "Get content of a specific product in HTML format")]
+    [Action("Download product",
+        Description = "Get content of a specific product")]
     public async Task<FileResponse> GetProductTranslationContent([ActionParameter] ProductRequest resourceRequest,
         [ActionParameter] LocaleRequest locale,
         [ActionParameter] GetProductContentRequest input,
@@ -106,11 +106,11 @@ public class ProductActions : TranslatableResourceActions
         };
     }
 
-    [Action("Update product content from HTML", Description = "Update content of a specific product from HTML file")]
+    [Action("Upload product", Description = "Upload content of a specific product")]
     public async Task UpdateProductContent([ActionParameter] NonPrimaryLocaleRequest locale, [ActionParameter] FileRequest file)
     {
-        var fileStream = await FileManagementClient.DownloadAsync(file.File);
-        var translations = ShopifyHtmlConverter.ProductToJson(fileStream, locale.Locale);
+        var html = await GetHtmlFromFile(file.File);
+        var translations = ShopifyHtmlConverter.ProductToJson(html, locale.Locale);
 
         var productContent = translations.ProductContentEntities.ToList();
 

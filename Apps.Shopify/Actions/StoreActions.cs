@@ -41,8 +41,8 @@ public class StoreActions : TranslatableResourceActions
         };
     }
 
-    [Action("Get store resources content as HTML",
-        Description = "Get content of all store resource type items in HTML format")]
+    [Action("Download store resources",
+        Description = "Get content of all store resource type items")]
     public async Task<FileResponse> GetStoreResourcesContent([ActionParameter] ResourceTypeRequest input,
         [ActionParameter] LocaleRequest locale, [ActionParameter] GetContentRequest getContentRequest)
 
@@ -69,19 +69,19 @@ public class StoreActions : TranslatableResourceActions
         };
     }
 
-    [Action("Update store resources content from HTML",
-        Description = "Update content of all store resource type items from an HTML file")]
+    [Action("Upload store resources",
+        Description = "Update content of all store resource type items")]
     public async Task UpdateStoreResourcesContent([ActionParameter] LocaleRequest locale, FileRequest file)
 
     {
-        var fileStream = await FileManagementClient.DownloadAsync(file.File);
-        var content = ShopifyHtmlConverter.ToJson(fileStream, locale.Locale).ToList();
+        var html = await GetHtmlFromFile(file.File);
+        var content = ShopifyHtmlConverter.ToJson(html, locale.Locale).ToList();
         await UpdateIdentifiedContent(content);
     }
 
 
-    [Action("Get store content as HTML",
-        Description = "Get content of the store in HTML format")]
+    [Action("Download store content",
+        Description = "Get content of the store")]
     public async Task<FileResponse> GetStoreContent([ActionParameter] StoreContentRequest input,
         [ActionParameter] LocaleRequest locale, [ActionParameter] GetContentRequest getContentRequest)
 
@@ -116,13 +116,13 @@ public class StoreActions : TranslatableResourceActions
         };
     }
 
-    [Action("Update store content from HTML",
-        Description = "Update content of the store from an HTML file")]
+    [Action("Upload store content",
+        Description = "Update content of the store from")]
     public async Task UpdateStoreContent([ActionParameter] LocaleRequest locale, FileRequest file)
 
     {
-        var fileStream = await FileManagementClient.DownloadAsync(file.File);
-        var content = ShopifyHtmlConverter.StoreToJson(fileStream, locale.Locale);
+        var html = await GetHtmlFromFile(file.File);
+        var content = ShopifyHtmlConverter.StoreToJson(html, locale.Locale);
 
         await UpdateIdentifiedContent(content.ThemesContentEntities?.ToList());
         await UpdateIdentifiedContent(content.MenuContentEntities?.ToList());
