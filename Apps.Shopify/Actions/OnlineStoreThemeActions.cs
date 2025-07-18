@@ -19,8 +19,8 @@ namespace Apps.Shopify.Actions;
 public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
     : TranslatableResourceActions(invocationContext, fileManagementClient)
 {
-    [Action("Get online store theme content as HTML",
-        Description = "Get content of a specific online store theme in HTML format")]
+    [Action("Download online store theme",
+        Description = "Get content of a specific online store theme")]
     public async Task<FileResponse> GetOnlineStoreThemeTranslationContent(
         [ActionParameter] GetOnlineStoreThemeContentAsHtmlRequest input, 
         [ActionParameter] LocaleRequest locale,
@@ -42,8 +42,8 @@ public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileM
         };
     }
 
-    [Action("Update online store theme content from HTML",
-        Description = "Update content of a specific online store theme from HTML file")]
+    [Action("Upload online store theme",
+        Description = "Update content of a specific online store theme")]
     public Task UpdateOnlineStoreThemeContent(
         [ActionParameter, DataSource(typeof(OnlineStoreThemeDataSourceHandler)), Display("Online store theme ID")]
         string? onlineStoreThemeId,

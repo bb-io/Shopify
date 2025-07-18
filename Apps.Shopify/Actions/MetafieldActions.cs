@@ -33,8 +33,8 @@ public class MetafieldActions : TranslatableResourceActions
     {
     }
 
-    [Action("Get metafield content as HTML",
-        Description = "Get metafield content of a specific product in HTML format")]
+    [Action("Download metafields",
+        Description = "Get metafield content of a specific product")]
     public async Task<FileResponse> GetMetafieldContent([ActionParameter] ProductRequest resourceRequest,
         [ActionParameter] LocaleRequest locale, [ActionParameter] GetContentRequest getContentRequest)
     {
@@ -58,8 +58,8 @@ public class MetafieldActions : TranslatableResourceActions
         };
     }
 
-    [Action("Update metafield content from HTML",
-        Description = "Update metafield content of a specific product from HTML file")]
+    [Action("Upload metafields",
+        Description = "Upload metafield content of a specific product")]
     public async Task UpdateMetaFieldContent([ActionParameter] NonPrimaryLocaleRequest locale,
         [ActionParameter] FileRequest file)
     {

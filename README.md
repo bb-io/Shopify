@@ -27,49 +27,49 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 ### Store
 - **Get store locales information** Get primary and other locales setup in the store
 - **Get store resources content as HTML** returns content of all store resource type items in HTML format.
-- **Update store resources content from HTML** updates content of all store resource type items from an HTML file.
-- **Get store content as HTML** returns content of the store in HTML format. You should specify what resources you want to export: theme, menu, shop or shop policy.
-- **Update store content from HTML** updates content of the store from an HTML file.
+- **Upload store resources** updates content of all store resource type items.
+- **Download store content** returns content of the store. You should specify what resources you want to export: theme, menu, shop or shop policy.
+- **Upload store content** updates content of the store.
 
 ### Articles
 
 - **List online store articles** List all articles in the online store
-- **Get online store article translation as HTML** Get content of a specific online store article in HTML format
-- **Update online store article content from HTML** Update content of a specific online store article from HTML file
+- **Download online store article** Get content of a specific online store article
+- **Upload online store article** Update content of a specific online store article
 
 ### Blogs
 
 - **List online store blogs** List all blogs in the online store
-- **Get online store blog content as HTML** Get content of a specific online store blog in HTML format. You can also specify `Include articles` to True to export all blog post's articles as well.
-- **Update online store blog content from HTML** Update content of a specific online store blog from HTML file
+- **Download online store blog** Get content of a specific online store blog. You can also specify `Include articles` to True to export all blog post's articles as well.
+- **Upload online store blog** Update content of a specific online store blog
 
 ### Pages
 
 - **List online store pages** List all pages in the online store
-- **Get online store page content as HTML** Get content of a specific online store page in HTML format
-- **Update online store page content from HTML** Update content of a specific online store page from HTML file
+- **Download online store page** Get content of a specific online store page
+- **Upload online store page content** Update content of a specific online store page
 
 ### Products
 
 - **Search products** Search for products based on provided criteria
-- **Get product content as HTML** Get content of a specific product in HTML format. You can also optionally specify more entities to export, f.e. metafields, options, option values.
-- **Update product content from HTML** Update content of a specific product from HTML file
+- **Download product** Get content of a specific product. You can also optionally specify more entities to export, f.e. metafields, options, option values.
+- **Uploade product** Update content of a specific product
 
 ### Metafields
 
-- **Get metafield content as HTML** returns product metafield contents in HTML format
-- **Update metafield content from HTML** updates product metafield contents from the HTML file
+- **Download metafields** returns product metafield contents
+- **Upload metafields** updates product metafield contents from
 - **Get metafield** returns metafield details of a specific product
 - **Update metafield** updates metafield value of a specific product
 
 ### Themes
 
-- **Get online store theme content as HTML** returns specific theme's contents in HTML format
-- **Update online store theme content from HTML** updates specific theme's contents from the HTML file
+- **Download online store theme** returns specific theme's contents
+- **Upload online store theme** updates specific theme's contents
 
 ### General
 
-- **Update content from HTML** updates content of a specific content from HTML file. You can specify the content type manually by using optional input;
+- **Upload content** updates content of a specific content. You can specify the content type manually by using optional input;
 
 ## Events
 

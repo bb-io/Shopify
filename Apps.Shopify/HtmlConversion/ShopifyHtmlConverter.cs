@@ -29,7 +29,7 @@ public static class ShopifyHtmlConverter
     public static string? ExtractContentTypeFromHtml(string file)
     {
         var doc = new HtmlDocument();
-        doc.Load(file);
+        doc.LoadHtml(file);
 
         var contentType = doc.DocumentNode
             .SelectSingleNode("//meta[@name='blackbird-content-type']")
@@ -94,7 +94,7 @@ public static class ShopifyHtmlConverter
         IEnumerable<IdentifiedContentRequest> blogPosts) BlogToJson(string file, string locale)
     {
         var doc = new HtmlDocument();
-        doc.Load(file);
+        doc.LoadHtml(file);
 
         var blogContentNodes = doc.DocumentNode.Descendants()
             .Where(x => x.Attributes[KeyAttr]?.Value != null && x.ParentNode.Name == "body");
@@ -151,7 +151,7 @@ public static class ShopifyHtmlConverter
     public static ProductTranslatableResourceDto ProductToJson(string file, string locale)
     {
         var doc = new HtmlDocument();
-        doc.Load(file);
+        doc.LoadHtml(file);
 
         var productContentNodes = doc.DocumentNode.Descendants()
             .Where(x => x.Attributes[KeyAttr]?.Value != null && x.ParentNode.Name == "body");
@@ -232,7 +232,7 @@ public static class ShopifyHtmlConverter
     public static ShopTranslatableResourceDto StoreToJson(string file, string locale)
     {
         var doc = new HtmlDocument();
-        doc.Load(file);
+        doc.LoadHtml(file);
 
         var themeContentNodes = doc.DocumentNode.Descendants()
             .FirstOrDefault(x => x.Attributes[TypeAttr]?.Value == ThemeType)?
@@ -312,7 +312,7 @@ public static class ShopifyHtmlConverter
     private static IEnumerable<HtmlNode> GetContentNodes(string file)
     {
         var doc = new HtmlDocument();
-        doc.Load(file);
+        doc.LoadHtml(file);
 
         return doc.DocumentNode.Descendants()
             .Where(x => x.Attributes[KeyAttr]?.Value != null);

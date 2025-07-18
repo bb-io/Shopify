@@ -36,7 +36,7 @@ public class GenericActions : TranslatableResourceActions
         };
     }
 
-    [Action("Update content from HTML", Description = "Update the content based on HTML file")]
+    [Action("Upload content", Description = "Update the content from a (translated) file")]
     public async Task UpdateContent([ActionParameter] UpdateContentRequest request,
         [ActionParameter] NonPrimaryLocaleRequest locale, 
         [ActionParameter] FileRequest file)

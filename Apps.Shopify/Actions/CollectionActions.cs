@@ -20,15 +20,15 @@ public class CollectionActions : TranslatableResourceActions
     {
     }
 
-    [Action("Get collection translation as HTML",
-        Description = "Get content of a specific collection in HTML format")]
+    [Action("Download collection",
+        Description = "Get content of a specific collection")]
     public Task<FileResponse> GetCollectionContent(
         [ActionParameter] CollectionRequest input, [ActionParameter] LocaleRequest locale,
         [ActionParameter] GetContentRequest getContentRequest)
         => GetResourceContent(input.CollectionId, locale.Locale, getContentRequest.Outdated ?? default, HtmlContentTypes.Collection);
 
-    [Action("Update collection content from HTML",
-        Description = "Update content of a specific collection from HTML file")]
+    [Action("Upload collection",
+        Description = "Upload content of a specific collection")]
     public Task UpdateCollectionContent(
         [ActionParameter, DataSource(typeof(CollectionDataHandler)), Display("Collection ID")]
         string? collectionId,
