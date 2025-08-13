@@ -92,6 +92,14 @@ The following example shows how a bird can be setup so that anytime a Shopify pr
 
 ![Sample Bird](image/README/ShopifySampleBird.png)
 
+## Demo video
+
+Shopify + DeepL + OpenAI: Multilingual Products in Minutes
+
+import { YouTube } from '@astro-community/astro-embed-youtube';
+
+<YouTube id="https://youtu.be/z7ILq75EVcY" />
+
 ## Feedback
 
 Do you want to use this app or do you have feedback on our implementation? Reach out to us using the [established channels](https://www.blackbird.io/) or create an issue.
