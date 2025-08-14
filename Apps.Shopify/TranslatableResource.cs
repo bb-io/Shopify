@@ -13,7 +13,8 @@ public enum TranslatableResource
     ONLINE_STORE_ARTICLE,
     ONLINE_STORE_BLOG,
     ONLINE_STORE_MENU,
-    ONLINE_STORE_PAGE,
+    //ONLINE_STORE_PAGE,  //does not exist in shopify enum
+    PAGE,
     ONLINE_STORE_THEME,
     ONLINE_STORE_THEME_APP_EMBED,
     ONLINE_STORE_THEME_JSON_TEMPLATE,

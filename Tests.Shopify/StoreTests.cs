@@ -18,5 +18,19 @@ namespace Tests.Shopify
             var result = await action.GetStoreContent(input1,input2,input3);
             Assert.IsNotNull(result);
         }
+
+        [TestMethod]
+        public async Task ListPages_ReturnsValues()
+        {
+            var action = new OnlineStorePageActions(InvocationContext, FileManager);
+            var input1 = new StoreContentRequest { IncludeShop = true };
+            var input2 = new LocaleRequest { Locale = "fr" };
+            var input3 = new GetContentRequest { };
+            var result = await action.ListPages();
+
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(result);
+            Console.WriteLine(json);
+            Assert.IsNotNull(result);
+        }
     }
 }
