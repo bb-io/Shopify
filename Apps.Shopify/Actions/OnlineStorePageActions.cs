@@ -29,7 +29,7 @@ public class OnlineStorePageActions : TranslatableResourceActions
     {
         var variables = new Dictionary<string, object>()
         {
-            ["resourceType"] = TranslatableResource.ONLINE_STORE_PAGE
+            ["resourceType"] = TranslatableResource.PAGE
         };
         var response = await Client
             .Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
