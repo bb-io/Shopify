@@ -4,6 +4,7 @@ using Apps.Shopify.HtmlConversion.Constants;
 using Apps.Shopify.Models.Dto;
 using Apps.Shopify.Models.Entities;
 using Apps.Shopify.Models.Request.TranslatableResource;
+using Blackbird.Applications.Sdk.Common.Exceptions;
 using HtmlAgilityPack;
 
 namespace Apps.Shopify.HtmlConversion;
@@ -155,6 +156,9 @@ public static class ShopifyHtmlConverter
 
         var productContentNodes = doc.DocumentNode.Descendants()
             .Where(x => x.Attributes[KeyAttr]?.Value != null && x.ParentNode.Name == "body");
+
+        if (!productContentNodes.Any())
+            throw new PluginMisconfigurationException("Invalid product HTML: no product nodes with 'key' attribute found.");
 
         var metafieldContentNodes = doc.DocumentNode.Descendants()
             .FirstOrDefault(x => x.Attributes[TypeAttr]?.Value == MetafieldType)?
