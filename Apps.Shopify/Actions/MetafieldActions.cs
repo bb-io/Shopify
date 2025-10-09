@@ -25,14 +25,10 @@ using Blackbird.Applications.Sdk.Common.Exceptions;
 
 namespace Apps.Shopify.Actions;
 
-[ActionList]
-public class MetafieldActions : TranslatableResourceActions
+[ActionList("Metafields")]
+public class MetafieldActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
+    : TranslatableResourceActions(invocationContext, fileManagementClient)
 {
-    public MetafieldActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient) : base(
-        invocationContext, fileManagementClient)
-    {
-    }
-
     [Action("Download metafields",
         Description = "Get metafield content of a specific product")]
     public async Task<FileResponse> GetMetafieldContent([ActionParameter] ProductRequest resourceRequest,

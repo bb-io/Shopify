@@ -21,14 +21,10 @@ using GraphQL;
 
 namespace Apps.Shopify.Actions;
 
-[ActionList]
-public class ProductActions : TranslatableResourceActions
+[ActionList("Products")]
+public class ProductActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
+    : TranslatableResourceActions(invocationContext, fileManagementClient)
 {
-    public ProductActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient) :
-        base(invocationContext, fileManagementClient)
-    {
-    }
-
     [Action("Search products", Description = "Search for products based on provided criterias")]
     public async Task<ListProductsResponse> SearchProducts([ActionParameter] SearchProductsRequest input)
     {

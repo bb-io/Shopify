@@ -15,7 +15,7 @@ using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
 namespace Apps.Shopify.Actions;
 
-[ActionList]
+[ActionList("Online store themes")]
 public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
     : TranslatableResourceActions(invocationContext, fileManagementClient)
 {

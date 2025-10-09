@@ -6,12 +6,12 @@
         <Nullable>enable</Nullable>
         <Product>Shopify</Product>
         <Description>E-commerce platform that enables individuals and businesses to create and manage online stores.</Description>
-        <Version>1.5.8</Version>
+        <Version>1.5.9</Version>
         <AssemblyName>Apps.Shopify</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Blackbird.Applications.Sdk.Common" Version="2.13.0" />
+        <PackageReference Include="Blackbird.Applications.SDK.Blueprints" Version="1.0.0-rc.10308" />
         <PackageReference Include="Blackbird.Applications.Sdk.Utils" Version="1.0.19" />
         <PackageReference Include="Blackbird.Filters" Version="1.1.20" />
         <PackageReference Include="GraphQL.Client" Version="6.0.2" />

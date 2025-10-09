@@ -22,14 +22,10 @@ using RestSharp;
 
 namespace Apps.Shopify.Actions;
 
-[ActionList]
-public class OnlineStoreBlogActions : TranslatableResourceActions
+[ActionList("Online store blogs")]
+public class OnlineStoreBlogActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
+    : TranslatableResourceActions(invocationContext, fileManagementClient)
 {
-    public OnlineStoreBlogActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient) :
-        base(invocationContext, fileManagementClient)
-    {
-    }
-
     [Action("List online store blogs", Description = "List all blogs in the online store")]
     public async Task<ListBlogsResponse> SearchBlogs()
     {
