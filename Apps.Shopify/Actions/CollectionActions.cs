@@ -12,14 +12,10 @@ using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
 namespace Apps.Shopify.Actions;
 
-[ActionList]
-public class CollectionActions : TranslatableResourceActions
+[ActionList("Collections")]
+public class CollectionActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
+    : TranslatableResourceActions(invocationContext, fileManagementClient)
 {
-    public CollectionActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-        : base(invocationContext, fileManagementClient)
-    {
-    }
-
     [Action("Download collection",
         Description = "Get content of a specific collection")]
     public Task<FileResponse> GetCollectionContent(

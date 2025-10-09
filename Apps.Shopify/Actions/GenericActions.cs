@@ -11,7 +11,7 @@ using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
 namespace Apps.Shopify.Actions;
 
-[ActionList]
+[ActionList("Content")]
 public class GenericActions : TranslatableResourceActions
 {
     private readonly InvocationContext _invocationContext;

@@ -17,14 +17,10 @@ using GraphQL;
 
 namespace Apps.Shopify.Actions;
 
-[ActionList]
-public class StoreActions : TranslatableResourceActions
+[ActionList("Stores")]
+public class StoreActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
+    : TranslatableResourceActions(invocationContext, fileManagementClient)
 {
-    public StoreActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient) :
-        base(invocationContext, fileManagementClient)
-    {
-    }
-
     [Action("Get store locales information", Description = "Get primary and other locales")]
     public async Task<StoreLocalesResponse> GetStoreLanguages()
     {

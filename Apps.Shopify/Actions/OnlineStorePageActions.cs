@@ -16,14 +16,10 @@ using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
 namespace Apps.Shopify.Actions;
 
-[ActionList]
-public class OnlineStorePageActions : TranslatableResourceActions
+[ActionList("Online store pages")]
+public class OnlineStorePageActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
+    : TranslatableResourceActions(invocationContext, fileManagementClient)
 {
-    public OnlineStorePageActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient) :
-        base(invocationContext, fileManagementClient)
-    {
-    }
-
     [Action("List online store pages", Description = "List all pages in the online store")]
     public async Task<ListPagesResponse> ListPages()
     {
