@@ -1,12 +1,8 @@
-﻿using Blackbird.Applications.Sdk.Common;
+﻿using Apps.Shopify.Models.Response.Content;
 
 namespace Apps.Shopify.Models.Response;
 
-public class ContentCreatedOrUpdatedResponse
+public class ContentCreatedOrUpdatedResponse(List<ContentResponse> content)
 {
-    [Display("Article IDs")]
-    public List<string> ArticleIds { get; set; } = new();
-
-    [Display("Page IDs")]
-    public List<string> PageIds { get; set; } = new();
+    public List<ContentResponse> Content { get; set; } = content;
 }

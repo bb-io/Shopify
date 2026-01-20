@@ -1,14 +1,17 @@
 using Apps.Shopify.Api.Rest;
+using Apps.Shopify.Constants;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities;
 using Apps.Shopify.Models.Request.OnlineStoreBlog;
 using Apps.Shopify.Models.Response;
 using Apps.Shopify.Models.Response.Article;
+using Apps.Shopify.Models.Response.Content;
 using Apps.Shopify.Models.Response.Page;
 using Apps.Shopify.Polling.Models.Memory;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.Sdk.Common.Polling;
+using Blackbird.Applications.SDK.Blueprints;
 using RestSharp;
 
 namespace Apps.Shopify.Polling;
@@ -16,6 +19,7 @@ namespace Apps.Shopify.Polling;
 [PollingEventList]
 public class PollingList(InvocationContext invocationContext) : ShopifyInvocable(invocationContext)
 {
+    [BlueprintEventDefinition(BlueprintEvent.ContentCreatedOrUpdatedMultiple)]
     [PollingEvent("On content created or updated", "On new content is created or existing content is updated")]
     public async Task<PollingEventResponse<DateMemory, ContentCreatedOrUpdatedResponse>> OnContentCreatedOrUpdated(
         PollingEventRequest<DateMemory> request,
@@ -30,25 +34,22 @@ public class PollingList(InvocationContext invocationContext) : ShopifyInvocable
 
         await Task.WhenAll(articlesCreatedTask, articlesUpdatedTask, pagesCreatedTask, pagesUpdatedTask);
 
-        var articlesResponse =
-            (await articlesCreatedTask).Result?.Items.Select(x => x.Id).ToList() ?? new List<string>();
-        articlesResponse.AddRange((await articlesUpdatedTask).Result?.Items.Select(x => x.Id).ToList() ??
-                                  new List<string>());
+        var articlesResponse = (await articlesCreatedTask).Result?.Items.Select(x => x.Id).ToList() ?? [];
+        articlesResponse.AddRange((await articlesUpdatedTask).Result?.Items.Select(x => x.Id).ToList() ?? []);
         articlesResponse = articlesResponse.Distinct().ToList();
 
-        var pagesResponse = (await pagesCreatedTask).Result?.Items.Select(x => x.Id).ToList() ?? new List<string>();
-        pagesResponse.AddRange((await pagesUpdatedTask).Result?.Items.Select(x => x.Id).ToList() ?? new List<string>());
+        var content = new List<ContentResponse>();
+        content.AddRange(articlesResponse.Select(a => new ContentResponse(a, HtmlContentTypes.OnlineStoreArticle)).ToList());
+
+        var pagesResponse = (await pagesCreatedTask).Result?.Items.Select(x => x.Id).ToList() ?? [];
+        pagesResponse.AddRange((await pagesUpdatedTask).Result?.Items.Select(x => x.Id).ToList() ?? []);
         pagesResponse = pagesResponse.Distinct().ToList();
+        content.AddRange(pagesResponse.Select(a => new ContentResponse(a, HtmlContentTypes.OnlineStorePageContent)).ToList());
 
-        var response = new ContentCreatedOrUpdatedResponse
-        {
-            ArticleIds = articlesResponse,
-            PageIds = pagesResponse,
-        };
-
+        var response = new ContentCreatedOrUpdatedResponse(content);
         return new PollingEventResponse<DateMemory, ContentCreatedOrUpdatedResponse>
         {
-            FlyBird = response.ArticleIds.Any() || response.PageIds.Any(),
+            FlyBird = response.Content.Count != 0,
             Result = response,
             Memory = new DateMemory { LastInteractionDate = DateTime.UtcNow }
         };
