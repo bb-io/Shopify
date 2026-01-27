@@ -1,10 +1,10 @@
 using Apps.Shopify.DataSourceHandlers;
 using Blackbird.Applications.Sdk.Common.Dynamic;
 
-namespace Apps.Shopify.Models.Request;
+namespace Apps.Shopify.Models.Identifiers;
 
-public class NonPrimaryLocaleRequest
+public class LocaleIdentifier
 {
-    [DataSource(typeof(NonPrimaryLanguageDataHandler))]
+    [DataSource(typeof(LanguageDataHandler))]
     public string Locale { get; set; }
 }

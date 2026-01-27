@@ -1,7 +1,9 @@
 ﻿namespace Apps.Shopify.Constants;
 
-public static class HtmlContentTypes
+public static class HtmlMetadataConstants
 {
+    public const string BlackbirdContentType = "blackbird-content-type";
+
     public const string OnlineStoreArticle = "online-store-article";
     public const string Collection = "collection";
     public const string MetafieldContent = "metafield";

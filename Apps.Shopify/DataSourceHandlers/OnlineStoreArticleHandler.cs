@@ -5,7 +5,7 @@ namespace Apps.Shopify.DataSourceHandlers;
 
 public class OnlineStoreArticleHandler: TranslatableResourceHandler
 {
-    protected override TranslatableResource ResourceType => TranslatableResource.ONLINE_STORE_ARTICLE;
+    protected override TranslatableResource ResourceType => TranslatableResource.ARTICLE;
 
     public OnlineStoreArticleHandler(InvocationContext invocationContext) : base(invocationContext)
     {

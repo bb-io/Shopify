@@ -1,8 +1,8 @@
-﻿using Apps.Shopify.Actions.Base;
-using Apps.Shopify.Constants.GraphQL;
+﻿using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities;
-using Apps.Shopify.Models.Request;
+using Apps.Shopify.Models.Identifiers;
+using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.OnlineStoreTheme;
 using Apps.Shopify.Models.Response.TranslatableResource;
 using Blackbird.Applications.Sdk.Common;
@@ -15,32 +15,27 @@ namespace Apps.Shopify.DataSourceHandlers;
 public class AssetThemeDataHandler(
     InvocationContext invocationContext,
     [ActionParameter] OnlineStoreThemeRequest request,
-    [ActionParameter] LocaleRequest localeRequest)
-    : ShopifyInvocable(invocationContext), IAsyncDataSourceHandler
+    [ActionParameter] DownloadContentRequest downloadContent,
+    [ActionParameter] LocaleIdentifier localeRequest)
+    : ShopifyInvocable(invocationContext), IAsyncDataSourceItemHandler
 {
-    public async Task<Dictionary<string, string>> GetDataAsync(DataSourceContext context,
-        CancellationToken cancellationToken)
+    public async Task<IEnumerable<DataSourceItem>> GetDataAsync(DataSourceContext context, CancellationToken ct)
     {
-        if (string.IsNullOrEmpty(request.OnlineStoreThemeId))
-        {
+        if (string.IsNullOrEmpty(request.OnlineStoreThemeId) || string.IsNullOrEmpty(downloadContent.ContentId))
             throw new InvalidOperationException("Please provide an online store theme ID first.");
-        }
 
-        if (string.IsNullOrEmpty(localeRequest.Locale))
-        {
-            throw new InvalidOperationException("Please provide a locale first.");
-        }
+        if (string.IsNullOrEmpty(localeRequest.Locale) || string.IsNullOrEmpty(downloadContent.Locale))
+            throw new InvalidOperationException("Please provide locale first.");
 
         var translatableContent = await GetTranslatableContent(request.OnlineStoreThemeId, localeRequest.Locale, false);
-        var list = translatableContent
+        var assets = translatableContent
             .Select(BuildName)
             .Where(x =>
                 context.SearchString == null ||
                 x.Contains(context.SearchString, StringComparison.OrdinalIgnoreCase))
-            .Distinct()
-            .ToList();
+            .Distinct();
         
-        return list.ToDictionary(x => x, x => x);
+        return assets.Select(x => new DataSourceItem(x, x)).ToList();
     }
     
     private static string BuildName(IdentifiedContentEntity entity)

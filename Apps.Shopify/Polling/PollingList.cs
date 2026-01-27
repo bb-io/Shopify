@@ -39,12 +39,12 @@ public class PollingList(InvocationContext invocationContext) : ShopifyInvocable
         articlesResponse = articlesResponse.Distinct().ToList();
 
         var content = new List<ContentResponse>();
-        content.AddRange(articlesResponse.Select(a => new ContentResponse(a, HtmlContentTypes.OnlineStoreArticle)).ToList());
+        content.AddRange(articlesResponse.Select(a => new ContentResponse(a, HtmlMetadataConstants.OnlineStoreArticle)).ToList());
 
         var pagesResponse = (await pagesCreatedTask).Result?.Items.Select(x => x.Id).ToList() ?? [];
         pagesResponse.AddRange((await pagesUpdatedTask).Result?.Items.Select(x => x.Id).ToList() ?? []);
         pagesResponse = pagesResponse.Distinct().ToList();
-        content.AddRange(pagesResponse.Select(a => new ContentResponse(a, HtmlContentTypes.OnlineStorePageContent)).ToList());
+        content.AddRange(pagesResponse.Select(a => new ContentResponse(a, HtmlMetadataConstants.OnlineStorePageContent)).ToList());
 
         var response = new ContentCreatedOrUpdatedResponse(content);
         return new PollingEventResponse<DateMemory, ContentCreatedOrUpdatedResponse>

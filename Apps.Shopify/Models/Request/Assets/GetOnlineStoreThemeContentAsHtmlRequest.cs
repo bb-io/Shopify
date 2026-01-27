@@ -7,6 +7,6 @@ namespace Apps.Shopify.Models.Request.Assets;
 
 public class GetOnlineStoreThemeContentAsHtmlRequest : OnlineStoreThemeRequest
 {
-    [Display("Asset keys", Description = "Specify this input if you want to translate only specific assets"), DataSource(typeof(AssetThemeDataHandler))]
+    [Display("Asset keys", Description = "Specific assets to translate"), DataSource(typeof(AssetThemeDataHandler))]
     public IEnumerable<string>? AssetKeys { get; set; }
 }

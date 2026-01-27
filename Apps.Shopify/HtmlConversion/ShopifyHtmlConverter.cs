@@ -33,8 +33,8 @@ public static class ShopifyHtmlConverter
         doc.LoadHtml(file);
 
         var contentType = doc.DocumentNode
-            .SelectSingleNode("//meta[@name='blackbird-content-type']")
-            ?.GetAttributeValue("content", null);
+            .SelectSingleNode($"//meta[@name='{HtmlMetadataConstants.BlackbirdContentType}']")?
+            .GetAttributeValue("content", null);
 
         return contentType;
     }
@@ -116,7 +116,7 @@ public static class ShopifyHtmlConverter
 
     public static MemoryStream ProductToHtml(ProductContentDto contentDto)
     {
-        var (doc, body) = PrepareEmptyHtmlDocument(HtmlContentTypes.ProductContent);
+        var (doc, body) = PrepareEmptyHtmlDocument(HtmlMetadataConstants.ProductContent);
         FillInIdentifiedContentEntities(doc, body, contentDto.ProductContentEntities);
 
         if (contentDto.MetafieldsContentEntities is not null && contentDto.MetafieldsContentEntities.Any())
@@ -192,7 +192,7 @@ public static class ShopifyHtmlConverter
 
     public static MemoryStream StoreToHtml(StoreContentDto contentDto)
     {
-        var (doc, body) = PrepareEmptyHtmlDocument(HtmlContentTypes.StoreContent);
+        var (doc, body) = PrepareEmptyHtmlDocument(HtmlMetadataConstants.StoreContent);
 
         if (contentDto.ThemesContentEntities is not null && contentDto.ThemesContentEntities.Any())
         {
@@ -338,19 +338,11 @@ public static class ShopifyHtmlConverter
         });
     }
 
-    private static IEnumerable<TranslatableResourceContentRequest> GetResourceContent(IEnumerable<HtmlNode>? nodes,
-        string locale) =>
-        nodes?.Select(x => new TranslatableResourceContentRequest()
-        {
-            Key = x.Attributes[KeyAttr].Value,
-            TranslatableContentDigest = x.Attributes[DigestAttr]?.Value,
-            Value = HttpUtility.HtmlDecode(x.InnerHtml),
-            Locale = locale
-        }) ?? [];
-
-    private static IEnumerable<IdentifiedContentRequest> GetIdentifiedResourceContent(IEnumerable<HtmlNode>? nodes,
-        string locale) =>
-        nodes?.Select(x => new IdentifiedContentRequest()
+    private static IEnumerable<IdentifiedContentRequest> GetIdentifiedResourceContent(
+        IEnumerable<HtmlNode>? nodes,
+        string locale)
+    {
+        return nodes?.Select(x => new IdentifiedContentRequest()
         {
             ResourceId = x.Attributes[ResourceAttr]?.Value,
             Key = x.Attributes[KeyAttr].Value,
@@ -358,4 +350,5 @@ public static class ShopifyHtmlConverter
             Value = HttpUtility.HtmlDecode(x.InnerHtml),
             Locale = locale
         }) ?? [];
+    }
 }

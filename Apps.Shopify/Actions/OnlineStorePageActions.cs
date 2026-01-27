@@ -1,16 +1,15 @@
-using Apps.Shopify.Actions.Base;
-using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
-using Apps.Shopify.DataSourceHandlers;
+using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities;
+using Apps.Shopify.Models.Identifiers;
 using Apps.Shopify.Models.Request;
+using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.OnlineStorePage;
-using Apps.Shopify.Models.Response;
 using Apps.Shopify.Models.Response.Page;
 using Apps.Shopify.Models.Response.TranslatableResource;
+using Apps.Shopify.Services;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
-using Blackbird.Applications.Sdk.Common.Dynamic;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
@@ -18,8 +17,10 @@ namespace Apps.Shopify.Actions;
 
 [ActionList("Online store pages")]
 public class OnlineStorePageActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : TranslatableResourceActions(invocationContext, fileManagementClient)
+    : ShopifyInvocable(invocationContext)
 {
+    private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
+
     [Action("List online store pages", Description = "List all pages in the online store")]
     public async Task<ListPagesResponse> ListPages()
     {
@@ -41,18 +42,37 @@ public class OnlineStorePageActions(InvocationContext invocationContext, IFileMa
         };
     }
 
-    [Action("Download online store page",
-        Description = "Get content of a specific online store page")]
-    public Task<FileResponse> GetOnlineStorePageTranslationContent(
-        [ActionParameter] OnlineStorePageRequest input, [ActionParameter] LocaleRequest locale,
+    [Action("Download online store page", Description = "Get content of a specific online store page")]
+    public async Task<DownloadPageResponse> GetOnlineStorePageTranslationContent(
+        [ActionParameter] OnlineStorePageRequest input, 
+        [ActionParameter] LocaleIdentifier locale,
         [ActionParameter] GetContentRequest getContentRequest)
-        => GetResourceContent(input.OnlineStorePageId, locale.Locale, getContentRequest.Outdated ?? default, HtmlContentTypes.OnlineStorePageContent);
+    {
+        var service = _factory.GetContentService(TranslatableResource.PAGE);
+        var request = new DownloadContentRequest
+        {
+            ContentId = input.OnlineStorePageId,
+            Locale = locale.Locale,
+            Outdated = getContentRequest.Outdated,
+        };
 
-    [Action("Upload online store page",
-        Description = "Update content of a specific online store page")]
-    public Task UpdateOnlineStorePageContent(
-        [ActionParameter, DataSource(typeof(OnlineStorePageHandler)), Display("Online store page ID")]
-        string? onlineStorePageId,
-        [ActionParameter] NonPrimaryLocaleRequest locale, [ActionParameter] FileRequest file)
-        => UpdateResourceContent(onlineStorePageId, locale.Locale, file.File);
+        var file = await service.Download(request);
+        return new(file);
+    }
+
+    [Action("Upload online store page", Description = "Update content of a specific online store page")]
+    public async Task UpdateOnlineStorePageContent(
+        [ActionParameter] UploadPageRequest input,
+        [ActionParameter] NonPrimaryLocaleIdentifier locale)
+    {
+        var service = _factory.GetContentService(TranslatableResource.PAGE);
+        var request = new UploadContentRequest
+        {
+            Content = input.File,
+            ContentId = input.PageId,
+            Locale = locale.Locale
+        };
+
+        await service.Upload(request);
+    }
 }

@@ -10,10 +10,9 @@ public enum TranslatableResource
     LINK,
     METAFIELD,
     METAOBJECT,
-    ONLINE_STORE_ARTICLE,
-    ONLINE_STORE_BLOG,
+    ARTICLE,
+    BLOG,
     ONLINE_STORE_MENU,
-    //ONLINE_STORE_PAGE,  //does not exist in shopify enum
     PAGE,
     ONLINE_STORE_THEME,
     ONLINE_STORE_THEME_APP_EMBED,

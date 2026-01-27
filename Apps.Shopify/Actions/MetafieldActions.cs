@@ -1,68 +1,67 @@
-using System.Net.Mime;
-using Apps.Shopify.Actions.Base;
 using Apps.Shopify.Api;
 using Apps.Shopify.Api.Rest;
-using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.DataSourceHandlers;
 using Apps.Shopify.Extensions;
-using Apps.Shopify.HtmlConversion;
+using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities;
+using Apps.Shopify.Models.Identifiers;
 using Apps.Shopify.Models.Request;
+using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.Metafield;
 using Apps.Shopify.Models.Request.Product;
-using Apps.Shopify.Models.Response;
 using Apps.Shopify.Models.Response.Metafield;
+using Apps.Shopify.Services;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Dynamic;
+using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Common.Invocation;
-using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using Blackbird.Applications.Sdk.Utils.Extensions.Http;
+using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using GraphQL;
 using RestSharp;
-using Blackbird.Applications.Sdk.Common.Exceptions;
 
 namespace Apps.Shopify.Actions;
 
 [ActionList("Metafields")]
 public class MetafieldActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : TranslatableResourceActions(invocationContext, fileManagementClient)
+    : ShopifyInvocable(invocationContext)
 {
-    [Action("Download metafields",
-        Description = "Get metafield content of a specific product")]
-    public async Task<FileResponse> GetMetafieldContent([ActionParameter] ProductRequest resourceRequest,
-        [ActionParameter] LocaleRequest locale, [ActionParameter] GetContentRequest getContentRequest)
+    private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
+
+    [Action("Download metafields", Description = "Get metafield content of a specific product")]
+    public async Task<DownloadMetafieldResponse> GetMetafieldContent(
+        [ActionParameter] ProductRequest resourceRequest,
+        [ActionParameter] LocaleIdentifier locale, 
+        [ActionParameter] GetContentRequest getContentRequest)
     {
-        var productMetaFields = await GetProductMetafields(resourceRequest.ProductId);
-        var metaFields = await ListTranslatableResources(TranslatableResource.METAFIELD, locale.Locale,
-            getContentRequest.Outdated ?? default);
-
-        var resources = metaFields
-            .Where(x => productMetaFields.Any(y => x.ResourceId == y.Id))
-            .ToArray();
-
-        var contents = resources.All(x => !x.Translations.Any())
-            ? resources.Select(x => (x.ResourceId, x.TranslatableContent.FirstOrDefault())).ToArray()
-            : resources.Select(x => (x.ResourceId, x.Translations.FirstOrDefault())).ToArray();
-
-        var html = ShopifyHtmlConverter.MetaFieldsToHtml(contents.Where(x => x.Item2 is not null), HtmlContentTypes.MetafieldContent);
-        return new()
+        var service = _factory.GetContentService(TranslatableResource.METAFIELD);
+        var request = new DownloadContentRequest
         {
-            File = await FileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html,
-                $"{resourceRequest.ProductId.GetShopifyItemId()}-metafields.html")
+            ContentId = resourceRequest.ProductId,
+            Locale = locale.Locale,
+            Outdated = getContentRequest.Outdated,
         };
+
+        var file = await service.Download(request);
+        return new(file);
     }
 
-    [Action("Upload metafields",
-        Description = "Upload metafield content of a specific product")]
-    public async Task UpdateMetaFieldContent([ActionParameter] NonPrimaryLocaleRequest locale,
-        [ActionParameter] FileRequest file)
+    [Action("Upload metafields", Description = "Upload metafield content of a specific product")]
+    public async Task UpdateMetaFieldContent(
+        [ActionParameter] UploadMetafieldRequest input,
+        [ActionParameter] NonPrimaryLocaleIdentifier locale)
     {
-        var html = await GetHtmlFromFile(file.File);
-        var translations = ShopifyHtmlConverter.MetaFieldsToJson(html, locale.Locale);
+        var service = _factory.GetContentService(TranslatableResource.METAFIELD);
+        var request = new UploadContentRequest
+        {
+            ContentId = input.MetafieldId,
+            Content = input.File,
+            Locale = locale.Locale
+        };
 
-        await UpdateIdentifiedContent(translations.ToList());
+        await service.Upload(request);
     }
 
     [Action("Get metafield",

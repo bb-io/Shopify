@@ -5,7 +5,7 @@ namespace Apps.Shopify.DataSourceHandlers;
 
 public class OnlineStoreBlogHandler : TranslatableResourceHandler
 {
-    protected override TranslatableResource ResourceType => TranslatableResource.ONLINE_STORE_BLOG;
+    protected override TranslatableResource ResourceType => TranslatableResource.BLOG;
 
     public OnlineStoreBlogHandler(InvocationContext invocationContext) : base(invocationContext)
     {

@@ -13,7 +13,7 @@ namespace Tests.Shopify
         {
             var action = new StoreActions(InvocationContext,FileManager);
             var input1 = new StoreContentRequest { IncludeShop =true};
-            var input2= new LocaleRequest { Locale = "fr" };
+            var input2= new LocaleIdentifier { Locale = "fr" };
             var input3 = new GetContentRequest { };
             var result = await action.GetStoreContent(input1,input2,input3);
             Assert.IsNotNull(result);
@@ -24,7 +24,7 @@ namespace Tests.Shopify
         {
             var action = new OnlineStorePageActions(InvocationContext, FileManager);
             var input1 = new StoreContentRequest { IncludeShop = true };
-            var input2 = new LocaleRequest { Locale = "fr" };
+            var input2 = new LocaleIdentifier { Locale = "fr" };
             var input3 = new GetContentRequest { };
             var result = await action.ListPages();
 
