@@ -47,4 +47,11 @@ public class GenericActions(InvocationContext invocationContext, IFileManagement
         var file = await service.Download(input);
         return new(file);
     }
+
+    [BlueprintActionDefinition(BlueprintAction.SearchContent)]
+    [Action("Search content", Description = "Search content")]
+    public async Task<SearchContentResponse> SearchContent()
+    {
+        return new SearchContentResponse([]);
+    }
 }

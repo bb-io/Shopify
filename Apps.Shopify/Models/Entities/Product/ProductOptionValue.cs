@@ -1,6 +1,6 @@
-namespace Apps.Shopify.Models.Entities;
+namespace Apps.Shopify.Models.Entities.Product;
 
-public class OptionValueEntity
+public class ProductOptionValue
 {
     public string Id { get; set; }
     

@@ -1,29 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ShopifyTests.Base;
 using Apps.Shopify.Actions;
-using Apps.Shopify.Models.Request.Metafield;
 using Apps.Shopify.Models.Request.Product;
-using ShopifyTests.Base;
+using Apps.Shopify.Models.Request.Metafield;
 
-namespace Tests.Shopify
+namespace Tests.Shopify;
+
+[TestClass]
+public class MetafieldTests : TestBase
 {
-    [TestClass]
-    public class MetafieldTests : TestBase
+    [TestMethod]
+    public async Task UpdateMetafiled_IsSuccess()
     {
-        [TestMethod]
-        public async Task UpdateMetafiled_IsSuccess()
+        var actions = new MetafieldActions(InvocationContext, FileManager);
+        var metafiledRequest = new MetafieldRequest { MetafieldDefinitionId= "gid://shopify/MetafieldDefinition/178835980618" };
+        var productRequest = new ProductRequest { ProductId = "gid://shopify/Product/15098755907968" };
+        string value = "false";
+
+        await actions.UpdateMetafield(metafiledRequest, productRequest, value);
+    }
+
+    [TestMethod]
+    public async Task SearchMetafields_ReturnsMetafields()
+    {
+        // Arrange
+        var action = new MetafieldActions(InvocationContext, FileManager);
+        var input = new SearchMetafieldsRequest
         {
-            var actions = new MetafieldActions(InvocationContext, FileManager);
-            var metafiledRequest = new MetafieldRequest { MetafieldDefinitionId= "gid://shopify/MetafieldDefinition/178835980618" };
-            var productRequest = new ProductRequest { ProductId = "gid://shopify/Product/15098755907968" };
-            string value = "false";
+            OwnerType = "PRODUCT",
+            NameContains = "mount",
+        };
 
-            await actions.UpdateMetafield(metafiledRequest, productRequest, value);
+        // Act
+        var result = await action.SearchMetafields(input);
 
-            Assert.IsTrue(true);
-        }
+        // Assert
+        PrintJsonResult(result);
+        Assert.IsNotNull(result);
     }
 }

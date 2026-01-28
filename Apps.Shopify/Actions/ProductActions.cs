@@ -1,17 +1,14 @@
-using Apps.Shopify.Api;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Invocables;
-using Apps.Shopify.Models.Entities;
+using Apps.Shopify.Models.Entities.Product;
 using Apps.Shopify.Models.Identifiers;
 using Apps.Shopify.Models.Request;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.Product;
-using Apps.Shopify.Models.Response.Metafield;
 using Apps.Shopify.Models.Response.Product;
 using Apps.Shopify.Services;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
-using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
@@ -24,31 +21,43 @@ public class ProductActions(InvocationContext invocationContext, IFileManagement
     private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
 
     [Action("Search products", Description = "Search for products based on provided criterias")]
-    public async Task<ListProductsResponse> SearchProducts([ActionParameter] SearchProductsRequest input)
+    public async Task<SearchProductsResponse> SearchProducts([ActionParameter] SearchProductsRequest input)
     {
-        if ((input.MetafieldKey == null) ^ (input.MetafieldValue == null))
-            throw new PluginMisconfigurationException("Metafield and Metafield value should be both either filled or empty");
-        
-        var variables = new Dictionary<string, object>();
+        input.Validate();
 
+        var variables = new Dictionary<string, object>();
         var query = new List<string>();
-        if (input.Status is not null)
-        {
+
+        if (!string.IsNullOrEmpty(input.TitleContains))
+            query.Add($"title:*{input.TitleContains}*");
+
+        if (!string.IsNullOrEmpty(input.Status))
             query.Add($"status:{input.Status}");
+
+        string graphQlQuery = GraphQlQueries.Products;
+        if (!string.IsNullOrEmpty(input.MetafieldKey))
+        {
+            variables["metafieldKey"] = input.MetafieldKey;
+            graphQlQuery = GraphQlQueries.ProductsWithMetafields;
         }
 
         if (!string.IsNullOrWhiteSpace(query.ToString()))
-        {
             variables["query"] = string.Join(" AND ", query);
+
+        var response = await Client.Paginate<ProductEntity, ProductsPaginationResponse>(graphQlQuery, variables);
+
+        if (!string.IsNullOrEmpty(input.MetafieldKey))
+        {
+            response = response
+                .Where(
+                    p => p.Metafield != null &&
+                    p.Metafield.Value.Contains(input.MetafieldValueContains!, StringComparison.OrdinalIgnoreCase)
+                )
+                .ToList();
         }
 
-        var response = await Client
-            .Paginate<ProductEntity, ProductsPaginationResponse>(GraphQlQueries.Products, variables);
-
-        if (input.MetafieldKey is not null)
-            await FilterProductsByMetafields(response, input.MetafieldKey, input.MetafieldValue!);
-
-        return new(response);
+        var result = response.Select(x => new GetProductResponse(x)).ToList();
+        return new(result);
     }
 
     [Action("Download product", Description = "Get content of a specific product")]
@@ -87,30 +96,5 @@ public class ProductActions(InvocationContext invocationContext, IFileManagement
         };
 
         await service.Upload(request);
-    }
-
-    private async Task<ICollection<MetafieldEntity>> GetProductMetafields(string productId)
-    {
-        var variables = new Dictionary<string, object>()
-        {
-            ["resourceId"] = productId
-        };
-
-        var client = new ShopifyClient(Creds, ShopifyClient.GenerateApiUrl(Creds, "unstable"));
-        return await client.Paginate<MetafieldEntity, MetafieldPaginationResponse>(GraphQlQueries.ProductMetaFields,
-            variables);
-    }
-    
-    private async Task FilterProductsByMetafields(List<ProductEntity> response, string metafieldKey, string metafieldValue)
-    {
-        foreach (var product in response.ToArray())
-        {
-            var metafields = await GetProductMetafields(product.Id);
-            
-            if(metafields.Any(x => x.Key == metafieldKey && x.Value == metafieldValue))
-                continue;
-
-            response.Remove(product);
-        }
     }
 }

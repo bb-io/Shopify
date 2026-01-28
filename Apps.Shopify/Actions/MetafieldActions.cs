@@ -64,10 +64,42 @@ public class MetafieldActions(InvocationContext invocationContext, IFileManageme
         await service.Upload(request);
     }
 
+    [Action("Search metafield definitions", Description = "Search metafield definitions with specific criteria")]
+    public async Task<SearchMetafieldsResponse> SearchMetafields([ActionParameter] SearchMetafieldsRequest input)
+    {
+        var variables = new Dictionary<string, object>
+        {
+            ["ownerType"] = input.OwnerType
+        };
+
+        var queryParts = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(input.Key))
+            queryParts.Add($"key:{input.Key}");
+
+        if (!string.IsNullOrWhiteSpace(input.Namespace))
+            queryParts.Add($"namespace:{input.Namespace}");
+
+        if (queryParts.Count != 0)
+            variables["query"] = string.Join(" AND ", queryParts);
+
+        var response = await Client
+            .Paginate<MetafieldDefinitionEntity, MetafieldDefinitionPaginationResponse>(
+                GraphQlQueries.MetafieldDefinitions,
+                variables
+            );
+
+        // We have to filter it by ourselves because API ignores the 'name' filter for some reason
+        if (!string.IsNullOrEmpty(input.NameContains))
+            response = response.Where(x => x.Name.Contains(input.NameContains, StringComparison.OrdinalIgnoreCase)).ToList();
+
+        return new SearchMetafieldsResponse(response);
+    }
+
     [Action("Get metafield",
         Description = "Get metafield details of a specific product")]
     public async Task<MetafieldEntity> GetMetafield(
-        [ActionParameter, Display("Metafield"), DataSource(typeof(ProductMetafieldDataHandler))] string metafieldKey,
+        [ActionParameter, Display("Metafield"), DataSource(typeof(ProductMetafieldKeyDataHandler))] string metafieldKey,
         [ActionParameter] ProductRequest product)
     {
         var productMetaFields = await GetProductMetafields(product.ProductId);

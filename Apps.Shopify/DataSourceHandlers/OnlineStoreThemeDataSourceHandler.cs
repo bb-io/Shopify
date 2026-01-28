@@ -17,7 +17,7 @@ public class OnlineStoreThemeDataSourceHandler : ShopifyInvocable, IAsyncDataSou
     public async Task<Dictionary<string, string>> GetDataAsync(DataSourceContext context, CancellationToken cancellationToken)
     {
         var request = new ShopifyRestRequest("themes.json", Method.Get, Creds);
-        var response = await RestClient.ExecuteWithErrorHandling<ListThemesResponse>(request);
+        var response = await RestClient.ExecuteWithErrorHandling<SearchThemesResponse>(request);
         
         return response.Themes
             .Where(x => context.SearchString is null ||

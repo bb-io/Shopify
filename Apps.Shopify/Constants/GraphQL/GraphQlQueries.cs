@@ -34,6 +34,31 @@ public static class GraphQlQueries
             }
           }";
 
+    public const string ProductsWithMetafields =
+        @"query ($limit: Int!, $after: String, $query: String, $metafieldKey: String!) {
+            products (first: $limit, after: $after, query: $query){
+              nodes {
+                 id
+                 title
+                 handle
+                 createdAt
+                 publishedAt
+                 description
+                 onlineStoreUrl
+                 productType
+                 status
+                 metafield(key: $metafieldKey) {
+                    value
+                 }
+               }
+              pageInfo {
+                 endCursor
+                 hasNextPage
+                 startCursor
+              }
+            }
+          }";
+
     public const string TranslatableResources =
         @"query ($resourceType: TranslatableResourceType!, $after: String, $limit: Int!) {
           translatableResources(first: $limit, after: $after, resourceType: $resourceType) {
@@ -204,12 +229,16 @@ public static class GraphQlQueries
         }";
 
     public const string MetafieldDefinitions =
-        @"query ($limit: Int!, $after: String, $ownerType: MetafieldOwnerType!) {
-            metafieldDefinitions (first: $limit, after: $after, ownerType: $ownerType){
+        @"query ($limit: Int!, $after: String, $ownerType: MetafieldOwnerType!, $query: String) {
+            metafieldDefinitions (first: $limit, after: $after, ownerType: $ownerType, query: $query) {
               nodes {
                  id
                  key
                  name
+                 namespace
+                 type {
+                   name
+                 }
                }
               pageInfo {
                  endCursor
@@ -228,6 +257,102 @@ public static class GraphQlQueries
             namespace
             type{
               name
+            }
+          }
+        }";
+
+    public const string Collections =
+        @"query ($limit: Int!, $after: String, $query: String) {
+          collections(first: $limit, after: $after, query: $query) {
+            nodes {
+              id
+              title
+              description
+              updatedAt
+            }
+            pageInfo {
+              endCursor
+              hasNextPage
+              startCursor
+            }
+          }
+        }";
+
+    public const string Articles =
+        @"query ($limit: Int!, $after: String, $query: String) {
+          articles(first: $limit, after: $after, query: $query) {
+            nodes {
+              id
+              title
+              publishedAt
+              createdAt
+              updatedAt
+              blog {
+                id
+              }
+              author {
+                name
+              }
+              handle
+            }
+            pageInfo {
+              endCursor
+              hasNextPage
+              startCursor
+            }
+          }
+        }";
+
+    public const string Blogs =
+        @"query ($limit: Int!, $after: String, $query: String) {
+          blogs(first: $limit, after: $after, query: $query) {
+            nodes {
+              id
+              title
+              createdAt
+              updatedAt
+            }
+            pageInfo {
+              endCursor
+              hasNextPage
+              startCursor
+            }
+          }
+        }";
+
+    public const string Pages =
+        @"query ($limit: Int!, $after: String, $query: String) {
+          pages(first: $limit, after: $after, query: $query) {
+            nodes {
+              id
+              title
+              createdAt
+              updatedAt
+              publishedAt
+              handle
+            }
+            pageInfo {
+              endCursor
+              hasNextPage
+              startCursor
+            }
+          }
+        }";
+
+    public const string Themes =
+        @"query ($limit: Int!, $after: String,  $roles: [ThemeRole!]) {
+          themes(first: $limit, after: $after, roles: $roles) {
+            nodes {
+              id
+              name
+              role
+              createdAt
+              updatedAt
+            }
+            pageInfo {
+              hasNextPage
+              endCursor
+              startCursor
             }
           }
         }";

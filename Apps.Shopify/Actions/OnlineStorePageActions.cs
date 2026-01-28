@@ -1,12 +1,12 @@
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Invocables;
-using Apps.Shopify.Models.Entities;
+using Apps.Shopify.Models.Entities.Page;
 using Apps.Shopify.Models.Identifiers;
 using Apps.Shopify.Models.Request;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.OnlineStorePage;
+using Apps.Shopify.Models.Request.Page;
 using Apps.Shopify.Models.Response.Page;
-using Apps.Shopify.Models.Response.TranslatableResource;
 using Apps.Shopify.Services;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
@@ -21,25 +21,42 @@ public class OnlineStorePageActions(InvocationContext invocationContext, IFileMa
 {
     private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
 
-    [Action("List online store pages", Description = "List all pages in the online store")]
-    public async Task<ListPagesResponse> ListPages()
+    [Action("Search online store pages", Description = "Search online store pages with specific criteria")]
+    public async Task<SearchPagesResponse> SearchPages([ActionParameter] SearchPagesRequest input)
     {
-        var variables = new Dictionary<string, object>()
-        {
-            ["resourceType"] = TranslatableResource.PAGE
-        };
-        var response = await Client
-            .Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
-                GraphQlQueries.TranslatableResources,
-                variables);
-        return new ListPagesResponse
-        {
-            Pages = response.Select(x => new Page
-            {
-                ResourceId = x.ResourceId,
-                Title = x.TranslatableContent.First(y => y.Key == "title").Value
-            })
-        };
+        var queryParts = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(input.TitleContains))
+            queryParts.Add($"title:*{input.TitleContains}*");
+
+        if (input.UpdatedAfter.HasValue)
+            queryParts.Add($"updated_at:>{input.UpdatedAfter.Value:O}");
+
+        if (input.UpdatedBefore.HasValue)
+            queryParts.Add($"updated_at:<{input.UpdatedBefore.Value:O}");
+
+        if (input.CreatedAfter.HasValue)
+            queryParts.Add($"created_at:>{input.CreatedAfter.Value:O}");
+
+        if (input.CreatedBefore.HasValue)
+            queryParts.Add($"created_at:<{input.CreatedBefore.Value:O}");
+
+        if (input.PublishedAfter.HasValue)
+            queryParts.Add($"published_at:>{input.PublishedAfter.Value:O}");
+
+        if (input.PublishedBefore.HasValue)
+            queryParts.Add($"published_at:<{input.PublishedBefore.Value:O}");
+
+        var variables = new Dictionary<string, object>();
+        if (queryParts.Count != 0)
+            variables["query"] = string.Join(" AND ", queryParts);
+
+        var response = await Client.Paginate<PageEntity, PagesPaginationResponse>(
+            GraphQlQueries.Pages,
+            variables
+        );
+
+        return new(response);
     }
 
     [Action("Download online store page", Description = "Get content of a specific online store page")]

@@ -1,8 +1,9 @@
-using Apps.Shopify.Api.Rest;
 using Apps.Shopify.Constants;
+using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.Invocables;
-using Apps.Shopify.Models.Entities;
+using Apps.Shopify.Models.Entities.Article;
+using Apps.Shopify.Models.Entities.Page;
 using Apps.Shopify.Models.Request.OnlineStoreBlog;
 using Apps.Shopify.Models.Response;
 using Apps.Shopify.Models.Response.Article;
@@ -12,7 +13,6 @@ using Apps.Shopify.Polling.Models.Memory;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.Sdk.Common.Polling;
 using Blackbird.Applications.SDK.Blueprints;
-using RestSharp;
 
 namespace Apps.Shopify.Polling;
 
@@ -34,17 +34,20 @@ public class PollingList(InvocationContext invocationContext) : ShopifyInvocable
 
         await Task.WhenAll(articlesCreatedTask, articlesUpdatedTask, pagesCreatedTask, pagesUpdatedTask);
 
-        var articlesResponse = (await articlesCreatedTask).Result?.Items.Select(x => x.Id).ToList() ?? [];
-        articlesResponse.AddRange((await articlesUpdatedTask).Result?.Items.Select(x => x.Id).ToList() ?? []);
+        var articlesResponse = (await articlesCreatedTask).Result?.Articles.ToList() ?? [];
+        articlesResponse.AddRange((await articlesUpdatedTask).Result?.Articles.ToList() ?? []);
         articlesResponse = articlesResponse.Distinct().ToList();
 
         var content = new List<ContentResponse>();
-        content.AddRange(articlesResponse.Select(a => new ContentResponse(a, HtmlMetadataConstants.OnlineStoreArticle)).ToList());
+        content.AddRange(articlesResponse
+            .Select(a => new ContentResponse(a.Id, HtmlMetadataConstants.OnlineStoreArticle, a.Title)).ToList());
 
-        var pagesResponse = (await pagesCreatedTask).Result?.Items.Select(x => x.Id).ToList() ?? [];
-        pagesResponse.AddRange((await pagesUpdatedTask).Result?.Items.Select(x => x.Id).ToList() ?? []);
+        var pagesResponse = (await pagesCreatedTask).Result?.Pages.ToList() ?? [];
+        pagesResponse.AddRange((await pagesUpdatedTask).Result?.Pages.ToList() ?? []);
         pagesResponse = pagesResponse.Distinct().ToList();
-        content.AddRange(pagesResponse.Select(a => new ContentResponse(a, HtmlMetadataConstants.OnlineStorePageContent)).ToList());
+
+        content.AddRange(pagesResponse
+            .Select(a => new ContentResponse(a.Id, HtmlMetadataConstants.OnlineStorePageContent, a.Title)).ToList());
 
         var response = new ContentCreatedOrUpdatedResponse(content);
         return new PollingEventResponse<DateMemory, ContentCreatedOrUpdatedResponse>
@@ -56,28 +59,28 @@ public class PollingList(InvocationContext invocationContext) : ShopifyInvocable
     }
 
     [PollingEvent("On articles created", "On new articles are created")]
-    public Task<PollingEventResponse<DateMemory, ArticlesPaginationResponse>> OnArticlesCreated(
+    public Task<PollingEventResponse<DateMemory, SearchArticlesResponse>> OnArticlesCreated(
         PollingEventRequest<DateMemory> request,
         [PollingEventParameter] OnlineStoreBlogRequest blog) => HandleArticlePolling(request, blog,
         $"created_at_min={request.Memory?.LastInteractionDate.ToString("yyyy-MM-ddTHH:mm:sszzz")}");
 
     [PollingEvent("On articles updated", "On any articles are updated")]
-    public Task<PollingEventResponse<DateMemory, ArticlesPaginationResponse>> OnArticlesUpdated(
+    public Task<PollingEventResponse<DateMemory, SearchArticlesResponse>> OnArticlesUpdated(
         PollingEventRequest<DateMemory> request,
         [PollingEventParameter] OnlineStoreBlogRequest blog) => HandleArticlePolling(request, blog,
         $"updated_at_min={request.Memory?.LastInteractionDate.ToString("yyyy-MM-ddTHH:mm:sszzz")}");
 
     [PollingEvent("On pages created", "On new pages are created")]
-    public Task<PollingEventResponse<DateMemory, PagesPaginationResponse>> OnPagesCreated(
+    public Task<PollingEventResponse<DateMemory, SearchPagesResponse>> OnPagesCreated(
         PollingEventRequest<DateMemory> request) => HandlePagesPolling(request,
         $"created_at_min={request.Memory?.LastInteractionDate.ToString("yyyy-MM-ddTHH:mm:sszzz")}");
 
     [PollingEvent("On pages updated", "On any pages are updated")]
-    public Task<PollingEventResponse<DateMemory, PagesPaginationResponse>> OnPagesUpdated(
+    public Task<PollingEventResponse<DateMemory, SearchPagesResponse>> OnPagesUpdated(
         PollingEventRequest<DateMemory> request) => HandlePagesPolling(request,
         $"updated_at_min={request.Memory?.LastInteractionDate.ToString("yyyy-MM-ddTHH:mm:sszzz")}");
 
-    private async Task<PollingEventResponse<DateMemory, ArticlesPaginationResponse>> HandleArticlePolling(
+    private async Task<PollingEventResponse<DateMemory, SearchArticlesResponse>> HandleArticlePolling(
         PollingEventRequest<DateMemory> request, OnlineStoreBlogRequest blog, string query)
     {
         if (request.Memory is null)
@@ -92,14 +95,17 @@ public class PollingList(InvocationContext invocationContext) : ShopifyInvocable
             };
         }
 
-        var articlesRequest =
-            new ShopifyRestRequest(
-                $"blogs/{blog.OnlineStoreBlogId.GetShopifyItemId()}/articles.json?{query}",
-                Method.Get, Creds);
-        var items = await new ShopifyRestClient(Creds)
-            .Paginate<OnlineStoreArticleEntity, ArticlesPaginationResponse>(articlesRequest);
+        var variables = new Dictionary<string, object>
+        {
+            ["query"] = $"blog_id:{blog.OnlineStoreBlogId.GetShopifyItemId()}"
+        };
+        var articlesResponse = await Client.Paginate<ArticleEntity, ArticlesPaginationResponse>(
+            GraphQlQueries.Articles,
+            variables
+        );
+        var result = articlesResponse.Select(x => new GetArticleResponse(x));
 
-        if (!items.Any())
+        if (!articlesResponse.Any())
         {
             return new()
             {
@@ -114,10 +120,7 @@ public class PollingList(InvocationContext invocationContext) : ShopifyInvocable
         return new()
         {
             FlyBird = true,
-            Result = new()
-            {
-                Items = items
-            },
+            Result = new(result),
             Memory = new()
             {
                 LastInteractionDate = DateTime.UtcNow
@@ -125,7 +128,7 @@ public class PollingList(InvocationContext invocationContext) : ShopifyInvocable
         };
     }
 
-    private async Task<PollingEventResponse<DateMemory, PagesPaginationResponse>> HandlePagesPolling(
+    private async Task<PollingEventResponse<DateMemory, SearchPagesResponse>> HandlePagesPolling(
         PollingEventRequest<DateMemory> request, string query)
     {
         if (request.Memory is null)
@@ -140,11 +143,9 @@ public class PollingList(InvocationContext invocationContext) : ShopifyInvocable
             };
         }
 
-        var articlesRequest = new ShopifyRestRequest($"pages.json?{query}", Method.Get, Creds);
-        var items = await new ShopifyRestClient(Creds)
-            .Paginate<OnlineStorePageEntity, PagesPaginationResponse>(articlesRequest);
+        var pages = await Client.Paginate<PageEntity, PagesPaginationResponse>(GraphQlQueries.Pages, []);
 
-        if (!items.Any())
+        if (pages.Count == 0)
         {
             return new()
             {
@@ -159,10 +160,7 @@ public class PollingList(InvocationContext invocationContext) : ShopifyInvocable
         return new()
         {
             FlyBird = true,
-            Result = new()
-            {
-                Items = items
-            },
+            Result = new(pages),
             Memory = new()
             {
                 LastInteractionDate = DateTime.UtcNow

@@ -2,6 +2,7 @@
 using Blackbird.Applications.Sdk.Common.Dynamic;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 
 namespace ShopifyTests.Base;
 
@@ -30,6 +31,11 @@ public class TestBase
         };
 
         FileManager = new FileManager();
+    }
+
+    public static void PrintJsonResult(object result)
+    {
+        Console.WriteLine(JsonConvert.SerializeObject(result, Formatting.Indented));
     }
 
     public static void PrintDataHandlerResult(IEnumerable<DataSourceItem> items)

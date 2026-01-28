@@ -1,4 +1,4 @@
-using Apps.Shopify.Models.Entities;
+using Apps.Shopify.Models.Entities.Product;
 
 namespace Apps.Shopify.Models.Response.Product;
 
