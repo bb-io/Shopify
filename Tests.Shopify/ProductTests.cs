@@ -14,8 +14,10 @@ public class ProductTests : TestBase
         var action = new ProductActions(InvocationContext, FileManager);
         var searchProductsRequest = new SearchProductsRequest 
         { 
-            MetafieldKey = "test_data.snowboard_length", 
-            MetafieldValueContains = "100"
+            //MetafieldKey = "test_data.snowboard_length", 
+            //MetafieldValueContains = "100",
+            CreatedAfter = new DateTime(2026, 01, 27, 10, 0, 0, DateTimeKind.Utc),
+            CreatedBefore = new DateTime(2026, 01, 29, 10, 0, 0, DateTimeKind.Utc),
         };
 
         // Act

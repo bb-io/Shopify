@@ -1,4 +1,5 @@
 using Apps.Shopify.Constants.GraphQL;
+using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Collection;
 using Apps.Shopify.Models.Identifiers;
@@ -57,39 +58,23 @@ public class CollectionActions(InvocationContext invocationContext, IFileManagem
     [Action("Search collections", Description = "Search collections with specific criteria")]
     public async Task<SearchCollectionsResponse> SearchCollections([ActionParameter] SearchCollectionsRequest input)
     {
-        var variables = new Dictionary<string, object>();
-        var queryParts = new List<string>();
+        input.ValidateDates();
 
-        if (!string.IsNullOrWhiteSpace(input.TitleContains))
-            queryParts.Add($"title:*{input.TitleContains}*");
+        var cleanProductIds = input.ProductIds?
+            .Select(id => id.Split('/').Last())
+            .ToList();
 
-        if (input.UpdatedAfter.HasValue)
-            queryParts.Add($"updated_at:>{input.UpdatedAfter.Value:O}");
+        string? query = new QueryBuilder()
+            .AddContains("title", input.TitleContains)
+            .AddDateRange("updated_at", input.UpdatedAfter, input.UpdatedBefore)
+            .AddOr("product_id", cleanProductIds)
+            .Build();
 
-        if (input.UpdatedBefore.HasValue)
-            queryParts.Add($"updated_at:<{input.UpdatedBefore.Value:O}");
+        var response = await Client.Paginate<CollectionEntity, CollectionsPaginationResponse>(
+            GraphQlQueries.Collections,
+            QueryHelper.QueryToDictionary(query)
+        );
 
-        if (input.ProductIds != null && input.ProductIds.Any())
-        {
-            var productQueries = input.ProductIds
-                .Select(id => $"product_id:{id.Split('/').Last()}")
-                .ToList();
-
-            if (productQueries.Count > 1)
-                queryParts.Add($"({string.Join(" OR ", productQueries)})");
-            else
-                queryParts.Add(productQueries.First());
-        }
-
-        if (queryParts.Count != 0)
-            variables["query"] = string.Join(" AND ", queryParts);
-
-        var response = await Client
-            .Paginate<CollectionEntity, CollectionsPaginationResponse>(
-                GraphQlQueries.Collections,
-                variables
-            );
-
-        return new SearchCollectionsResponse(response);
+        return new(response);
     }
 }

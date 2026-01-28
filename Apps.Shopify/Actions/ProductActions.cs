@@ -1,4 +1,5 @@
 using Apps.Shopify.Constants.GraphQL;
+using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Product;
 using Apps.Shopify.Models.Identifiers;
@@ -24,16 +25,17 @@ public class ProductActions(InvocationContext invocationContext, IFileManagement
     public async Task<SearchProductsResponse> SearchProducts([ActionParameter] SearchProductsRequest input)
     {
         input.Validate();
+        input.ValidateDates();
+
+        string? query = new QueryBuilder()
+            .AddContains("title", input.TitleContains)
+            .AddEquals("status", input.Status)
+            .AddDateRange("updated_at", input.UpdatedAfter, input.UpdatedBefore)
+            .AddDateRange("created_at", input.CreatedAfter, input.CreatedBefore)
+            .AddDateRange("published_at", input.PublishedAfter, input.PublishedBefore)
+            .Build();
 
         var variables = new Dictionary<string, object>();
-        var query = new List<string>();
-
-        if (!string.IsNullOrEmpty(input.TitleContains))
-            query.Add($"title:*{input.TitleContains}*");
-
-        if (!string.IsNullOrEmpty(input.Status))
-            query.Add($"status:{input.Status}");
-
         string graphQlQuery = GraphQlQueries.Products;
         if (!string.IsNullOrEmpty(input.MetafieldKey))
         {
@@ -41,10 +43,10 @@ public class ProductActions(InvocationContext invocationContext, IFileManagement
             graphQlQuery = GraphQlQueries.ProductsWithMetafields;
         }
 
-        if (!string.IsNullOrWhiteSpace(query.ToString()))
-            variables["query"] = string.Join(" AND ", query);
-
-        var response = await Client.Paginate<ProductEntity, ProductsPaginationResponse>(graphQlQuery, variables);
+        var response = await Client.Paginate<ProductEntity, ProductsPaginationResponse>(
+            graphQlQuery, 
+            QueryHelper.QueryToDictionary(query, variables)
+        );
 
         if (!string.IsNullOrEmpty(input.MetafieldKey))
         {

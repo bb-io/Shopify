@@ -6,6 +6,6 @@ namespace Apps.Shopify.Models.Request.Theme;
 
 public class SearchThemesRequest
 {
-    [Display("Role"), StaticDataSource(typeof(ThemeRoleDataHandler))]
+    [Display("Roles"), StaticDataSource(typeof(ThemeRoleDataHandler))]
     public string? Role { get; set; }
 }

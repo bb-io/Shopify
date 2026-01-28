@@ -26,8 +26,7 @@ public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileM
     public async Task<SearchThemesResponse> SearchThemes([ActionParameter] SearchThemesRequest input)
     {
         var variables = new Dictionary<string, object>();
-
-        if (!string.IsNullOrWhiteSpace(input.Role))
+        if (!string.IsNullOrEmpty(input.Role))
             variables["roles"] = new[] { input.Role };
 
         var response = await Client.Paginate<ThemeEntity, ThemesPaginationResponse>(

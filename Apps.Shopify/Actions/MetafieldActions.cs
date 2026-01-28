@@ -3,6 +3,7 @@ using Apps.Shopify.Api.Rest;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.DataSourceHandlers;
 using Apps.Shopify.Extensions;
+using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities;
 using Apps.Shopify.Models.Identifiers;
@@ -67,33 +68,22 @@ public class MetafieldActions(InvocationContext invocationContext, IFileManageme
     [Action("Search metafield definitions", Description = "Search metafield definitions with specific criteria")]
     public async Task<SearchMetafieldsResponse> SearchMetafields([ActionParameter] SearchMetafieldsRequest input)
     {
-        var variables = new Dictionary<string, object>
-        {
-            ["ownerType"] = input.OwnerType
-        };
+        var variables = new Dictionary<string, object> { ["ownerType"] = input.OwnerType };
+        string? query = new QueryBuilder()
+            .AddEquals("key", input.Key)
+            .AddEquals("namespace", input.Namespace)
+            .Build();
 
-        var queryParts = new List<string>();
-
-        if (!string.IsNullOrWhiteSpace(input.Key))
-            queryParts.Add($"key:{input.Key}");
-
-        if (!string.IsNullOrWhiteSpace(input.Namespace))
-            queryParts.Add($"namespace:{input.Namespace}");
-
-        if (queryParts.Count != 0)
-            variables["query"] = string.Join(" AND ", queryParts);
-
-        var response = await Client
-            .Paginate<MetafieldDefinitionEntity, MetafieldDefinitionPaginationResponse>(
-                GraphQlQueries.MetafieldDefinitions,
-                variables
-            );
+        var response = await Client.Paginate<MetafieldDefinitionEntity, MetafieldDefinitionPaginationResponse>(
+            GraphQlQueries.MetafieldDefinitions,
+            QueryHelper.QueryToDictionary(query, variables)
+        );
 
         // We have to filter it by ourselves because API ignores the 'name' filter for some reason
         if (!string.IsNullOrEmpty(input.NameContains))
             response = response.Where(x => x.Name.Contains(input.NameContains, StringComparison.OrdinalIgnoreCase)).ToList();
 
-        return new SearchMetafieldsResponse(response);
+        return new(response);
     }
 
     [Action("Get metafield",

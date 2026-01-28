@@ -1,4 +1,5 @@
 using Apps.Shopify.Constants.GraphQL;
+using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Blog;
 using Apps.Shopify.Models.Identifiers;
@@ -24,30 +25,17 @@ public class OnlineStoreBlogActions(InvocationContext invocationContext, IFileMa
     [Action("Search online store blogs", Description = "Search online store blogs with specific criteria")]
     public async Task<SearchBlogsResponse> SearchBlogs([ActionParameter] SearchBlogsRequest input)
     {
-        var queryParts = new List<string>();
+        input.ValidateDates();
 
-        if (!string.IsNullOrWhiteSpace(input.TitleContains))
-            queryParts.Add($"title:*{input.TitleContains}*");
-
-        if (input.UpdatedAfter.HasValue)
-            queryParts.Add($"updated_at:>{input.UpdatedAfter.Value:O}");
-
-        if (input.UpdatedBefore.HasValue)
-            queryParts.Add($"updated_at:<{input.UpdatedBefore.Value:O}");
-
-        if (input.CreatedAfter.HasValue)
-            queryParts.Add($"created_at:>{input.CreatedAfter.Value:O}");
-
-        if (input.CreatedBefore.HasValue)
-            queryParts.Add($"created_at:<{input.CreatedBefore.Value:O}");
-
-        var variables = new Dictionary<string, object>();
-        if (queryParts.Count != 0)
-            variables["query"] = string.Join(" AND ", queryParts);
+        string? query = new QueryBuilder()
+            .AddContains("title", input.TitleContains)
+            .AddDateRange("updated_at", input.UpdatedAfter, input.UpdatedBefore)
+            .AddDateRange("created_at", input.CreatedAfter, input.CreatedBefore)
+            .Build();
 
         var response = await Client.Paginate<BlogEntity, BlogsPaginationResponse>(
             GraphQlQueries.Blogs,
-            variables
+            QueryHelper.QueryToDictionary(query)
         );
 
         return new(response);

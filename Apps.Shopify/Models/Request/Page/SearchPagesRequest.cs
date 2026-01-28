@@ -1,8 +1,9 @@
-﻿using Blackbird.Applications.Sdk.Common;
+﻿using Apps.Shopify.Models.Filters;
+using Blackbird.Applications.Sdk.Common;
 
 namespace Apps.Shopify.Models.Request.Page;
 
-public class SearchPagesRequest
+public class SearchPagesRequest : ICreatedDateFilter, IUpdatedDateFilter, IPublishedDateFilter
 {
     [Display("Title contains")]
     public string? TitleContains { get; set; }

@@ -1,4 +1,5 @@
 using Apps.Shopify.Constants.GraphQL;
+using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Page;
 using Apps.Shopify.Models.Identifiers;
@@ -24,36 +25,18 @@ public class OnlineStorePageActions(InvocationContext invocationContext, IFileMa
     [Action("Search online store pages", Description = "Search online store pages with specific criteria")]
     public async Task<SearchPagesResponse> SearchPages([ActionParameter] SearchPagesRequest input)
     {
-        var queryParts = new List<string>();
+        input.ValidateDates();
 
-        if (!string.IsNullOrWhiteSpace(input.TitleContains))
-            queryParts.Add($"title:*{input.TitleContains}*");
-
-        if (input.UpdatedAfter.HasValue)
-            queryParts.Add($"updated_at:>{input.UpdatedAfter.Value:O}");
-
-        if (input.UpdatedBefore.HasValue)
-            queryParts.Add($"updated_at:<{input.UpdatedBefore.Value:O}");
-
-        if (input.CreatedAfter.HasValue)
-            queryParts.Add($"created_at:>{input.CreatedAfter.Value:O}");
-
-        if (input.CreatedBefore.HasValue)
-            queryParts.Add($"created_at:<{input.CreatedBefore.Value:O}");
-
-        if (input.PublishedAfter.HasValue)
-            queryParts.Add($"published_at:>{input.PublishedAfter.Value:O}");
-
-        if (input.PublishedBefore.HasValue)
-            queryParts.Add($"published_at:<{input.PublishedBefore.Value:O}");
-
-        var variables = new Dictionary<string, object>();
-        if (queryParts.Count != 0)
-            variables["query"] = string.Join(" AND ", queryParts);
+        string? query = new QueryBuilder()
+            .AddContains("title", input.TitleContains)
+            .AddDateRange("updated_at", input.UpdatedAfter, input.UpdatedBefore)
+            .AddDateRange("created_at", input.CreatedAfter, input.CreatedBefore)
+            .AddDateRange("published_at", input.PublishedAfter, input.PublishedBefore)
+            .Build();
 
         var response = await Client.Paginate<PageEntity, PagesPaginationResponse>(
             GraphQlQueries.Pages,
-            variables
+            QueryHelper.QueryToDictionary(query)
         );
 
         return new(response);

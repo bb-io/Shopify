@@ -1,4 +1,5 @@
 using Apps.Shopify.Constants.GraphQL;
+using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Article;
 using Apps.Shopify.Models.Identifiers;
@@ -24,30 +25,17 @@ public class OnlineStoreArticleActions(InvocationContext invocationContext, IFil
     [Action("Search online store articles", Description = "Search aricles of the online store with specific criteria")]
     public async Task<SearchArticlesResponse> SearchArticles([ActionParameter] SearchArticlesRequest input)
     {
-        var queryParts = new List<string>();
+        input.ValidateDates();
 
-        if (input.PublishedBefore.HasValue)
-            queryParts.Add($"published_at:<{input.PublishedBefore.Value:O}");
-        if (input.PublishedAfter.HasValue)
-            queryParts.Add($"published_at:>{input.PublishedAfter.Value:O}");
-
-        if (input.CreatedBefore.HasValue)
-            queryParts.Add($"created_at:<{input.CreatedBefore.Value:O}");
-        if (input.CreatedAfter.HasValue)
-            queryParts.Add($"created_at:>{input.CreatedAfter.Value:O}");
-
-        if (input.UpdatedBefore.HasValue)
-            queryParts.Add($"updated_at:<{input.UpdatedBefore.Value:O}");
-        if (input.UpdatedAfter.HasValue)
-            queryParts.Add($"updated_at:>{input.UpdatedAfter.Value:O}");
-
-        var variables = new Dictionary<string, object>();
-        if (queryParts.Count != 0)
-            variables["query"] = string.Join(" AND ", queryParts);
+        string? query = new QueryBuilder()
+            .AddDateRange("published_at", input.PublishedAfter, input.PublishedBefore)
+            .AddDateRange("created_at", input.CreatedAfter, input.CreatedBefore)
+            .AddDateRange("updated_at", input.UpdatedAfter, input.UpdatedBefore)
+            .Build();
 
         var response = await Client.Paginate<ArticleEntity, ArticlesPaginationResponse>(
             GraphQlQueries.Articles,
-            variables
+            QueryHelper.QueryToDictionary(query)
         );
 
         if (!string.IsNullOrEmpty(input.TitleContains))
