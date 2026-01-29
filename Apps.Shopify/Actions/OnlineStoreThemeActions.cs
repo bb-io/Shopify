@@ -34,6 +34,9 @@ public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileM
             variables
         );
 
+        if (!string.IsNullOrEmpty(input.NameContains))
+            response = response.Where(x => x.Name.Contains(input.NameContains, StringComparison.OrdinalIgnoreCase)).ToList();
+
         return new(response);
     }
 

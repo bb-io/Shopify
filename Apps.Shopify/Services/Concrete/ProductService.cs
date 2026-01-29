@@ -5,9 +5,11 @@ using Apps.Shopify.Helper;
 using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities;
+using Apps.Shopify.Models.Entities.Content;
 using Apps.Shopify.Models.Entities.Product;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.TranslatableResource;
+using Apps.Shopify.Models.Response.Content;
 using Apps.Shopify.Models.Response.Metafield;
 using Apps.Shopify.Models.Response.Product;
 using Apps.Shopify.Models.Response.TranslatableResource;
@@ -59,6 +61,24 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
             MediaTypeNames.Text.Html,
             $"{input.ContentId.GetShopifyItemId()}.html"
         );
+    }
+
+    public async Task<SearchContentResponse> Search(SearchContentRequest input)
+    {
+        string? query = new QueryBuilder()
+            .AddContains("title", input.NameContains)
+            .AddDateRange("updated_at", input.UpdatedAfter, input.UpdatedBefore)
+            .AddDateRange("created_at", input.CreatedAfter, input.CreatedBefore)
+            .AddDateRange("published_at", input.PublishedAfter, input.PublishedBefore)
+            .Build();
+
+        var response = await Client.Paginate<ProductEntity, ProductsPaginationResponse>(
+            GraphQlQueries.Product,
+            QueryHelper.QueryToDictionary(query)
+        );
+
+        var items = response.Select(x => new ContentItemEntity(x.Id, "Product", x.Title)).ToList();
+        return new(items);
     }
 
     public async Task Upload(UploadContentRequest input)

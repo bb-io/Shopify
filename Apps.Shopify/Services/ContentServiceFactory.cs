@@ -10,8 +10,27 @@ public class ContentServiceFactory(InvocationContext invocationContext, IFileMan
     {
         return contentType switch
         {
+            TranslatableResource.COLLECTION => new CollectionService(invocationContext, fileManagementClient),
+            TranslatableResource.METAFIELD => new MetafieldService(invocationContext, fileManagementClient),
+            TranslatableResource.ARTICLE => new ArticleService(invocationContext, fileManagementClient),
             TranslatableResource.BLOG => new BlogService(invocationContext, fileManagementClient),
+            TranslatableResource.PAGE => new PageService(invocationContext, fileManagementClient),
+            TranslatableResource.ONLINE_STORE_THEME => new ThemeService(invocationContext, fileManagementClient),
+            TranslatableResource.PRODUCT => new ProductService(invocationContext, fileManagementClient),
             _ => throw new Exception($"Unsupported content type '{contentType}' was passed in ContentServiceFactory")
         };
+    }
+
+    public List<IContentService> GetContentServices(IEnumerable<string> contentTypes)
+    {
+        var contentServices = new List<IContentService>();
+
+        foreach (var contentType in contentTypes)
+        {
+            var enumType = Enum.Parse<TranslatableResource>(contentType);
+            contentServices.Add(GetContentService(enumType));
+        }
+
+        return contentServices;
     }
 }

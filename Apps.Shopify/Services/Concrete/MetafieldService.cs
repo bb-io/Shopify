@@ -5,7 +5,9 @@ using Apps.Shopify.Extensions;
 using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities;
+using Apps.Shopify.Models.Entities.Content;
 using Apps.Shopify.Models.Request.Content;
+using Apps.Shopify.Models.Response.Content;
 using Apps.Shopify.Models.Response.Metafield;
 using Blackbird.Applications.Sdk.Common.Files;
 using Blackbird.Applications.Sdk.Common.Invocation;
@@ -45,6 +47,22 @@ public class MetafieldService(InvocationContext invocationContext, IFileManageme
             MediaTypeNames.Text.Html,
             $"{input.ContentId.GetShopifyItemId()}-metafields.html"
         );
+    }
+
+    public async Task<SearchContentResponse> Search(SearchContentRequest input)
+    {
+        var variables = new Dictionary<string, object> { ["ownerType"] = input.MetafieldOwnerType! };
+
+        var response = await Client.Paginate<MetafieldDefinitionEntity, MetafieldDefinitionPaginationResponse>(
+            GraphQlQueries.MetafieldDefinitions,
+            variables
+        );
+
+        if (!string.IsNullOrEmpty(input.NameContains))
+            response = response.Where(x => x.Name.Contains(input.NameContains, StringComparison.OrdinalIgnoreCase)).ToList();
+
+        var items = response.Select(x => new ContentItemEntity(x.Id, "Metafield", x.Name)).ToList();
+        return new(items);
     }
 
     public async Task Upload(UploadContentRequest input)

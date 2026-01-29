@@ -3,11 +3,11 @@ using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Article;
+using Apps.Shopify.Models.Entities.Content;
 using Apps.Shopify.Models.Entities.Page;
 using Apps.Shopify.Models.Request.OnlineStoreBlog;
 using Apps.Shopify.Models.Response;
 using Apps.Shopify.Models.Response.Article;
-using Apps.Shopify.Models.Response.Content;
 using Apps.Shopify.Models.Response.Page;
 using Apps.Shopify.Polling.Models.Memory;
 using Blackbird.Applications.Sdk.Common.Invocation;
@@ -38,16 +38,16 @@ public class PollingList(InvocationContext invocationContext) : ShopifyInvocable
         articlesResponse.AddRange((await articlesUpdatedTask).Result?.Articles.ToList() ?? []);
         articlesResponse = articlesResponse.Distinct().ToList();
 
-        var content = new List<ContentResponse>();
+        var content = new List<ContentItemEntity>();
         content.AddRange(articlesResponse
-            .Select(a => new ContentResponse(a.Id, HtmlMetadataConstants.OnlineStoreArticle, a.Title)).ToList());
+            .Select(a => new ContentItemEntity(a.Id, HtmlMetadataConstants.OnlineStoreArticle, a.Title)).ToList());
 
         var pagesResponse = (await pagesCreatedTask).Result?.Pages.ToList() ?? [];
         pagesResponse.AddRange((await pagesUpdatedTask).Result?.Pages.ToList() ?? []);
         pagesResponse = pagesResponse.Distinct().ToList();
 
         content.AddRange(pagesResponse
-            .Select(a => new ContentResponse(a.Id, HtmlMetadataConstants.OnlineStorePageContent, a.Title)).ToList());
+            .Select(a => new ContentItemEntity(a.Id, HtmlMetadataConstants.OnlineStorePageContent, a.Title)).ToList());
 
         var response = new ContentCreatedOrUpdatedResponse(content);
         return new PollingEventResponse<DateMemory, ContentCreatedOrUpdatedResponse>

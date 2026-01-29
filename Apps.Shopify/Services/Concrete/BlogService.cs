@@ -6,8 +6,12 @@ using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities;
 using Apps.Shopify.Models.Entities.Article;
+using Apps.Shopify.Models.Entities.Blog;
+using Apps.Shopify.Models.Entities.Content;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Response.Article;
+using Apps.Shopify.Models.Response.Blog;
+using Apps.Shopify.Models.Response.Content;
 using Apps.Shopify.Models.Response.TranslatableResource;
 using Blackbird.Applications.Sdk.Common.Files;
 using Blackbird.Applications.Sdk.Common.Invocation;
@@ -52,6 +56,23 @@ public class BlogService(InvocationContext invocationContext, IFileManagementCli
             MediaTypeNames.Text.Html, 
             $"{input.ContentId.GetShopifyItemId()}.html"
         );
+    }
+
+    public async Task<SearchContentResponse> Search(SearchContentRequest input)
+    {
+        string? query = new QueryBuilder()
+            .AddContains("title", input.NameContains)
+            .AddDateRange("updated_at", input.UpdatedAfter, input.UpdatedBefore)
+            .AddDateRange("created_at", input.CreatedAfter, input.CreatedBefore)
+            .Build();
+
+        var response = await Client.Paginate<BlogEntity, BlogsPaginationResponse>(
+            GraphQlQueries.Blogs,
+            QueryHelper.QueryToDictionary(query)
+        );
+
+        var items = response.Select(x => new ContentItemEntity(x.Id, "Blog", x.Title)).ToList();
+        return new(items);
     }
 
     public async Task Upload(UploadContentRequest input)

@@ -8,4 +8,7 @@ public class SearchThemesRequest
 {
     [Display("Roles"), StaticDataSource(typeof(ThemeRoleDataHandler))]
     public string? Role { get; set; }
+
+    [Display("Name contains")]
+    public string? NameContains { get; set; }
 }

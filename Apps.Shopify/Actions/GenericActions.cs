@@ -10,6 +10,8 @@ using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Blueprints;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
+using Apps.Shopify.Constants;
+using Apps.Shopify.Extensions;
 
 namespace Apps.Shopify.Actions;
 
@@ -50,8 +52,12 @@ public class GenericActions(InvocationContext invocationContext, IFileManagement
 
     [BlueprintActionDefinition(BlueprintAction.SearchContent)]
     [Action("Search content", Description = "Search content")]
-    public async Task<SearchContentResponse> SearchContent()
+    public async Task<SearchContentResponse> SearchContent([ActionParameter] SearchContentRequest input)
     {
-        return new SearchContentResponse([]);
+        input.Validate();
+
+        input.ContentTypes ??= TranslatableResources.SupportedResources;
+        var services = _factory.GetContentServices(input.ContentTypes);
+        return await services.ExecuteMany(input);
     }
 }

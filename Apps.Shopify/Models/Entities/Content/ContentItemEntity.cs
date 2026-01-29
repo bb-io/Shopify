@@ -1,9 +1,9 @@
 ﻿using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.SDK.Blueprints.Interfaces.CMS;
 
-namespace Apps.Shopify.Models.Response.Content;
+namespace Apps.Shopify.Models.Entities.Content;
 
-public class ContentResponse(string contentId, string contentType, string name) : IDownloadContentInput
+public class ContentItemEntity(string contentId, string contentType, string name) : IDownloadContentInput
 {
     [Display("Content ID")]
     public string ContentId { get; set; } = contentId;

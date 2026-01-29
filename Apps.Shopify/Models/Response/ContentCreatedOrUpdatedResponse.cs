@@ -1,8 +1,8 @@
-﻿using Apps.Shopify.Models.Response.Content;
+﻿using Apps.Shopify.Models.Entities.Content;
 
 namespace Apps.Shopify.Models.Response;
 
-public class ContentCreatedOrUpdatedResponse(List<ContentResponse> content)
+public class ContentCreatedOrUpdatedResponse(List<ContentItemEntity> content)
 {
-    public List<ContentResponse> Content { get; set; } = content;
+    public List<ContentItemEntity> Content { get; set; } = content;
 }

@@ -1,3 +1,5 @@
-﻿namespace Apps.Shopify.Models.Response.Content;
+﻿using Apps.Shopify.Models.Entities.Content;
 
-public record SearchContentResponse(List<ContentResponse> Items);
+namespace Apps.Shopify.Models.Response.Content;
+
+public record SearchContentResponse(List<ContentItemEntity> Items);
