@@ -14,7 +14,7 @@ using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 namespace Apps.Shopify.Services.Concrete;
 
 public class PageService(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : ShopifyInvocable(invocationContext), IContentService
+    : ShopifyInvocable(invocationContext), IContentService, IPollingContentService
 {
     private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
 
@@ -26,6 +26,22 @@ public class PageService(InvocationContext invocationContext, IFileManagementCli
             input.Outdated ?? default, 
             HtmlMetadataConstants.OnlineStorePageContent
         );
+    }
+
+    public async Task<ContentUpdatedResponse> PollUpdated(DateTime after, DateTime before, PollUpdatedContentRequest input)
+    {
+        string? query = new QueryBuilder()
+            .AddContains("title", input.NameContains)
+            .AddDateRange("updated_at", after, before)
+            .Build();
+
+        var response = await Client.Paginate<PageEntity, PagesPaginationResponse>(
+            GraphQlQueries.Pages,
+            QueryHelper.QueryToDictionary(query)
+        );
+
+        var items = response.Select(x => new PollingContentItemEntity(x.Id, "Page", x.Title, x.UpdatedAt)).ToList();
+        return new(items);
     }
 
     public async Task<SearchContentResponse> Search(SearchContentRequest input)

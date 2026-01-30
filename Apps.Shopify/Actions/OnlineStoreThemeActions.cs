@@ -16,13 +16,13 @@ using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
 namespace Apps.Shopify.Actions;
 
-[ActionList("Online store themes")]
+[ActionList("Themes")]
 public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
     : ShopifyInvocable(invocationContext)
 {
     private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
 
-    [Action("Search online store themes", Description = "Search online store themes with specific criteria")]
+    [Action("Search themes", Description = "Search themes with specific criteria")]
     public async Task<SearchThemesResponse> SearchThemes([ActionParameter] SearchThemesRequest input)
     {
         var variables = new Dictionary<string, object>();
@@ -40,7 +40,7 @@ public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileM
         return new(response);
     }
 
-    [Action("Download online store theme", Description = "Get content of a specific online store theme")]
+    [Action("Download theme", Description = "Get content of a specific theme")]
     public async Task<DownloadThemeResponse> GetOnlineStoreThemeTranslationContent(
         [ActionParameter] GetOnlineStoreThemeContentAsHtmlRequest input, 
         [ActionParameter] LocaleIdentifier locale,
@@ -59,7 +59,7 @@ public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileM
         return new(file);
     }
 
-    [Action("Upload online store theme", Description = "Update content of a specific online store theme")]
+    [Action("Upload theme", Description = "Update content of a specific theme")]
     public async Task UpdateOnlineStoreThemeContent(
         [ActionParameter] UploadThemeRequest input,
         [ActionParameter] NonPrimaryLocaleIdentifier locale)

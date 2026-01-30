@@ -26,8 +26,11 @@ public class ProductEntity
     public string? OnlineStoreUrl { get; set; }   
     
     [Display("Created at")]
-    public DateTime CreatedAt { get; set; }   
-    
+    public DateTime CreatedAt { get; set; }
+
+    [Display("Updated at")]
+    public DateTime UpdatedAt { get; set; }
+
     [Display("Published at")]
     public DateTime? PublishedAt { get; set; }
 

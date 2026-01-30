@@ -3,11 +3,7 @@ using Blackbird.Applications.Sdk.Common.Invocation;
 
 namespace Apps.Shopify.DataSourceHandlers;
 
-public class OnlineStoreBlogHandler : TranslatableResourceHandler
+public class BlogDataHandler(InvocationContext invocationContext) : TranslatableResourceHandler(invocationContext)
 {
     protected override TranslatableResource ResourceType => TranslatableResource.BLOG;
-
-    public OnlineStoreBlogHandler(InvocationContext invocationContext) : base(invocationContext)
-    {
-    }
 }

@@ -16,13 +16,13 @@ using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
 namespace Apps.Shopify.Actions;
 
-[ActionList("Online store articles")]
+[ActionList("Articles")]
 public class OnlineStoreArticleActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
     : ShopifyInvocable(invocationContext)
 {
     private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
 
-    [Action("Search online store articles", Description = "Search aricles of the online store with specific criteria")]
+    [Action("Search articles", Description = "Search aricles with specific criteria")]
     public async Task<SearchArticlesResponse> SearchArticles([ActionParameter] SearchArticlesRequest input)
     {
         input.ValidateDates();
@@ -49,7 +49,7 @@ public class OnlineStoreArticleActions(InvocationContext invocationContext, IFil
         return new(result);
     }
 
-    [Action("Download online store article", Description = "Get content of a specific online store article")]
+    [Action("Download article", Description = "Get content of a specific online store article")]
     public async Task<DownloadArticleResponse> GetOnlineStoreArticleTranslationContent(
         [ActionParameter] OnlineStoreArticleRequest input, 
         [ActionParameter] LocaleIdentifier locale,
@@ -67,7 +67,7 @@ public class OnlineStoreArticleActions(InvocationContext invocationContext, IFil
         return new(file);
     }
 
-    [Action("Upload online store article", Description = "Upload content of a specific online store article")]
+    [Action("Upload article", Description = "Upload content of a specific article")]
     public async Task UpdateOnlineStoreArticleContent(
         [ActionParameter] UploadArticleRequest input,
         [ActionParameter] NonPrimaryLocaleIdentifier locale)

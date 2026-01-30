@@ -33,4 +33,15 @@ public class ContentServiceFactory(InvocationContext invocationContext, IFileMan
 
         return contentServices;
     }
+
+    public IEnumerable<IPollingContentService> GetPollingContentServices(IEnumerable<string> contentTypes)
+    {
+        foreach (var type in contentTypes)
+        {
+            var service = GetContentService(Enum.Parse<TranslatableResource>(type));
+
+            if (service is IPollingContentService pollingService)
+                yield return pollingService;
+        }
+    }
 }

@@ -56,7 +56,7 @@ public class GenericActions(InvocationContext invocationContext, IFileManagement
     {
         input.Validate();
 
-        input.ContentTypes ??= TranslatableResources.SupportedResources;
+        input.ContentTypes ??= TranslatableResources.SupportedContentTypes;
         var services = _factory.GetContentServices(input.ContentTypes);
         return await services.ExecuteMany(input);
     }

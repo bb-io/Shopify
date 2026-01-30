@@ -16,13 +16,13 @@ using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
 namespace Apps.Shopify.Actions;
 
-[ActionList("Online store blogs")]
+[ActionList("Blogs")]
 public class OnlineStoreBlogActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
     : ShopifyInvocable(invocationContext)
 {
     private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
 
-    [Action("Search online store blogs", Description = "Search online store blogs with specific criteria")]
+    [Action("Search blogs", Description = "Search blogs with specific criteria")]
     public async Task<SearchBlogsResponse> SearchBlogs([ActionParameter] SearchBlogsRequest input)
     {
         input.ValidateDates();
@@ -41,9 +41,9 @@ public class OnlineStoreBlogActions(InvocationContext invocationContext, IFileMa
         return new(response);
     }
 
-    [Action("Download online store blog", Description = "Get content of a specific online store blog")]
+    [Action("Download blog", Description = "Get content of a specific blog")]
     public async Task<DownloadBlogResponse> GetOnlineStoreBlogTranslationContent(
-        [ActionParameter] OnlineStoreBlogRequest input, 
+        [ActionParameter] BlogIdentifier input, 
         [ActionParameter] LocaleIdentifier locale,
         [ActionParameter, Display("Include articles")] bool? includeBlogsPosts,
         [ActionParameter] GetContentRequest getContentRequest)
@@ -51,7 +51,7 @@ public class OnlineStoreBlogActions(InvocationContext invocationContext, IFileMa
         var service = _factory.GetContentService(TranslatableResource.BLOG);
         var request = new DownloadContentRequest
         {
-            ContentId = input.OnlineStoreBlogId,
+            ContentId = input.BlogId,
             IncludeBlogPosts = includeBlogsPosts,
             Locale = locale.Locale,
             Outdated = getContentRequest.Outdated,
@@ -61,7 +61,7 @@ public class OnlineStoreBlogActions(InvocationContext invocationContext, IFileMa
         return new(file);
     }
 
-    [Action("Upload online store blog", Description = "Upload content of a specific online store blog")]
+    [Action("Upload blog", Description = "Upload content of a specific blog")]
     public async Task UpdateOnlineStoreBlogContent(
         [ActionParameter] UploadBlogRequest input,
         [ActionParameter] NonPrimaryLocaleIdentifier locale)

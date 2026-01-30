@@ -10,6 +10,6 @@ public class UploadBlogRequest
     [Display("Content")]
     public FileReference File { get; set; }
 
-    [Display("Blog ID"), DataSource(typeof(OnlineStoreBlogHandler))]
+    [Display("Blog ID"), DataSource(typeof(BlogDataHandler))]
     public string? BlogId { get; set; }
 }

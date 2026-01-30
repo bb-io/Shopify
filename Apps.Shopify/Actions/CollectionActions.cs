@@ -1,4 +1,5 @@
 using Apps.Shopify.Constants.GraphQL;
+using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Collection;
@@ -61,7 +62,7 @@ public class CollectionActions(InvocationContext invocationContext, IFileManagem
         input.ValidateDates();
 
         var cleanProductIds = input.ProductIds?
-            .Select(id => id.Split('/').Last())
+            .Select(id => id.GetShopifyItemId())
             .ToList();
 
         string? query = new QueryBuilder()

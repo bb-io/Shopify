@@ -16,13 +16,13 @@ using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
 namespace Apps.Shopify.Actions;
 
-[ActionList("Online store pages")]
+[ActionList("Pages")]
 public class OnlineStorePageActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
     : ShopifyInvocable(invocationContext)
 {
     private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
 
-    [Action("Search online store pages", Description = "Search online store pages with specific criteria")]
+    [Action("Search pages", Description = "Search pages with specific criteria")]
     public async Task<SearchPagesResponse> SearchPages([ActionParameter] SearchPagesRequest input)
     {
         input.ValidateDates();
@@ -42,7 +42,7 @@ public class OnlineStorePageActions(InvocationContext invocationContext, IFileMa
         return new(response);
     }
 
-    [Action("Download online store page", Description = "Get content of a specific online store page")]
+    [Action("Download page", Description = "Get content of a specific page")]
     public async Task<DownloadPageResponse> GetOnlineStorePageTranslationContent(
         [ActionParameter] OnlineStorePageRequest input, 
         [ActionParameter] LocaleIdentifier locale,
@@ -60,7 +60,7 @@ public class OnlineStorePageActions(InvocationContext invocationContext, IFileMa
         return new(file);
     }
 
-    [Action("Upload online store page", Description = "Update content of a specific online store page")]
+    [Action("Upload page", Description = "Update content of a specific page")]
     public async Task UpdateOnlineStorePageContent(
         [ActionParameter] UploadPageRequest input,
         [ActionParameter] NonPrimaryLocaleIdentifier locale)

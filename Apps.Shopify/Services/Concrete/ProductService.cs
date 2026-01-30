@@ -22,7 +22,7 @@ using System.Net.Mime;
 namespace Apps.Shopify.Services.Concrete;
 
 public class ProductService(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : ShopifyInvocable(invocationContext), IContentService
+    : ShopifyInvocable(invocationContext), IContentService, IPollingContentService
 {
     private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
 
@@ -63,6 +63,22 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
         );
     }
 
+    public async Task<ContentUpdatedResponse> PollUpdated(DateTime after, DateTime before, PollUpdatedContentRequest input)
+    {
+        string? query = new QueryBuilder()
+            .AddContains("title", input.NameContains)
+            .AddDateRange("updated_at", after, before)
+            .Build();
+
+        var response = await Client.Paginate<ProductEntity, ProductsPaginationResponse>(
+            GraphQlQueries.Products,
+            QueryHelper.QueryToDictionary(query)
+        );
+
+        var items = response.Select(x => new PollingContentItemEntity(x.Id, "Product", x.Title, x.UpdatedAt)).ToList();
+        return new(items);
+    }
+
     public async Task<SearchContentResponse> Search(SearchContentRequest input)
     {
         string? query = new QueryBuilder()
@@ -73,7 +89,7 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
             .Build();
 
         var response = await Client.Paginate<ProductEntity, ProductsPaginationResponse>(
-            GraphQlQueries.Product,
+            GraphQlQueries.Products,
             QueryHelper.QueryToDictionary(query)
         );
 

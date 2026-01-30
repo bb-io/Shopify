@@ -22,7 +22,7 @@ using System.Net.Mime;
 namespace Apps.Shopify.Services.Concrete;
 
 public class BlogService(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : ShopifyInvocable(invocationContext), IContentService
+    : ShopifyInvocable(invocationContext), IContentService, IPollingContentService
 {
     private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
 
@@ -56,6 +56,24 @@ public class BlogService(InvocationContext invocationContext, IFileManagementCli
             MediaTypeNames.Text.Html, 
             $"{input.ContentId.GetShopifyItemId()}.html"
         );
+    }
+
+    public async Task<ContentUpdatedResponse> PollUpdated(DateTime after, DateTime before, PollUpdatedContentRequest input)
+    {
+        string? query = new QueryBuilder()
+            .AddContains("title", input.NameContains)
+            .AddDateRange("updated_at", after, before)
+            .Build();
+
+        var response = await Client.Paginate<BlogEntity, BlogsPaginationResponse>(
+            GraphQlQueries.Blogs,
+            QueryHelper.QueryToDictionary(query)
+        );
+
+        var items = response.Select(x => 
+            new PollingContentItemEntity(x.Id, "Blog", x.Title, x.UpdatedAt ?? x.CreatedAt)
+        ).ToList();
+        return new(items);
     }
 
     public async Task<SearchContentResponse> Search(SearchContentRequest input)
