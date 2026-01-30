@@ -3,7 +3,6 @@ using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Article;
 using Apps.Shopify.Models.Identifiers;
-using Apps.Shopify.Models.Request;
 using Apps.Shopify.Models.Request.Article;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.OnlineStoreArticle;
@@ -51,14 +50,14 @@ public class OnlineStoreArticleActions(InvocationContext invocationContext, IFil
 
     [Action("Download article", Description = "Get content of a specific online store article")]
     public async Task<DownloadArticleResponse> GetOnlineStoreArticleTranslationContent(
-        [ActionParameter] OnlineStoreArticleRequest input, 
+        [ActionParameter] ArticleIdentifier input, 
         [ActionParameter] LocaleIdentifier locale,
-        [ActionParameter] GetContentRequest getContentRequest)
+        [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
         var service = _factory.GetContentService(TranslatableResource.ARTICLE);
         var request = new DownloadContentRequest
         {
-            ContentId = input.OnlineStoreArticleId,
+            ContentId = input.ArticleId,
             Locale = locale.Locale,
             Outdated = getContentRequest.Outdated,
         };

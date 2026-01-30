@@ -2,7 +2,7 @@ using Blackbird.Applications.Sdk.Common;
 
 namespace Apps.Shopify.Models.Request.OnlineStore;
 
-public class StoreContentRequest
+public class DownloadStoreContentRequest
 {
     [Display("Include themes")]
     public bool? IncludeThemes { get; set; }

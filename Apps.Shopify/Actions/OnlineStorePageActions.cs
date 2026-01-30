@@ -3,7 +3,6 @@ using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Page;
 using Apps.Shopify.Models.Identifiers;
-using Apps.Shopify.Models.Request;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.OnlineStorePage;
 using Apps.Shopify.Models.Request.Page;
@@ -46,7 +45,7 @@ public class OnlineStorePageActions(InvocationContext invocationContext, IFileMa
     public async Task<DownloadPageResponse> GetOnlineStorePageTranslationContent(
         [ActionParameter] OnlineStorePageRequest input, 
         [ActionParameter] LocaleIdentifier locale,
-        [ActionParameter] GetContentRequest getContentRequest)
+        [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
         var service = _factory.GetContentService(TranslatableResource.PAGE);
         var request = new DownloadContentRequest

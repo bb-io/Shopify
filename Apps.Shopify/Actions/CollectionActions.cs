@@ -4,7 +4,6 @@ using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Collection;
 using Apps.Shopify.Models.Identifiers;
-using Apps.Shopify.Models.Request;
 using Apps.Shopify.Models.Request.Collection;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Response.Collection;
@@ -24,9 +23,9 @@ public class CollectionActions(InvocationContext invocationContext, IFileManagem
 
     [Action("Download collection", Description = "Get content of a specific collection")]
     public async Task<DownloadCollectionResponse> GetCollectionContent(
-        [ActionParameter] CollectionRequest input, 
+        [ActionParameter] CollectionIdentifier input, 
         [ActionParameter] LocaleIdentifier locale,
-        [ActionParameter] GetContentRequest getContentRequest)
+        [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
         var service = _factory.GetContentService(TranslatableResource.COLLECTION);
         var request = new DownloadContentRequest

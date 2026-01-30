@@ -3,7 +3,6 @@ using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Product;
 using Apps.Shopify.Models.Identifiers;
-using Apps.Shopify.Models.Request;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.Product;
 using Apps.Shopify.Models.Response.Product;
@@ -64,10 +63,10 @@ public class ProductActions(InvocationContext invocationContext, IFileManagement
 
     [Action("Download product", Description = "Get content of a specific product")]
     public async Task<DownloadProductResponse> GetProductTranslationContent(
-        [ActionParameter] ProductRequest resourceRequest,
+        [ActionParameter] ProductIdentifier resourceRequest,
         [ActionParameter] LocaleIdentifier locale,
-        [ActionParameter] GetProductContentRequest input,
-        [ActionParameter] GetContentRequest getContentRequest)
+        [ActionParameter] DownloadProductRequest input,
+        [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
         var service = _factory.GetContentService(TranslatableResource.PRODUCT);
         var request = new DownloadContentRequest

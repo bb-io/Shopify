@@ -3,7 +3,6 @@ using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Blog;
 using Apps.Shopify.Models.Identifiers;
-using Apps.Shopify.Models.Request;
 using Apps.Shopify.Models.Request.Blog;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.OnlineStoreBlog;
@@ -43,16 +42,16 @@ public class OnlineStoreBlogActions(InvocationContext invocationContext, IFileMa
 
     [Action("Download blog", Description = "Get content of a specific blog")]
     public async Task<DownloadBlogResponse> GetOnlineStoreBlogTranslationContent(
-        [ActionParameter] BlogIdentifier input, 
+        [ActionParameter] BlogIdentifier blogId, 
         [ActionParameter] LocaleIdentifier locale,
-        [ActionParameter, Display("Include articles")] bool? includeBlogsPosts,
-        [ActionParameter] GetContentRequest getContentRequest)
+        [ActionParameter] DownloadBlogRequest blogInput,
+        [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
         var service = _factory.GetContentService(TranslatableResource.BLOG);
         var request = new DownloadContentRequest
         {
-            ContentId = input.BlogId,
-            IncludeBlogPosts = includeBlogsPosts,
+            ContentId = blogId.BlogId,
+            IncludeBlogPosts = blogInput.IncludeBlogPosts,
             Locale = locale.Locale,
             Outdated = getContentRequest.Outdated,
         };

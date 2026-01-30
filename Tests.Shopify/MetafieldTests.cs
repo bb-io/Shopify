@@ -12,8 +12,8 @@ public class MetafieldTests : TestBase
     public async Task UpdateMetafiled_IsSuccess()
     {
         var actions = new MetafieldActions(InvocationContext, FileManager);
-        var metafiledRequest = new MetafieldRequest { MetafieldDefinitionId= "gid://shopify/MetafieldDefinition/178835980618" };
-        var productRequest = new ProductRequest { ProductId = "gid://shopify/Product/15098755907968" };
+        var metafiledRequest = new MetafieldDefinitionIdentifier { MetafieldDefinitionId= "gid://shopify/MetafieldDefinition/178835980618" };
+        var productRequest = new ProductIdentifier { ProductId = "gid://shopify/Product/15098755907968" };
         string value = "false";
 
         await actions.UpdateMetafield(metafiledRequest, productRequest, value);

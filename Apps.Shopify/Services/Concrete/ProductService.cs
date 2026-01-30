@@ -6,6 +6,7 @@ using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities;
 using Apps.Shopify.Models.Entities.Content;
+using Apps.Shopify.Models.Entities.Metafield;
 using Apps.Shopify.Models.Entities.Product;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.TranslatableResource;

@@ -2,7 +2,7 @@ using Blackbird.Applications.Sdk.Common;
 
 namespace Apps.Shopify.Models.Request.Product;
 
-public class GetProductContentRequest
+public class DownloadProductRequest
 {
     [Display("Include metafields")]
     public bool? IncludeMetafields { get; set; }

@@ -1,6 +1,6 @@
 ﻿using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Invocables;
-using Apps.Shopify.Models.Entities;
+using Apps.Shopify.Models.Entities.Metafield;
 using Apps.Shopify.Models.Response.Metafield;
 using Blackbird.Applications.Sdk.Common.Dynamic;
 using Blackbird.Applications.Sdk.Common.Invocation;

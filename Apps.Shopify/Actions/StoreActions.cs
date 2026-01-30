@@ -5,10 +5,9 @@ using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities;
 using Apps.Shopify.Models.Identifiers;
-using Apps.Shopify.Models.Request;
 using Apps.Shopify.Models.Request.OnlineStore;
-using Apps.Shopify.Models.Response;
 using Apps.Shopify.Models.Response.Locale;
+using Apps.Shopify.Models.Response.Store;
 using Apps.Shopify.Services;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
@@ -41,10 +40,10 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
     }
 
     [Action("Download store resources", Description = "Get content of all store resource type items")]
-    public async Task<FileResponse> GetStoreResourcesContent(
-        [ActionParameter] ResourceTypeRequest input,
+    public async Task<DownloadStoreResourcesResponse> GetStoreResourcesContent(
+        [ActionParameter] ResourceTypeIdentifier input,
         [ActionParameter] LocaleIdentifier locale, 
-        [ActionParameter] GetContentRequest getContentRequest)
+        [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
         if (!Enum.TryParse(input.ResourceType, ignoreCase: true, out TranslatableResource resourceType))
             throw new PluginMisconfigurationException("Invalid resource type value specified. Please check the input");
@@ -64,27 +63,29 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
         });
         
         var html = ShopifyHtmlConverter.ToHtml(contentEntities, HtmlMetadataConstants.StoreResourcesContent);
-        return new()
-        {
-            File = await fileManagementClient.UploadAsync(
-                html, 
-                MediaTypeNames.Text.Html,
-                $"{input.ResourceType}-{locale.Locale}.html"
-            )
-        };
+        var file = await fileManagementClient.UploadAsync(
+            html, 
+            MediaTypeNames.Text.Html, 
+            $"{input.ResourceType}-{locale.Locale}.html"
+        );
+        return new(file);
     }
 
     [Action("Upload store resources", Description = "Update content of all store resource type items")]
-    public async Task UpdateStoreResourcesContent([ActionParameter] LocaleIdentifier locale, FileRequest file)
+    public async Task UpdateStoreResourcesContent(
+        [ActionParameter] LocaleIdentifier locale,
+        [ActionParameter] UploadStoreResourcesRequest input)
     {
-        var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, file.File);
+        var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, input.Content);
         var content = ShopifyHtmlConverter.ToJson(html, locale.Locale).ToList();
         await _translatableResourceService.UpdateIdentifiedContent(content);
     }
 
     [Action("Download store content", Description = "Get content of the store")]
-    public async Task<FileResponse> GetStoreContent([ActionParameter] StoreContentRequest input,
-        [ActionParameter] LocaleIdentifier locale, [ActionParameter] GetContentRequest getContentRequest)
+    public async Task<DownloadStoreContentResponse> GetStoreContent(
+        [ActionParameter] DownloadStoreContentRequest input,
+        [ActionParameter] LocaleIdentifier locale, 
+        [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
         if (NoneItemsIncluded(input))
             throw new PluginMisconfigurationException("You should include at least one content type. Please check your input and try again");
@@ -125,20 +126,20 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
                 : null,
         });
 
-        return new()
-        {
-            File = await fileManagementClient.UploadAsync(
-                html, 
-                MediaTypeNames.Text.Html,
-                $"Shop-{locale.Locale}.html"
-            )
-        };
+        var file = await fileManagementClient.UploadAsync(
+            html,
+            MediaTypeNames.Text.Html,
+            $"Shop-{locale.Locale}.html"
+        );
+        return new(file);
     }
 
     [Action("Upload store content", Description = "Update content of the store from")]
-    public async Task UpdateStoreContent([ActionParameter] LocaleIdentifier locale, FileRequest file)
+    public async Task UpdateStoreContent(
+        [ActionParameter] LocaleIdentifier locale, 
+        [ActionParameter] UploadStoreContentRequest input)
     {
-        var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, file.File);
+        var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, input.Content);
         var content = ShopifyHtmlConverter.StoreToJson(html, locale.Locale);
 
         await _translatableResourceService.UpdateIdentifiedContent(content.ThemesContentEntities?.ToList());
@@ -147,7 +148,7 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
         await _translatableResourceService.UpdateIdentifiedContent(content.ShopPolicyContentEntities?.ToList());
     }
 
-    private static bool NoneItemsIncluded(StoreContentRequest input)
+    private static bool NoneItemsIncluded(DownloadStoreContentRequest input)
     {
         return 
             input.IncludeThemes is not true && 

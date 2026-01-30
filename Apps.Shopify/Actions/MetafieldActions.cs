@@ -1,21 +1,17 @@
 using Apps.Shopify.Api;
 using Apps.Shopify.Api.Rest;
 using Apps.Shopify.Constants.GraphQL;
-using Apps.Shopify.DataSourceHandlers;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
-using Apps.Shopify.Models.Entities;
+using Apps.Shopify.Models.Entities.Metafield;
 using Apps.Shopify.Models.Identifiers;
-using Apps.Shopify.Models.Request;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.Metafield;
-using Apps.Shopify.Models.Request.Product;
 using Apps.Shopify.Models.Response.Metafield;
 using Apps.Shopify.Services;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
-using Blackbird.Applications.Sdk.Common.Dynamic;
 using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.Sdk.Utils.Extensions.Http;
@@ -33,9 +29,9 @@ public class MetafieldActions(InvocationContext invocationContext, IFileManageme
 
     [Action("Download metafields", Description = "Get metafield content of a specific product")]
     public async Task<DownloadMetafieldResponse> GetMetafieldContent(
-        [ActionParameter] ProductRequest resourceRequest,
+        [ActionParameter] ProductIdentifier resourceRequest,
         [ActionParameter] LocaleIdentifier locale, 
-        [ActionParameter] GetContentRequest getContentRequest)
+        [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
         var service = _factory.GetContentService(TranslatableResource.METAFIELD);
         var request = new DownloadContentRequest
@@ -86,28 +82,26 @@ public class MetafieldActions(InvocationContext invocationContext, IFileManageme
         return new(response);
     }
 
-    [Action("Get metafield",
-        Description = "Get metafield details of a specific product")]
+    [Action("Get metafield", Description = "Get metafield details of a specific product")]
     public async Task<MetafieldEntity> GetMetafield(
-        [ActionParameter, Display("Metafield"), DataSource(typeof(ProductMetafieldKeyDataHandler))] string metafieldKey,
-        [ActionParameter] ProductRequest product)
+        [ActionParameter] MetafieldKeyIdentifier metafieldKey,
+        [ActionParameter] ProductIdentifier product)
     {
         var productMetaFields = await GetProductMetafields(product.ProductId);
-        return productMetaFields.FirstOrDefault(x => x.Key == metafieldKey) ??
-               throw new("No metafield with the provided key found for the project");
+        return productMetaFields.FirstOrDefault(x => x.Key == metafieldKey.MetafieldKey) ??
+               throw new PluginMisconfigurationException("No metafield with the provided key found for the project");
     }
 
-    [Action("Update metafield",
-        Description = "Update metafield value of a specific product")]
-    public async Task UpdateMetafield([ActionParameter] MetafieldRequest metafield,
-        [ActionParameter] ProductRequest product, [ActionParameter, Display("New value")] string value)
+    [Action("Update metafield", Description = "Update metafield value of a specific product")]
+    public async Task UpdateMetafield(
+        [ActionParameter] MetafieldDefinitionIdentifier metafield,
+        [ActionParameter] ProductIdentifier product, 
+        [ActionParameter, Display("New value")] string value)
     {
         var metafieldDefinition = await GetMetafieldDefinitin(metafield.MetafieldDefinitionId);
 
         if (metafieldDefinition == null)
-        {
             throw new PluginApplicationException($"Metafield definition not found for ID:  + {metafield.MetafieldDefinitionId}. Please check the input and try again");
-        }
 
         var request = new ShopifyRestRequest($"/products/{product.ProductId.GetShopifyItemId()}/metafields.json",
                 Method.Post, Creds)
@@ -142,13 +136,10 @@ public class MetafieldActions(InvocationContext invocationContext, IFileManageme
 
     private async Task<ICollection<MetafieldEntity>> GetProductMetafields(string productId)
     {
-        var variables = new Dictionary<string, object>()
-        {
-            ["resourceId"] = productId
-        };
-
         var client = new ShopifyClient(Creds, ShopifyClient.GenerateApiUrl(Creds, "unstable"));
-        return await client.Paginate<MetafieldEntity, MetafieldPaginationResponse>(GraphQlQueries.ProductMetaFields,
-            variables);
+        return await client.Paginate<MetafieldEntity, MetafieldPaginationResponse>(
+            GraphQlQueries.ProductMetaFields,
+            new Dictionary<string, object>() { ["resourceId"] = productId }
+        );
     }
 }

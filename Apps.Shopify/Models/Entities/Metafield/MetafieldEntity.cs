@@ -1,6 +1,6 @@
 using Blackbird.Applications.Sdk.Common;
 
-namespace Apps.Shopify.Models.Entities;
+namespace Apps.Shopify.Models.Entities.Metafield;
 
 public class MetafieldEntity
 {

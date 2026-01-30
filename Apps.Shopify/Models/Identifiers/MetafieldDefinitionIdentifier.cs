@@ -2,9 +2,9 @@ using Apps.Shopify.DataSourceHandlers;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Dynamic;
 
-namespace Apps.Shopify.Models.Request.Metafield;
+namespace Apps.Shopify.Models.Identifiers;
 
-public class MetafieldRequest
+public class MetafieldDefinitionIdentifier
 {
     [Display("Metafield")]
     [DataSource(typeof(ProductMetafieldDefinitionDataHandler))]

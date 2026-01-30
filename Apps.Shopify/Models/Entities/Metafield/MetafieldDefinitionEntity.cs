@@ -1,6 +1,6 @@
 using Blackbird.Applications.Sdk.Common;
 
-namespace Apps.Shopify.Models.Entities;
+namespace Apps.Shopify.Models.Entities.Metafield;
 
 public class MetafieldDefinitionEntity
 {
@@ -14,7 +14,7 @@ public class MetafieldDefinitionEntity
     public string Name { get; set; }
 
     [Display("Type")]
-    public DefinitionTypeEntity Type { get; set; }
+    public MetafieldDefinitionType Type { get; set; }
 
     [Display("Namespace")]
     public string Namespace { get; set; }
