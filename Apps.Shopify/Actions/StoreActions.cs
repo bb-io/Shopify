@@ -3,7 +3,7 @@ using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Helper;
 using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.Invocables;
-using Apps.Shopify.Models.Entities;
+using Apps.Shopify.Models.Entities.Resource;
 using Apps.Shopify.Models.Identifiers;
 using Apps.Shopify.Models.Request.OnlineStore;
 using Apps.Shopify.Models.Response.Locale;

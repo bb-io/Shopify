@@ -69,12 +69,13 @@ public class OnlineStoreArticleActions(InvocationContext invocationContext, IFil
     [Action("Upload article", Description = "Upload content of a specific article")]
     public async Task UpdateOnlineStoreArticleContent(
         [ActionParameter] UploadArticleRequest input,
+        [ActionParameter] ArticleIdentifier articleId,
         [ActionParameter] NonPrimaryLocaleIdentifier locale)
     {
         var service = _factory.GetContentService(TranslatableResource.ARTICLE);
         var request = new UploadContentRequest
         {
-            ContentId = input.ArticleId,
+            ContentId = articleId.ArticleId,
             Content = input.File,
             Locale = locale.Locale,
         };

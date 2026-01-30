@@ -41,14 +41,15 @@ public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileM
 
     [Action("Download theme", Description = "Get content of a specific theme")]
     public async Task<DownloadThemeResponse> GetOnlineStoreThemeTranslationContent(
-        [ActionParameter] GetOnlineStoreThemeContentAsHtmlRequest input, 
+        [ActionParameter] ThemeIdentifier theme,
+        [ActionParameter] GetOnlineStoreThemeContentAsHtmlRequest input,
         [ActionParameter] LocaleIdentifier locale,
         [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
         var service = _factory.GetContentService(TranslatableResource.ONLINE_STORE_THEME);
         var request = new DownloadContentRequest
         {
-            ContentId = input.OnlineStoreThemeId,
+            ContentId = theme.ThemeId,
             AssetKeys = input.AssetKeys,
             Locale = locale.Locale,
             Outdated = getContentRequest.Outdated,

@@ -4,9 +4,9 @@ using Blackbird.Applications.Sdk.Common.Dynamic;
 
 namespace Apps.Shopify.Models.Identifiers;
 
-public class ArticleIdentifier
+public class ThemeIdentifier
 {
-    [Display("Article ID")]
-    [DataSource(typeof(ArticleDataHandler))]
-    public string ArticleId { get; set; }
+    [Display("Online store theme ID")]
+    [DataSource(typeof(ThemeDataHandler))]
+    public string ThemeId { get; set; }
 }

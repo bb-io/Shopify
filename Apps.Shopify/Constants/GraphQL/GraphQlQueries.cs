@@ -356,4 +356,14 @@ public static class GraphQlQueries
             }
           }
         }";
+
+    public const string TranslatableResourceIds =
+        @"query ($resourceId: ID!) {
+          translatableResource(resourceId: $resourceId) {
+            resourceId
+            translatableContent {
+              key
+            }
+          }
+        }";
 }

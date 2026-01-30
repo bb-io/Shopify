@@ -12,10 +12,7 @@ public class MetafieldDataHandler(InvocationContext invocationContext)
 {
     public async Task<IEnumerable<DataSourceItem>> GetDataAsync(DataSourceContext context, CancellationToken cancellationToken)
     {
-        var variables = new Dictionary<string, object>()
-        {
-            ["ownerType"] = "PRODUCT"
-        };
+        var variables = new Dictionary<string, object>() { ["ownerType"] = "PRODUCT" };
 
         var response = await Client.Paginate<MetafieldDefinitionEntity, MetafieldDefinitionPaginationResponse>(
             GraphQlQueries.MetafieldDefinitions, 

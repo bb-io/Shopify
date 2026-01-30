@@ -10,6 +10,6 @@ public class UploadThemeRequest
     [Display("Content")]
     public FileReference File { get; set; }
 
-    [Display("Theme ID"), DataSource(typeof(OnlineStoreThemeDataSourceHandler))]
+    [Display("Theme ID"), DataSource(typeof(ThemeDataHandler))]
     public string? ThemeId { get; set; }
 }

@@ -1,15 +1,15 @@
+using Blackbird.Applications.Sdk.Common.Dynamic;
 using Blackbird.Applications.Sdk.Common.Dictionaries;
 
-namespace Apps.Shopify.DataSourceHandlers.DictionaryHandlers;
+namespace Apps.Shopify.DataSourceHandlers.Static;
 
-public class ResourceTypeDataHandler : IStaticDataSourceHandler
+public class ResourceTypeDataHandler : IStaticDataSourceItemHandler
 {
-    public Dictionary<string, string> GetData()
+    public IEnumerable<DataSourceItem> GetData()
     {
-        return new()
-        {
-            ["LINK"] = "Link",
-            ["METAOBJECT"] = "Metaobject"
-        };
+        return [
+            new DataSourceItem("LINK", "Link"),
+            new DataSourceItem("METAOBJECT", "Metaobject"),
+        ];
     }
 }

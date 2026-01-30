@@ -1,7 +1,7 @@
 ﻿using ShopifyTests.Base;
 using Apps.Shopify.Actions;
-using Apps.Shopify.Models.Request.Product;
 using Apps.Shopify.Models.Request.Metafield;
+using Apps.Shopify.Models.Identifiers;
 
 namespace Tests.Shopify;
 

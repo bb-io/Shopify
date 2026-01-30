@@ -10,6 +10,6 @@ public class UploadPageRequest
     [Display("Content")]
     public FileReference File { get; set; }
 
-    [Display("Page ID"), DataSource(typeof(OnlineStorePageHandler))]
+    [Display("Page ID"), DataSource(typeof(PageDataHandler))]
     public string? PageId { get; set; }
 }

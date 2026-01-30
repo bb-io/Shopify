@@ -3,7 +3,7 @@ using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
 using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.Invocables;
-using Apps.Shopify.Models.Entities;
+using Apps.Shopify.Models.Entities.Resource;
 using Apps.Shopify.Models.Request.TranslatableResource;
 using Apps.Shopify.Models.Response.TranslatableResource;
 using Blackbird.Applications.Sdk.Common.Exceptions;

@@ -1,15 +1,14 @@
-using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
-using Apps.Shopify.Models.Entities.Blog;
-using Apps.Shopify.Models.Response.Blog;
+using Apps.Shopify.Constants.GraphQL;
+using Apps.Shopify.Models.Entities.Page;
+using Apps.Shopify.Models.Response.Page;
 using Blackbird.Applications.Sdk.Common.Dynamic;
 using Blackbird.Applications.Sdk.Common.Invocation;
 
 namespace Apps.Shopify.DataSourceHandlers;
 
-public class BlogDataHandler(InvocationContext invocationContext) 
-    : ShopifyInvocable(invocationContext), IAsyncDataSourceItemHandler
+public class PageDataHandler(InvocationContext context) : ShopifyInvocable(context), IAsyncDataSourceItemHandler
 {
     public async Task<IEnumerable<DataSourceItem>> GetDataAsync(DataSourceContext context, CancellationToken cancellationToken)
     {
@@ -17,10 +16,9 @@ public class BlogDataHandler(InvocationContext invocationContext)
             .AddContains("title", context.SearchString)
             .Build();
 
-        var response = await Client.Paginate<BlogEntity, BlogsPaginationResponse>(
-            GraphQlQueries.Blogs,
-            QueryHelper.QueryToDictionary(query),
-            cancellationToken
+        var response = await Client.Paginate<PageEntity, PagesPaginationResponse>(
+            GraphQlQueries.Pages,
+            QueryHelper.QueryToDictionary(query)
         );
 
         var items = response.Select(x => new DataSourceItem(x.Id, x.Title)).ToList();

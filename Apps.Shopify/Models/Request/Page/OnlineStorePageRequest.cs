@@ -7,6 +7,6 @@ namespace Apps.Shopify.Models.Request.OnlineStorePage;
 public class OnlineStorePageRequest
 {
     [Display("Online store page ID")]
-    [DataSource(typeof(OnlineStorePageHandler))]
+    [DataSource(typeof(PageDataHandler))]
     public string OnlineStorePageId { get; set; }
 }

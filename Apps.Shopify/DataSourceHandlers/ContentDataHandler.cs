@@ -1,6 +1,6 @@
 ﻿using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Invocables;
-using Apps.Shopify.Models.Entities;
+using Apps.Shopify.Models.Entities.Resource;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Response.TranslatableResource;
 using Blackbird.Applications.Sdk.Common;
@@ -16,7 +16,7 @@ public class ContentDataHandler(InvocationContext context, [ActionParameter] Con
     public async Task<IEnumerable<DataSourceItem>> GetDataAsync(DataSourceContext context, CancellationToken ct)
     {
         if (string.IsNullOrEmpty(contentType.ContentType))
-            throw new PluginMisconfigurationException("Please specify content type first");
+            throw new PluginMisconfigurationException("Please specify content type first.");
 
         var variables = new Dictionary<string, object>
         {

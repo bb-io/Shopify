@@ -2,7 +2,7 @@ using System.Web;
 using Apps.Shopify.Constants;
 using Apps.Shopify.HtmlConversion.Constants;
 using Apps.Shopify.Models.Dto;
-using Apps.Shopify.Models.Entities;
+using Apps.Shopify.Models.Entities.Resource;
 using Apps.Shopify.Models.Request.TranslatableResource;
 using Blackbird.Applications.Sdk.Common.Exceptions;
 using HtmlAgilityPack;

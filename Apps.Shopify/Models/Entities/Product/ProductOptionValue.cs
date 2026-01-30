@@ -1,3 +1,5 @@
+using Apps.Shopify.Models.Entities.Resource;
+
 namespace Apps.Shopify.Models.Entities.Product;
 
 public class ProductOptionValue

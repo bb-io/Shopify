@@ -1,4 +1,4 @@
-namespace Apps.Shopify.Models.Entities;
+namespace Apps.Shopify.Models.Entities.Resource;
 
 public class IdentifiedContentEntity : ContentEntity
 {

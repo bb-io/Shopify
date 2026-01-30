@@ -10,13 +10,9 @@ namespace Apps.Shopify.DataSourceHandlers;
 public class ProductDataHandler(InvocationContext invocationContext) 
     : ShopifyInvocable(invocationContext), IAsyncDataSourceItemHandler
 {
-    public async Task<IEnumerable<DataSourceItem>> GetDataAsync(DataSourceContext context,
-        CancellationToken cancellationToken)
+    public async Task<IEnumerable<DataSourceItem>> GetDataAsync(DataSourceContext context, CancellationToken cancellationToken)
     {
-        var variables = new Dictionary<string, object>()
-        {
-            ["query"] = $"title:{context.SearchString}*"
-        };
+        var variables = new Dictionary<string, object>() { ["query"] = $"title:*{context.SearchString}*" };
         var response =  await Client.Paginate<ProductEntity, ProductsPaginationResponse>(
             GraphQlQueries.Products, 
             variables, 

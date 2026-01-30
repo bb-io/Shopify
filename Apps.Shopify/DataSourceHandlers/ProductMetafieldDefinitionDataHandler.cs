@@ -7,28 +7,24 @@ using Blackbird.Applications.Sdk.Common.Invocation;
 
 namespace Apps.Shopify.DataSourceHandlers;
 
-public class ProductMetafieldDefinitionDataHandler : ShopifyInvocable, IAsyncDataSourceHandler
+public class ProductMetafieldDefinitionDataHandler(InvocationContext invocationContext)
+    : ShopifyInvocable(invocationContext), IAsyncDataSourceItemHandler
 {
-    public ProductMetafieldDefinitionDataHandler(InvocationContext invocationContext) : base(invocationContext)
+    public async Task<IEnumerable<DataSourceItem>> GetDataAsync(DataSourceContext context, CancellationToken cancellationToken)
     {
-    }
+        var variables = new Dictionary<string, object>() { ["ownerType"] = "PRODUCT" };
 
-    public async Task<Dictionary<string, string>> GetDataAsync(DataSourceContext context,
-        CancellationToken cancellationToken)
-    {
-        var variables = new Dictionary<string, object>()
-        {
-            ["ownerType"] = "PRODUCT"
-        };
-
-        var response = await Client
-            .Paginate<MetafieldDefinitionEntity, MetafieldDefinitionPaginationResponse>(
-                GraphQlQueries.MetafieldDefinitions, variables, cancellationToken);
+        var response = await Client.Paginate<MetafieldDefinitionEntity, MetafieldDefinitionPaginationResponse>(
+            GraphQlQueries.MetafieldDefinitions, 
+            variables, 
+            cancellationToken
+        );
 
         return response
             .Where(x => context.SearchString is null ||
                         x.Name.Contains(context.SearchString, StringComparison.OrdinalIgnoreCase))
-            .Take(30)
-            .ToDictionary(x => x.Id, x => x.Name);
+            .Take(50)
+            .Select(x => new DataSourceItem(x.Id, x.Name))
+            .ToList();
     }
 }

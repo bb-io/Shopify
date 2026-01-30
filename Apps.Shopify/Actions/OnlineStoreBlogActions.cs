@@ -62,6 +62,7 @@ public class OnlineStoreBlogActions(InvocationContext invocationContext, IFileMa
 
     [Action("Upload blog", Description = "Upload content of a specific blog")]
     public async Task UpdateOnlineStoreBlogContent(
+        [ActionParameter] BlogIdentifier blogId,
         [ActionParameter] UploadBlogRequest input,
         [ActionParameter] NonPrimaryLocaleIdentifier locale)
     {
@@ -69,7 +70,7 @@ public class OnlineStoreBlogActions(InvocationContext invocationContext, IFileMa
         var request = new UploadContentRequest
         {
             Content = input.File,
-            ContentId = input.BlogId,
+            ContentId = blogId.BlogId,
             Locale = locale.Locale
         };
 

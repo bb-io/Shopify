@@ -1,11 +1,11 @@
-using Apps.Shopify.Models.Entities;
+using Apps.Shopify.Models.Entities.Resource;
 using Apps.Shopify.Models.Response.Pagination;
 using Newtonsoft.Json;
 
 namespace Apps.Shopify.Models.Response.TranslatableResource;
 
-public class TranslatableResourcePaginationResponse : IPaginationResponse<TranslatableResourceEntity>
+public class TranslatableResourcesByIdsPaginationResponse : IPaginationResponse<TranslatableResourceEntity>
 {
-    [JsonProperty("translatableResources")]
+    [JsonProperty("translatableResourcesByIds")]
     public PaginationData<TranslatableResourceEntity> Items { get; set; }
 }
