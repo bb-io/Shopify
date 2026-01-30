@@ -40,7 +40,7 @@ public class OnlineStoreBlogActions(InvocationContext invocationContext, IFileMa
         return new(response);
     }
 
-    [Action("Download blog", Description = "Get content of a specific blog")]
+    [Action("Download blog", Description = "Download content of a specific blog")]
     public async Task<DownloadBlogResponse> GetOnlineStoreBlogTranslationContent(
         [ActionParameter] BlogIdentifier blogId, 
         [ActionParameter] LocaleIdentifier locale,

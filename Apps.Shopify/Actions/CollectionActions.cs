@@ -21,7 +21,7 @@ public class CollectionActions(InvocationContext invocationContext, IFileManagem
 {
     private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
 
-    [Action("Download collection", Description = "Get content of a specific collection")]
+    [Action("Download collection", Description = "Download content of a specific collection")]
     public async Task<DownloadCollectionResponse> GetCollectionContent(
         [ActionParameter] CollectionIdentifier input, 
         [ActionParameter] LocaleIdentifier locale,

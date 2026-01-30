@@ -21,7 +21,7 @@ public class OnlineStoreArticleActions(InvocationContext invocationContext, IFil
 {
     private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
 
-    [Action("Search articles", Description = "Search aricles with specific criteria")]
+    [Action("Search articles", Description = "Search articles with specific criteria")]
     public async Task<SearchArticlesResponse> SearchArticles([ActionParameter] SearchArticlesRequest input)
     {
         input.ValidateDates();
@@ -48,7 +48,7 @@ public class OnlineStoreArticleActions(InvocationContext invocationContext, IFil
         return new(result);
     }
 
-    [Action("Download article", Description = "Get content of a specific online store article")]
+    [Action("Download article", Description = "Download content of a specific article")]
     public async Task<DownloadArticleResponse> GetOnlineStoreArticleTranslationContent(
         [ActionParameter] ArticleIdentifier input, 
         [ActionParameter] LocaleIdentifier locale,

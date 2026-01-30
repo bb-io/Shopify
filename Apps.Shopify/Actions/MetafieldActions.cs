@@ -23,7 +23,7 @@ public class MetafieldActions(InvocationContext invocationContext, IFileManageme
 {
     private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
 
-    [Action("Download metafields", Description = "Get metafield content of a specific product")]
+    [Action("Download metafields", Description = "Download metafield content of a specific product")]
     public async Task<DownloadMetafieldResponse> GetMetafieldContent(
         [ActionParameter] ProductIdentifier resourceRequest,
         [ActionParameter] LocaleIdentifier locale, 

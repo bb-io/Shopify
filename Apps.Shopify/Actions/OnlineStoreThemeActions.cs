@@ -39,7 +39,7 @@ public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileM
         return new(response);
     }
 
-    [Action("Download theme", Description = "Get content of a specific theme")]
+    [Action("Download theme", Description = "Download content of a specific theme")]
     public async Task<DownloadThemeResponse> GetOnlineStoreThemeTranslationContent(
         [ActionParameter] ThemeIdentifier theme,
         [ActionParameter] GetOnlineStoreThemeContentAsHtmlRequest input,
@@ -59,7 +59,7 @@ public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileM
         return new(file);
     }
 
-    [Action("Upload theme", Description = "Update content of a specific theme")]
+    [Action("Upload theme", Description = "Upload content of a specific theme")]
     public async Task UpdateOnlineStoreThemeContent(
         [ActionParameter] UploadThemeRequest input,
         [ActionParameter] NonPrimaryLocaleIdentifier locale)

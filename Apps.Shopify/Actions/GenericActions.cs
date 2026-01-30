@@ -22,7 +22,7 @@ public class GenericActions(InvocationContext invocationContext, IFileManagement
     private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
 
     [BlueprintActionDefinition(BlueprintAction.UploadContent)]
-    [Action("Upload content", Description = "Update content from a file")]
+    [Action("Upload content", Description = "Upload content of a specific content type from a file")]
     public async Task UpdateContent([ActionParameter] UploadContentRequest input)
     {
         var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, input.Content);
@@ -40,7 +40,7 @@ public class GenericActions(InvocationContext invocationContext, IFileManagement
     }
 
     [BlueprintActionDefinition(BlueprintAction.DownloadContent)]
-    [Action("Download content", Description = "Download content")]
+    [Action("Download content", Description = "Download content of a specific content type")]
     public async Task<DownloadContentResponse> DownloadContent(
         [ActionParameter] ContentTypeIdentifier contentType,
         [ActionParameter] DownloadContentRequest input)
@@ -51,7 +51,7 @@ public class GenericActions(InvocationContext invocationContext, IFileManagement
     }
 
     [BlueprintActionDefinition(BlueprintAction.SearchContent)]
-    [Action("Search content", Description = "Search content")]
+    [Action("Search content", Description = "Search through different content types with specific criteria")]
     public async Task<SearchContentResponse> SearchContent([ActionParameter] SearchContentRequest input)
     {
         input.Validate();

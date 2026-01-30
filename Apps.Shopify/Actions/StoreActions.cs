@@ -25,7 +25,7 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
 {
     private readonly TranslatableResourceService _translatableResourceService = new(invocationContext, fileManagementClient);
 
-    [Action("Get store locales information", Description = "Get primary and other locales")]
+    [Action("Get store locales information", Description = "Get primary and additional store locales")]
     public async Task<StoreLocalesResponse> GetStoreLanguages()
     {
         var request = new GraphQLRequest()
@@ -39,7 +39,7 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
         return new StoreLocalesResponse(primaryLocale, otherLocales);
     }
 
-    [Action("Download store resources", Description = "Get content of all store resource type items")]
+    [Action("Download store resources", Description = "Download content of all store resource type items")]
     public async Task<DownloadStoreResourcesResponse> GetStoreResourcesContent(
         [ActionParameter] ResourceTypeIdentifier input,
         [ActionParameter] LocaleIdentifier locale, 
@@ -71,7 +71,7 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
         return new(file);
     }
 
-    [Action("Upload store resources", Description = "Update content of all store resource type items")]
+    [Action("Upload store resources", Description = "Upload content of all store resource type items")]
     public async Task UpdateStoreResourcesContent(
         [ActionParameter] LocaleIdentifier locale,
         [ActionParameter] UploadStoreResourcesRequest input)
@@ -81,7 +81,7 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
         await _translatableResourceService.UpdateIdentifiedContent(content);
     }
 
-    [Action("Download store content", Description = "Get content of the store")]
+    [Action("Download store content", Description = "Download content of the store")]
     public async Task<DownloadStoreContentResponse> GetStoreContent(
         [ActionParameter] DownloadStoreContentRequest input,
         [ActionParameter] LocaleIdentifier locale, 
@@ -134,7 +134,7 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
         return new(file);
     }
 
-    [Action("Upload store content", Description = "Update content of the store from")]
+    [Action("Upload store content", Description = "Upload content of the store")]
     public async Task UpdateStoreContent(
         [ActionParameter] LocaleIdentifier locale, 
         [ActionParameter] UploadStoreContentRequest input)

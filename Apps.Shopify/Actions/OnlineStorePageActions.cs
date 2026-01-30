@@ -41,7 +41,7 @@ public class OnlineStorePageActions(InvocationContext invocationContext, IFileMa
         return new(response);
     }
 
-    [Action("Download page", Description = "Get content of a specific page")]
+    [Action("Download page", Description = "Download content of a specific page")]
     public async Task<DownloadPageResponse> GetOnlineStorePageTranslationContent(
         [ActionParameter] OnlineStorePageRequest input, 
         [ActionParameter] LocaleIdentifier locale,
@@ -59,7 +59,7 @@ public class OnlineStorePageActions(InvocationContext invocationContext, IFileMa
         return new(file);
     }
 
-    [Action("Upload page", Description = "Update content of a specific page")]
+    [Action("Upload page", Description = "Upload content of a specific page")]
     public async Task UpdateOnlineStorePageContent(
         [ActionParameter] UploadPageRequest input,
         [ActionParameter] NonPrimaryLocaleIdentifier locale)

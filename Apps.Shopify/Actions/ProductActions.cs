@@ -20,7 +20,7 @@ public class ProductActions(InvocationContext invocationContext, IFileManagement
 {
     private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
 
-    [Action("Search products", Description = "Search for products based on provided criterias")]
+    [Action("Search products", Description = "Search products with specific criteria")]
     public async Task<SearchProductsResponse> SearchProducts([ActionParameter] SearchProductsRequest input)
     {
         input.Validate();
@@ -61,7 +61,7 @@ public class ProductActions(InvocationContext invocationContext, IFileManagement
         return new(result);
     }
 
-    [Action("Download product", Description = "Get content of a specific product")]
+    [Action("Download product", Description = "Download content of a specific product")]
     public async Task<DownloadProductResponse> GetProductTranslationContent(
         [ActionParameter] ProductIdentifier resourceRequest,
         [ActionParameter] LocaleIdentifier locale,
