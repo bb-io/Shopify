@@ -12,10 +12,10 @@
 
     <ItemGroup>
         <PackageReference Include="Blackbird.Applications.SDK.Blueprints" Version="1.0.1" />
-        <PackageReference Include="Blackbird.Applications.Sdk.Utils" Version="1.0.19" />
-        <PackageReference Include="Blackbird.Filters" Version="1.1.49" />
-        <PackageReference Include="GraphQL.Client" Version="6.0.2" />
-        <PackageReference Include="GraphQL.Client.Serializer.Newtonsoft" Version="6.0.2" />
+        <PackageReference Include="Blackbird.Applications.Sdk.Utils" Version="1.0.26" />
+        <PackageReference Include="Blackbird.Filters" Version="1.1.50" />
+        <PackageReference Include="GraphQL.Client" Version="6.1.0" />
+        <PackageReference Include="GraphQL.Client.Serializer.Newtonsoft" Version="6.1.0" />
     </ItemGroup>
 
     <ItemGroup>

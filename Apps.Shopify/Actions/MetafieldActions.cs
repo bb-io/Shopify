@@ -1,7 +1,5 @@
 using Apps.Shopify.Api;
-using Apps.Shopify.Api.Rest;
 using Apps.Shopify.Constants.GraphQL;
-using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Metafield;
@@ -14,10 +12,8 @@ using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Common.Invocation;
-using Blackbird.Applications.Sdk.Utils.Extensions.Http;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using GraphQL;
-using RestSharp;
 
 namespace Apps.Shopify.Actions;
 
@@ -98,28 +94,41 @@ public class MetafieldActions(InvocationContext invocationContext, IFileManageme
         [ActionParameter] ProductIdentifier product, 
         [ActionParameter, Display("New value")] string value)
     {
-        var metafieldDefinition = await GetMetafieldDefinitin(metafield.MetafieldDefinitionId);
+        var metafieldDefinition = await GetMetafieldDefinition(metafield.MetafieldDefinitionId);
 
         if (metafieldDefinition == null)
-            throw new PluginApplicationException($"Metafield definition not found for ID:  + {metafield.MetafieldDefinitionId}. Please check the input and try again");
+        {
+            throw new PluginApplicationException(
+                $"Metafield definition not found for ID:  + {metafield.MetafieldDefinitionId}. " +
+                $"Please check the input and try again"
+            );
+        }
 
-        var request = new ShopifyRestRequest($"/products/{product.ProductId.GetShopifyItemId()}/metafields.json",
-                Method.Post, Creds)
-            .WithJsonBody(new
+        var variables = new
+        {
+            metafields = new[]
             {
-                metafield = new
+                new
                 {
-                    value,
-                    key = metafieldDefinition.Key,
+                    ownerId = product.ProductId,
                     @namespace = metafieldDefinition.Namespace,
+                    key = metafieldDefinition.Key,
                     type = metafieldDefinition.Type.Name,
+                    value
                 }
-            });
+            }
+        };
 
-        await RestClient.ExecuteWithErrorHandling(request);
+        var request = new GraphQLRequest
+        {
+            Query = GraphQlMutations.MetafieldsSet,
+            Variables = variables
+        };
+
+        await Client.ExecuteWithErrorHandling(request);
     }
 
-    private async Task<MetafieldDefinitionEntity> GetMetafieldDefinitin(string metafieldDefinitionId)
+    private async Task<MetafieldDefinitionEntity> GetMetafieldDefinition(string metafieldDefinitionId)
     {
         var request = new GraphQLRequest()
         {
