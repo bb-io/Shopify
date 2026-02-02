@@ -1,4 +1,5 @@
 ﻿using Apps.Shopify.Api;
+using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.HtmlConversion;
@@ -19,6 +20,7 @@ public class MetafieldService(InvocationContext invocationContext, IFileManageme
     : ShopifyInvocable(invocationContext), IContentService
 {
     private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
+    private readonly string ContentType = TranslatableResources.Metafield;
 
     public async Task<FileReference> Download(DownloadContentRequest input)
     {
@@ -39,7 +41,7 @@ public class MetafieldService(InvocationContext invocationContext, IFileManageme
 
         var html = ShopifyHtmlConverter.MetaFieldsToHtml(
             contents.Where(x => x.Item2 is not null),
-            TranslatableResource.METAFIELD.ToString().ToLower()
+            ContentType.ToLower()
         );
         return await fileManagementClient.UploadAsync(
             html, 
@@ -60,7 +62,7 @@ public class MetafieldService(InvocationContext invocationContext, IFileManageme
         if (!string.IsNullOrEmpty(input.NameContains))
             response = response.Where(x => x.Name.Contains(input.NameContains, StringComparison.OrdinalIgnoreCase)).ToList();
 
-        var items = response.Select(x => new ContentItemEntity(x.Id, "Metafield", x.Name)).ToList();
+        var items = response.Select(x => new ContentItemEntity(x.Id, ContentType, x.Name)).ToList();
         return new(items);
     }
 

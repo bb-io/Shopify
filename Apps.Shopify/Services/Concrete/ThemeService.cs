@@ -1,4 +1,5 @@
-﻿using Apps.Shopify.Constants.GraphQL;
+﻿using Apps.Shopify.Constants;
+using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.Invocables;
@@ -18,6 +19,7 @@ public class ThemeService(InvocationContext invocationContext, IFileManagementCl
     : ShopifyInvocable(invocationContext), IContentService
 {
     private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
+    private readonly string ContentType = TranslatableResources.Theme;
 
     public async Task<FileReference> Download(DownloadContentRequest input)
     {
@@ -34,7 +36,7 @@ public class ThemeService(InvocationContext invocationContext, IFileManagementCl
                 .ToList();
         }
 
-        var html = ShopifyHtmlConverter.ToHtml(translatableContent, TranslatableResource.ONLINE_STORE_THEME.ToString().ToLower());
+        var html = ShopifyHtmlConverter.ToHtml(translatableContent, ContentType.ToLower());
         return await fileManagementClient.UploadAsync(
             html, 
             MediaTypeNames.Text.Html, 
@@ -49,7 +51,7 @@ public class ThemeService(InvocationContext invocationContext, IFileManagementCl
         if (!string.IsNullOrEmpty(input.NameContains))
             response = response.Where(x => x.Name.Contains(input.NameContains, StringComparison.OrdinalIgnoreCase)).ToList();
 
-        var items = response.Select(x => new ContentItemEntity(x.Id, "Theme", x.Name)).ToList();
+        var items = response.Select(x => new ContentItemEntity(x.Id, ContentType, x.Name)).ToList();
         return new(items);
     }
 

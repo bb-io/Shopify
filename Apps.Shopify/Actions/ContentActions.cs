@@ -35,19 +35,7 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
             );
         }
 
-        TranslatableResource enumContentType;
-        try
-        {
-            enumContentType = Enum.Parse<TranslatableResource>(contentType, true);
-        }
-        catch
-        {
-            string supportedTypes = string.Join(", ", TranslatableResources.SupportedContentTypes);
-            throw new PluginMisconfigurationException(
-                $"Unsupported content type. Supported content types for this action: {supportedTypes.ToLower()}"
-            );
-        }
-        var service = _factory.GetContentService(enumContentType);
+        var service = _factory.GetContentService(contentType);
         await service.Upload(input);
     }
 
@@ -57,7 +45,7 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
         [ActionParameter] ContentTypeIdentifier contentType,
         [ActionParameter] DownloadContentRequest input)
     {
-        var service = _factory.GetContentService(Enum.Parse<TranslatableResource>(contentType.ContentType));
+        var service = _factory.GetContentService(contentType.ContentType);
         var file = await service.Download(input);
         return new(file);
     }

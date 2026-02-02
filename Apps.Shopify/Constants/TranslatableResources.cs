@@ -2,21 +2,31 @@
 
 public static class TranslatableResources
 {
+    public const string Collection = "Collection";
+    public const string Metafield = "Metafield";
+    public const string Article = "Article";
+    public const string Blog = "Blog";
+    public const string Page = "Page";
+    public const string Theme = "Theme";
+    public const string Product = "Product";
+    public const string Store = "Store";
+    public const string StoreResources = "Resources";
+
     public static readonly IEnumerable<string> SupportedContentTypes = [
-        TranslatableResource.COLLECTION.ToString(),
-        TranslatableResource.METAFIELD.ToString(),
-        TranslatableResource.ARTICLE.ToString(),
-        TranslatableResource.BLOG.ToString(),
-        TranslatableResource.PAGE.ToString(),
-        TranslatableResource.ONLINE_STORE_THEME.ToString(),
-        TranslatableResource.PRODUCT.ToString()
+        Collection,
+        Article,
+        Metafield,
+        Blog,
+        Page,
+        Theme,
+        Product
     ];
 
     public static readonly IEnumerable<string> SupportedPollingContentTypes = [
-        TranslatableResource.COLLECTION.ToString(),
-        TranslatableResource.ARTICLE.ToString(),
-        TranslatableResource.BLOG.ToString(),
-        TranslatableResource.PAGE.ToString(),
-        TranslatableResource.PRODUCT.ToString()
+        Collection,
+        Article,
+        Blog,
+        Page,
+        Product
     ];
 }

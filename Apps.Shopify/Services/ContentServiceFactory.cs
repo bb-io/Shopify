@@ -1,4 +1,5 @@
-﻿using Apps.Shopify.Services.Concrete;
+﻿using Apps.Shopify.Constants;
+using Apps.Shopify.Services.Concrete;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
@@ -6,17 +7,18 @@ namespace Apps.Shopify.Services;
 
 public class ContentServiceFactory(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
 {
-    public IContentService GetContentService(TranslatableResource contentType)
+    public IContentService GetContentService(string contentType)
     {
-        return contentType switch
+        string normalizedType = char.ToUpper(contentType[0]) + contentType.Substring(1).ToLower();
+        return normalizedType switch
         {
-            TranslatableResource.COLLECTION => new CollectionService(invocationContext, fileManagementClient),
-            TranslatableResource.METAFIELD => new MetafieldService(invocationContext, fileManagementClient),
-            TranslatableResource.ARTICLE => new ArticleService(invocationContext, fileManagementClient),
-            TranslatableResource.BLOG => new BlogService(invocationContext, fileManagementClient),
-            TranslatableResource.PAGE => new PageService(invocationContext, fileManagementClient),
-            TranslatableResource.ONLINE_STORE_THEME => new ThemeService(invocationContext, fileManagementClient),
-            TranslatableResource.PRODUCT => new ProductService(invocationContext, fileManagementClient),
+            TranslatableResources.Collection => new CollectionService(invocationContext, fileManagementClient),
+            TranslatableResources.Metafield => new MetafieldService(invocationContext, fileManagementClient),
+            TranslatableResources.Article => new ArticleService(invocationContext, fileManagementClient),
+            TranslatableResources.Blog => new BlogService(invocationContext, fileManagementClient),
+            TranslatableResources.Page => new PageService(invocationContext, fileManagementClient),
+            TranslatableResources.Theme => new ThemeService(invocationContext, fileManagementClient),
+            TranslatableResources.Product => new ProductService(invocationContext, fileManagementClient),
             _ => throw new Exception($"Unsupported content type '{contentType}' was passed in ContentServiceFactory")
         };
     }
@@ -26,19 +28,16 @@ public class ContentServiceFactory(InvocationContext invocationContext, IFileMan
         var contentServices = new List<IContentService>();
 
         foreach (var contentType in contentTypes)
-        {
-            var enumType = Enum.Parse<TranslatableResource>(contentType);
-            contentServices.Add(GetContentService(enumType));
-        }
+            contentServices.Add(GetContentService(contentType));
 
         return contentServices;
     }
 
     public IEnumerable<IPollingContentService> GetPollingContentServices(IEnumerable<string> contentTypes)
     {
-        foreach (var type in contentTypes)
+        foreach (var contentType in contentTypes)
         {
-            var service = GetContentService(Enum.Parse<TranslatableResource>(type));
+            var service = GetContentService(contentType);
 
             if (service is IPollingContentService pollingService)
                 yield return pollingService;

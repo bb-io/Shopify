@@ -1,3 +1,4 @@
+using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
@@ -20,6 +21,7 @@ public class OnlineStoreBlogActions(InvocationContext invocationContext, IFileMa
     : ShopifyInvocable(invocationContext)
 {
     private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
+    private readonly string ContentType = TranslatableResources.Blog;
 
     [Action("Search blogs", Description = "Search blogs with specific criteria")]
     public async Task<SearchBlogsResponse> SearchBlogs([ActionParameter] SearchBlogsRequest input)
@@ -47,7 +49,7 @@ public class OnlineStoreBlogActions(InvocationContext invocationContext, IFileMa
         [ActionParameter] DownloadBlogRequest blogInput,
         [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
-        var service = _factory.GetContentService(TranslatableResource.BLOG);
+        var service = _factory.GetContentService(ContentType);
         var request = new DownloadContentRequest
         {
             ContentId = blogId.BlogId,
@@ -65,7 +67,7 @@ public class OnlineStoreBlogActions(InvocationContext invocationContext, IFileMa
         [ActionParameter] UploadBlogRequest input,
         [ActionParameter] NonPrimaryLocaleIdentifier locale)
     {
-        var service = _factory.GetContentService(TranslatableResource.BLOG);
+        var service = _factory.GetContentService(ContentType);
         var request = new UploadContentRequest
         {
             Content = input.File,

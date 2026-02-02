@@ -1,4 +1,5 @@
 ﻿using Apps.Shopify.Api;
+using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
@@ -26,6 +27,7 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
     : ShopifyInvocable(invocationContext), IContentService, IPollingContentService
 {
     private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
+    private readonly string ContentType = TranslatableResources.Product;
 
     public async Task<FileReference> Download(DownloadContentRequest input)
     {
@@ -76,7 +78,7 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
             QueryHelper.QueryToDictionary(query)
         );
 
-        var items = response.Select(x => new PollingContentItemEntity(x.Id, "Product", x.Title, x.UpdatedAt)).ToList();
+        var items = response.Select(x => new PollingContentItemEntity(x.Id, ContentType, x.Title, x.UpdatedAt)).ToList();
         return new(items);
     }
 
@@ -94,7 +96,7 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
             QueryHelper.QueryToDictionary(query)
         );
 
-        var items = response.Select(x => new ContentItemEntity(x.Id, "Product", x.Title)).ToList();
+        var items = response.Select(x => new ContentItemEntity(x.Id, ContentType, x.Title)).ToList();
         return new(items);
     }
 

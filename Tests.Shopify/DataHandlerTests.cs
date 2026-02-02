@@ -1,5 +1,5 @@
 ﻿using ShopifyTests.Base;
-using Apps.Shopify;
+using Apps.Shopify.Constants;
 using Apps.Shopify.DataSourceHandlers;
 using Apps.Shopify.Models.Identifiers;
 using Apps.Shopify.Models.Request.Content;
@@ -31,7 +31,7 @@ public class DataHandlerTests : TestBase
     {
         var contentType = new ContentTypeIdentifier
         {
-            ContentType = TranslatableResource.PRODUCT.ToString()
+            ContentType = TranslatableResources.Product
         };
 
         await TestHandler<ContentDataHandler>(contentType);

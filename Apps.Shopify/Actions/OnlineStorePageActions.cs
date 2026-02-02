@@ -1,3 +1,4 @@
+using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
@@ -20,6 +21,7 @@ public class OnlineStorePageActions(InvocationContext invocationContext, IFileMa
     : ShopifyInvocable(invocationContext)
 {
     private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
+    private readonly string ContentType = TranslatableResources.Page;
 
     [Action("Search pages", Description = "Search pages with specific criteria")]
     public async Task<SearchPagesResponse> SearchPages([ActionParameter] SearchPagesRequest input)
@@ -47,7 +49,7 @@ public class OnlineStorePageActions(InvocationContext invocationContext, IFileMa
         [ActionParameter] LocaleIdentifier locale,
         [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
-        var service = _factory.GetContentService(TranslatableResource.PAGE);
+        var service = _factory.GetContentService(ContentType);
         var request = new DownloadContentRequest
         {
             ContentId = input.PageId,
@@ -64,7 +66,7 @@ public class OnlineStorePageActions(InvocationContext invocationContext, IFileMa
         [ActionParameter] UploadPageRequest input,
         [ActionParameter] NonPrimaryLocaleIdentifier locale)
     {
-        var service = _factory.GetContentService(TranslatableResource.PAGE);
+        var service = _factory.GetContentService(ContentType);
         var request = new UploadContentRequest
         {
             Content = input.File,

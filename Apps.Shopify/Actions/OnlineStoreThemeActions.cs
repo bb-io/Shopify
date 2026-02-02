@@ -1,3 +1,4 @@
+using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Theme;
@@ -19,6 +20,7 @@ public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileM
     : ShopifyInvocable(invocationContext)
 {
     private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
+    private readonly string ContentType = TranslatableResources.Theme;
 
     [Action("Search themes", Description = "Search themes with specific criteria")]
     public async Task<SearchThemesResponse> SearchThemes([ActionParameter] SearchThemesRequest input)
@@ -45,7 +47,7 @@ public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileM
         [ActionParameter] LocaleIdentifier locale,
         [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
-        var service = _factory.GetContentService(TranslatableResource.ONLINE_STORE_THEME);
+        var service = _factory.GetContentService(ContentType);
         var request = new DownloadContentRequest
         {
             ContentId = theme.ThemeId,
@@ -63,7 +65,7 @@ public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileM
         [ActionParameter] UploadThemeRequest input,
         [ActionParameter] NonPrimaryLocaleIdentifier locale)
     {
-        var service = _factory.GetContentService(TranslatableResource.ONLINE_STORE_THEME);
+        var service = _factory.GetContentService(ContentType);
         var request = new UploadContentRequest
         {
             Content = input.File,

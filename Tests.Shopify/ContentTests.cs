@@ -14,7 +14,7 @@ public class ContentTests : TestBase
 		var action = new ContentActions(InvocationContext, FileManager);
 		var input = new SearchContentRequest
 		{
-			ContentTypes = ["PRODUCT"]
+			ContentTypes = ["Product"]
         };
 
 		// Act
@@ -30,7 +30,7 @@ public class ContentTests : TestBase
 	{
         // Arrange
         var action = new ContentActions(InvocationContext, FileManager);
-		var contentType = new ContentTypeIdentifier { ContentType = "PRODUCT" };
+		var contentType = new ContentTypeIdentifier { ContentType = "Product" };
 		var input = new DownloadContentRequest
 		{
 			ContentId = "gid://shopify/Product/10745816351004",

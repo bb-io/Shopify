@@ -1,4 +1,5 @@
-﻿using Apps.Shopify.Constants.GraphQL;
+﻿using Apps.Shopify.Constants;
+using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
 using Apps.Shopify.HtmlConversion;
@@ -24,6 +25,7 @@ public class BlogService(InvocationContext invocationContext, IFileManagementCli
     : ShopifyInvocable(invocationContext), IContentService, IPollingContentService
 {
     private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
+    private readonly string ContentType = TranslatableResources.Blog;
 
     public async Task<FileReference> Download(DownloadContentRequest input)
     {
@@ -48,7 +50,7 @@ public class BlogService(InvocationContext invocationContext, IFileManagementCli
         var html = ShopifyHtmlConverter.BlogToHtml(blogTranslations.Select(x => new IdentifiedContentEntity(x)
         {
             Id = input.ContentId
-        }), blogPostTranslations, TranslatableResource.BLOG.ToString().ToLower());
+        }), blogPostTranslations, ContentType.ToLower());
 
         return await fileManagementClient.UploadAsync(
             html, 
@@ -70,7 +72,7 @@ public class BlogService(InvocationContext invocationContext, IFileManagementCli
         );
 
         var items = response.Select(x => 
-            new PollingContentItemEntity(x.Id, "Blog", x.Title, x.UpdatedAt ?? x.CreatedAt)
+            new PollingContentItemEntity(x.Id, ContentType, x.Title, x.UpdatedAt ?? x.CreatedAt)
         ).ToList();
         return new(items);
     }
@@ -88,7 +90,7 @@ public class BlogService(InvocationContext invocationContext, IFileManagementCli
             QueryHelper.QueryToDictionary(query)
         );
 
-        var items = response.Select(x => new ContentItemEntity(x.Id, "Blog", x.Title)).ToList();
+        var items = response.Select(x => new ContentItemEntity(x.Id, ContentType, x.Title)).ToList();
         return new(items);
     }
 

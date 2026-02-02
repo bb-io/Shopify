@@ -1,4 +1,5 @@
 using Apps.Shopify.Api;
+using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
@@ -22,6 +23,7 @@ public class MetafieldActions(InvocationContext invocationContext, IFileManageme
     : ShopifyInvocable(invocationContext)
 {
     private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
+    private readonly string ContentType = TranslatableResources.Metafield;
 
     [Action("Download metafields", Description = "Download metafield content of a specific product")]
     public async Task<DownloadMetafieldResponse> GetMetafieldContent(
@@ -29,7 +31,7 @@ public class MetafieldActions(InvocationContext invocationContext, IFileManageme
         [ActionParameter] LocaleIdentifier locale, 
         [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
-        var service = _factory.GetContentService(TranslatableResource.METAFIELD);
+        var service = _factory.GetContentService(ContentType);
         var request = new DownloadContentRequest
         {
             ContentId = resourceRequest.ProductId,
@@ -46,7 +48,7 @@ public class MetafieldActions(InvocationContext invocationContext, IFileManageme
         [ActionParameter] UploadMetafieldRequest input,
         [ActionParameter] NonPrimaryLocaleIdentifier locale)
     {
-        var service = _factory.GetContentService(TranslatableResource.METAFIELD);
+        var service = _factory.GetContentService(ContentType);
         var request = new UploadContentRequest
         {
             ContentId = input.MetafieldId,

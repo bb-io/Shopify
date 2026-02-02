@@ -1,3 +1,4 @@
+using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
@@ -20,6 +21,7 @@ public class OnlineStoreArticleActions(InvocationContext invocationContext, IFil
     : ShopifyInvocable(invocationContext)
 {
     private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
+    private readonly string ContentType = TranslatableResources.Article;
 
     [Action("Search articles", Description = "Search articles with specific criteria")]
     public async Task<SearchArticlesResponse> SearchArticles([ActionParameter] SearchArticlesRequest input)
@@ -54,7 +56,7 @@ public class OnlineStoreArticleActions(InvocationContext invocationContext, IFil
         [ActionParameter] LocaleIdentifier locale,
         [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
-        var service = _factory.GetContentService(TranslatableResource.ARTICLE);
+        var service = _factory.GetContentService(ContentType);
         var request = new DownloadContentRequest
         {
             ContentId = input.ArticleId,
@@ -71,7 +73,7 @@ public class OnlineStoreArticleActions(InvocationContext invocationContext, IFil
         [ActionParameter] UploadArticleRequest input,
         [ActionParameter] NonPrimaryLocaleIdentifier locale)
     {
-        var service = _factory.GetContentService(TranslatableResource.ARTICLE);
+        var service = _factory.GetContentService(ContentType);
         var request = new UploadContentRequest
         {
             ContentId = input.ArticleId,

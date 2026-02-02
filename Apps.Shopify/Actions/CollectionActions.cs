@@ -1,3 +1,4 @@
+using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
@@ -20,6 +21,7 @@ public class CollectionActions(InvocationContext invocationContext, IFileManagem
     : ShopifyInvocable(invocationContext)
 {
     private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
+    private readonly string ContentType = TranslatableResources.Collection;
 
     [Action("Download collection", Description = "Download content of a specific collection")]
     public async Task<DownloadCollectionResponse> GetCollectionContent(
@@ -27,7 +29,7 @@ public class CollectionActions(InvocationContext invocationContext, IFileManagem
         [ActionParameter] LocaleIdentifier locale,
         [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
-        var service = _factory.GetContentService(TranslatableResource.COLLECTION);
+        var service = _factory.GetContentService(ContentType);
         var request = new DownloadContentRequest
         {
             ContentId = input.CollectionId,
@@ -44,7 +46,7 @@ public class CollectionActions(InvocationContext invocationContext, IFileManagem
         [ActionParameter] UploadCollectionRequest input,
         [ActionParameter] NonPrimaryLocaleIdentifier locale)
     {
-        var service = _factory.GetContentService(TranslatableResource.COLLECTION);
+        var service = _factory.GetContentService(ContentType);
         var request = new UploadContentRequest
         {
             Content = input.File,

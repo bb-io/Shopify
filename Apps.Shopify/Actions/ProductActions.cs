@@ -1,3 +1,4 @@
+using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
@@ -19,6 +20,7 @@ public class ProductActions(InvocationContext invocationContext, IFileManagement
     : ShopifyInvocable(invocationContext)
 {
     private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
+    private readonly string ContentType = TranslatableResources.Product;
 
     [Action("Search products", Description = "Search products with specific criteria")]
     public async Task<SearchProductsResponse> SearchProducts([ActionParameter] SearchProductsRequest input)
@@ -68,7 +70,7 @@ public class ProductActions(InvocationContext invocationContext, IFileManagement
         [ActionParameter] DownloadProductRequest input,
         [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
-        var service = _factory.GetContentService(TranslatableResource.PRODUCT);
+        var service = _factory.GetContentService(ContentType);
         var request = new DownloadContentRequest
         {
             ContentId = resourceRequest.ProductId,
@@ -88,7 +90,7 @@ public class ProductActions(InvocationContext invocationContext, IFileManagement
         [ActionParameter] UploadProductRequest input,
         [ActionParameter] NonPrimaryLocaleIdentifier locale)
     {
-        var service = _factory.GetContentService(TranslatableResource.PRODUCT);
+        var service = _factory.GetContentService(ContentType);
         var request = new UploadContentRequest
         {
             Content = input.File,

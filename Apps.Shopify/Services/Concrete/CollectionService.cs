@@ -1,4 +1,5 @@
-﻿using Apps.Shopify.Constants.GraphQL;
+﻿using Apps.Shopify.Constants;
+using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Collection;
@@ -16,6 +17,7 @@ public class CollectionService(InvocationContext invocationContext, IFileManagem
     : ShopifyInvocable(invocationContext), IContentService, IPollingContentService
 {
     private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
+    private readonly string ContentType = TranslatableResources.Collection;
 
     public async Task<FileReference> Download(DownloadContentRequest input)
     {
@@ -23,7 +25,7 @@ public class CollectionService(InvocationContext invocationContext, IFileManagem
             input.ContentId, 
             input.Locale, 
             input.Outdated ?? default,
-            TranslatableResource.COLLECTION.ToString().ToLower()
+            ContentType.ToLower()
         );
     }
 
@@ -39,7 +41,7 @@ public class CollectionService(InvocationContext invocationContext, IFileManagem
             QueryHelper.QueryToDictionary(query)
         );
 
-        var items = response.Select(x => new PollingContentItemEntity(x.Id, "Collection", x.Title, x.UpdatedAt)).ToList();
+        var items = response.Select(x => new PollingContentItemEntity(x.Id, ContentType, x.Title, x.UpdatedAt)).ToList();
         return new(items);
     }
 
@@ -55,7 +57,7 @@ public class CollectionService(InvocationContext invocationContext, IFileManagem
             QueryHelper.QueryToDictionary(query)
         );
 
-        var items = response.Select(x => new ContentItemEntity(x.Id, "Collection", x.Title)).ToList();
+        var items = response.Select(x => new ContentItemEntity(x.Id, ContentType, x.Title)).ToList();
         return new(items);
     }
 

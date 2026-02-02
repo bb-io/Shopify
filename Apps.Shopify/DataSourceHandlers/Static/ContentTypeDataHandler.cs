@@ -1,4 +1,4 @@
-﻿using Apps.Shopify.Extensions;
+﻿using Apps.Shopify.Constants;
 using Blackbird.Applications.Sdk.Common.Dynamic;
 using Blackbird.Applications.Sdk.Common.Dictionaries;
 
@@ -10,13 +10,13 @@ public class ContentTypeDataHandler : IStaticDataSourceItemHandler
     {
         return
         [
-            new DataSourceItem(TranslatableResource.COLLECTION.ToString(), TranslatableResource.COLLECTION.ToTitle()),
-            new DataSourceItem(TranslatableResource.METAFIELD.ToString(), TranslatableResource.METAFIELD.ToTitle()),
-            new DataSourceItem(TranslatableResource.ARTICLE.ToString(), TranslatableResource.ARTICLE.ToTitle()),
-            new DataSourceItem(TranslatableResource.BLOG.ToString(), TranslatableResource.BLOG.ToTitle()),
-            new DataSourceItem(TranslatableResource.PAGE.ToString(), TranslatableResource.PAGE.ToTitle()),
-            new DataSourceItem(TranslatableResource.ONLINE_STORE_THEME.ToString(), TranslatableResource.ONLINE_STORE_THEME.ToTitle()),
-            new DataSourceItem(TranslatableResource.PRODUCT.ToString(), TranslatableResource.PRODUCT.ToTitle()),
+            new DataSourceItem(TranslatableResources.Collection, TranslatableResources.Collection),
+            new DataSourceItem(TranslatableResources.Metafield, TranslatableResources.Metafield),
+            new DataSourceItem(TranslatableResources.Article, TranslatableResources.Article),
+            new DataSourceItem(TranslatableResources.Blog, TranslatableResources.Blog),
+            new DataSourceItem(TranslatableResources.Page, TranslatableResources.Page),
+            new DataSourceItem(TranslatableResources.Theme, TranslatableResources.Theme),
+            new DataSourceItem(TranslatableResources.Product, TranslatableResources.Product),
         ];
     }
 }
