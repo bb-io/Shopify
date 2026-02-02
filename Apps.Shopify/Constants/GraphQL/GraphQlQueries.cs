@@ -21,6 +21,7 @@ public static class GraphQlQueries
                  handle
                  createdAt
                  publishedAt
+                 updatedAt
                  description
                  onlineStoreUrl
                  productType

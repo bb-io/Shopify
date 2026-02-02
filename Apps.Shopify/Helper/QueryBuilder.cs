@@ -3,6 +3,7 @@
 public class QueryBuilder
 {
     private readonly List<string> _parts = [];
+    private const string DateFormat = "yyyy-MM-ddTHH:mm:ssZ";
 
     public QueryBuilder Add(string field, string? value)
     {
@@ -31,10 +32,10 @@ public class QueryBuilder
     public QueryBuilder AddDateRange(string field, DateTime? after, DateTime? before)
     {
         if (after.HasValue)
-            _parts.Add($"{field}:>{after.Value:O}");
+            _parts.Add($"{field}:>'{after.Value.ToString(DateFormat)}'");
 
         if (before.HasValue)
-            _parts.Add($"{field}:<{before.Value:O}");
+            _parts.Add($"{field}:<'{before.Value.ToString(DateFormat)}'");
 
         return this;
     }

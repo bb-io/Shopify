@@ -33,6 +33,9 @@ public class GetProductResponse(ProductEntity entity)
     [Display("Published at")]
     public DateTime? PublishedAt { get; set; } = entity.PublishedAt;
 
+    [Display("Updated at")]
+    public DateTime UpdatedAt { get; set; } = entity.UpdatedAt;
+
     [Display("Metafield")]
     public string? Metafield { get; set; } = MetafieldFormatter.Prettify(entity.Metafield?.Value);
 }

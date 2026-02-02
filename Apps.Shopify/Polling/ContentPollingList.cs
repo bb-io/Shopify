@@ -18,7 +18,7 @@ public class ContentPollingList(InvocationContext invocationContext) : ShopifyIn
 
     [BlueprintEventDefinition(BlueprintEvent.ContentCreatedOrUpdatedMultiple)]
     [PollingEvent("On content updated", "On existing content is updated")]
-    public async Task<PollingEventResponse<DateMemory, ContentUpdatedResponse>> OnContentCreatedOrUpdated(
+    public async Task<PollingEventResponse<DateMemory, ContentUpdatedResponse>> OnContentUpdated(
         PollingEventRequest<DateMemory> request,
         [PollingEventParameter] PollUpdatedContentRequest input)
     {
