@@ -43,14 +43,13 @@ public class SearchContentRequest : ICreatedDateFilter, IUpdatedDateFilter, IPub
         this.ValidateDates();
 
         bool searchesMetafields = 
-            ContentTypes != null && 
+            ContentTypes == null || 
             ContentTypes.Contains(Shopify.TranslatableResource.METAFIELD.ToString());
 
         if (searchesMetafields && string.IsNullOrEmpty(MetafieldOwnerType))
         {
             throw new PluginMisconfigurationException(
-                "When searching for Metafields, " +
-                "you must select a 'Metafield owner type'"
+                "When searching for metafields, you must select a 'Metafield owner type'"
             );
         }
     }

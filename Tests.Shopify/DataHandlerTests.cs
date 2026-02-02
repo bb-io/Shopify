@@ -54,8 +54,8 @@ public class DataHandlerTests : TestBase
     public async Task AssetThemeDataHandler_ReturnsAssetThemes()
     {
         // Arrange
-        var theme = new ThemeIdentifier { /*ThemeId = "gid://shopify/OnlineStoreTheme/162863874332"*/ };
-        var contentRequest = new DownloadContentRequest { ContentId = "gid://shopify/OnlineStoreTheme/162863874332" };
+        var theme = new ThemeIdentifier { ThemeId = "gid://shopify/OnlineStoreTheme/180081623324" };
+        var contentRequest = new DownloadContentRequest { ContentId = "gid://shopify/OnlineStoreTheme/180081623324" };
 
         // Act
         await TestHandler<AssetThemeDataHandler>(theme, contentRequest);

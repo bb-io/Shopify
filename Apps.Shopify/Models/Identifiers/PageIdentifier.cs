@@ -4,8 +4,9 @@ using Blackbird.Applications.Sdk.Common.Dynamic;
 
 namespace Apps.Shopify.Models.Identifiers;
 
-public class ThemeIdentifier
+public class PageIdentifier
 {
-    [Display("Theme ID"), DataSource(typeof(ThemeDataHandler))]
-    public string ThemeId { get; set; }
+    [Display("Page ID")]
+    [DataSource(typeof(PageDataHandler))]
+    public string PageId { get; set; }
 }

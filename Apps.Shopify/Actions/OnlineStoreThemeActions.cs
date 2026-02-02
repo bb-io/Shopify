@@ -2,7 +2,6 @@ using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Theme;
 using Apps.Shopify.Models.Identifiers;
-using Apps.Shopify.Models.Request.Assets;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.OnlineStoreTheme;
 using Apps.Shopify.Models.Request.Theme;
@@ -42,7 +41,7 @@ public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileM
     [Action("Download theme", Description = "Download content of a specific theme")]
     public async Task<DownloadThemeResponse> GetOnlineStoreThemeTranslationContent(
         [ActionParameter] ThemeIdentifier theme,
-        [ActionParameter] GetOnlineStoreThemeContentAsHtmlRequest input,
+        [ActionParameter] DownloadThemeRequest input,
         [ActionParameter] LocaleIdentifier locale,
         [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {

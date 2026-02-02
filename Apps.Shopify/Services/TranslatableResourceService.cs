@@ -105,7 +105,7 @@ public class TranslatableResourceService(InvocationContext invocationContext,
                     Query = GraphQlMutations.TranslationsRegister,
                     Variables = new
                     {
-                        id,
+                        resourceId = id,
                         translations = chunk
                     }
                 };

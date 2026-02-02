@@ -6,7 +6,7 @@ namespace Apps.Shopify.Models.Identifiers;
 
 public class MetafieldDefinitionIdentifier
 {
-    [Display("Metafield")]
+    [Display("Metafield definition ID")]
     [DataSource(typeof(ProductMetafieldDefinitionDataHandler))]
     public string MetafieldDefinitionId { get; set; }
 }

@@ -37,4 +37,36 @@ public class MetafieldTests : TestBase
         PrintJsonResult(result);
         Assert.IsNotNull(result);
     }
+
+    [TestMethod]
+    public async Task GetMetafieldContent_IsSuccess()
+    {
+        // Arrange
+        var action = new MetafieldActions(InvocationContext, FileManager);
+        var product = new ProductIdentifier { ProductId = "gid://shopify/Product/10745816351004" };
+        var locale = new LocaleIdentifier { Locale = "en" };
+        var outdated = new OutdatedOptionalIdentifier { Outdated = false };
+
+        // Act
+        var result = await action.GetMetafieldContent(product, locale, outdated);
+
+        // Assert
+        Console.WriteLine(result.File.Name);
+        Assert.IsNotNull(result);
+    }
+
+    [TestMethod]
+    public async Task UpdateMetaFieldContent_IsSuccess()
+    {
+        // Arrange
+        var action = new MetafieldActions(InvocationContext, FileManager);
+        var input = new UploadMetafieldRequest
+        {
+            File = new FileReference { Name = "test.html" },
+        };
+        var locale = new NonPrimaryLocaleIdentifier { Locale = "nl" };
+
+        // Act
+        await action.UpdateMetaFieldContent(input, locale);
+    }
 }

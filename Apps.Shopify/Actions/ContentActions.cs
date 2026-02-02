@@ -16,14 +16,14 @@ using Apps.Shopify.Extensions;
 namespace Apps.Shopify.Actions;
 
 [ActionList("Content")]
-public class GenericActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient) 
+public class ContentActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient) 
     : ShopifyInvocable(invocationContext)
 {
     private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
 
     [BlueprintActionDefinition(BlueprintAction.UploadContent)]
     [Action("Upload content", Description = "Upload content of a specific content type from a file")]
-    public async Task UpdateContent([ActionParameter] UploadContentRequest input)
+    public async Task UploadContent([ActionParameter] UploadContentRequest input)
     {
         var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, input.Content);
 

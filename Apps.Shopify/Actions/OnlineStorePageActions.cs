@@ -43,14 +43,14 @@ public class OnlineStorePageActions(InvocationContext invocationContext, IFileMa
 
     [Action("Download page", Description = "Download content of a specific page")]
     public async Task<DownloadPageResponse> GetOnlineStorePageTranslationContent(
-        [ActionParameter] OnlineStorePageRequest input, 
+        [ActionParameter] PageIdentifier input, 
         [ActionParameter] LocaleIdentifier locale,
         [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
         var service = _factory.GetContentService(TranslatableResource.PAGE);
         var request = new DownloadContentRequest
         {
-            ContentId = input.OnlineStorePageId,
+            ContentId = input.PageId,
             Locale = locale.Locale,
             Outdated = getContentRequest.Outdated,
         };
