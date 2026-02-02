@@ -116,7 +116,7 @@ public static class ShopifyHtmlConverter
 
     public static MemoryStream ProductToHtml(ProductContentDto contentDto)
     {
-        var (doc, body) = PrepareEmptyHtmlDocument(HtmlMetadataConstants.ProductContent);
+        var (doc, body) = PrepareEmptyHtmlDocument(TranslatableResource.PRODUCT.ToString().ToLower());
         FillInIdentifiedContentEntities(doc, body, contentDto.ProductContentEntities);
 
         if (contentDto.MetafieldsContentEntities is not null && contentDto.MetafieldsContentEntities.Any())
@@ -192,7 +192,7 @@ public static class ShopifyHtmlConverter
 
     public static MemoryStream StoreToHtml(StoreContentDto contentDto)
     {
-        var (doc, body) = PrepareEmptyHtmlDocument(HtmlMetadataConstants.StoreContent);
+        var (doc, body) = PrepareEmptyHtmlDocument(TranslatableResource.STORE.ToString().ToLower());
 
         if (contentDto.ThemesContentEntities is not null && contentDto.ThemesContentEntities.Any())
         {

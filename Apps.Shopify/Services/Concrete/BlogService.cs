@@ -1,5 +1,4 @@
-﻿using Apps.Shopify.Constants;
-using Apps.Shopify.Constants.GraphQL;
+﻿using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
 using Apps.Shopify.HtmlConversion;
@@ -49,7 +48,7 @@ public class BlogService(InvocationContext invocationContext, IFileManagementCli
         var html = ShopifyHtmlConverter.BlogToHtml(blogTranslations.Select(x => new IdentifiedContentEntity(x)
         {
             Id = input.ContentId
-        }), blogPostTranslations, HtmlMetadataConstants.OnlineStoreBlogContent);
+        }), blogPostTranslations, TranslatableResource.BLOG.ToString().ToLower());
 
         return await fileManagementClient.UploadAsync(
             html, 

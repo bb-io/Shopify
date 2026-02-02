@@ -62,7 +62,7 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
             });
         });
         
-        var html = ShopifyHtmlConverter.ToHtml(contentEntities, HtmlMetadataConstants.StoreResourcesContent);
+        var html = ShopifyHtmlConverter.ToHtml(contentEntities, TranslatableResource.STORE_RESOURCES.ToString().ToLower());
         var file = await fileManagementClient.UploadAsync(
             html, 
             MediaTypeNames.Text.Html, 

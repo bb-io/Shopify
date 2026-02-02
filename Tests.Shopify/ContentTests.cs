@@ -1,7 +1,6 @@
 ﻿using ShopifyTests.Base;
 using Apps.Shopify.Actions;
 using Apps.Shopify.Models.Request.Content;
-using Apps.Shopify.Models.Identifiers;
 
 namespace Tests.Shopify;
 
@@ -54,7 +53,7 @@ public class ContentTests : TestBase
 		var input = new UploadContentRequest
 		{
 			Content = new FileReference { Name = "test.html" },
-			Locale = "fr"
+			Locale = "en"
 		};
 
         // Act

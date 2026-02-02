@@ -1,5 +1,4 @@
-﻿using Apps.Shopify.Constants;
-using Apps.Shopify.Constants.GraphQL;
+﻿using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.Invocables;
@@ -35,7 +34,7 @@ public class ThemeService(InvocationContext invocationContext, IFileManagementCl
                 .ToList();
         }
 
-        var html = ShopifyHtmlConverter.ToHtml(translatableContent, HtmlMetadataConstants.OnlineStoreThemeContent);
+        var html = ShopifyHtmlConverter.ToHtml(translatableContent, TranslatableResource.ONLINE_STORE_THEME.ToString().ToLower());
         return await fileManagementClient.UploadAsync(
             html, 
             MediaTypeNames.Text.Html, 

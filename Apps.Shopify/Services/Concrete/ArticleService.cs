@@ -1,5 +1,4 @@
-﻿using Apps.Shopify.Constants;
-using Apps.Shopify.Constants.GraphQL;
+﻿using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Article;
@@ -23,8 +22,8 @@ public class ArticleService(InvocationContext invocationContext, IFileManagement
         return await _resourceService.GetResourceContent(
             input.ContentId, 
             input.Locale, 
-            input.Outdated ?? default, 
-            HtmlMetadataConstants.OnlineStoreArticle
+            input.Outdated ?? default,
+            TranslatableResource.ARTICLE.ToString().ToLower()
         );
     }
 

@@ -1,5 +1,4 @@
-﻿using Apps.Shopify.Constants;
-using Apps.Shopify.Constants.GraphQL;
+﻿using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Collection;
@@ -23,8 +22,8 @@ public class CollectionService(InvocationContext invocationContext, IFileManagem
         return await _resourceService.GetResourceContent(
             input.ContentId, 
             input.Locale, 
-            input.Outdated ?? default, 
-            HtmlMetadataConstants.Collection
+            input.Outdated ?? default,
+            TranslatableResource.COLLECTION.ToString().ToLower()
         );
     }
 

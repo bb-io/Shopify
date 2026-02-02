@@ -29,5 +29,7 @@ public enum TranslatableResource
     SELLING_PLAN,
     SELLING_PLAN_GROUP,
     SHOP,
-    SHOP_POLICY
+    SHOP_POLICY,
+    STORE,
+    STORE_RESOURCES
 }

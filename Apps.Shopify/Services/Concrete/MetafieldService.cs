@@ -1,5 +1,4 @@
 ﻿using Apps.Shopify.Api;
-using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.HtmlConversion;
@@ -39,8 +38,8 @@ public class MetafieldService(InvocationContext invocationContext, IFileManageme
             : resources.Select(x => (x.ResourceId, x.Translations.FirstOrDefault())).ToArray();
 
         var html = ShopifyHtmlConverter.MetaFieldsToHtml(
-            contents.Where(x => x.Item2 is not null), 
-            HtmlMetadataConstants.MetafieldContent
+            contents.Where(x => x.Item2 is not null),
+            TranslatableResource.METAFIELD.ToString().ToLower()
         );
         return await fileManagementClient.UploadAsync(
             html, 

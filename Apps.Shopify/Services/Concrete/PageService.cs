@@ -23,8 +23,8 @@ public class PageService(InvocationContext invocationContext, IFileManagementCli
         return await _resourceService.GetResourceContent(
             input.ContentId, 
             input.Locale, 
-            input.Outdated ?? default, 
-            HtmlMetadataConstants.OnlineStorePageContent
+            input.Outdated ?? default,
+            TranslatableResource.PAGE.ToString().ToLower()
         );
     }
 
