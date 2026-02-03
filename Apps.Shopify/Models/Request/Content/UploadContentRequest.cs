@@ -1,5 +1,5 @@
 ﻿using Apps.Shopify.DataSourceHandlers;
-using Apps.Shopify.DataSourceHandlers.DictionaryHandlers;
+using Apps.Shopify.DataSourceHandlers.Static;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Dictionaries;
 using Blackbird.Applications.Sdk.Common.Dynamic;

@@ -6,7 +6,7 @@ namespace Apps.Shopify.Models.Request.Theme;
 
 public class SearchThemesRequest
 {
-    [Display("Roles"), StaticDataSource(typeof(ThemeRoleDataHandler))]
+    [Display("Role"), StaticDataSource(typeof(ThemeRoleDataHandler))]
     public string? Role { get; set; }
 
     [Display("Name contains")]

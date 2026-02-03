@@ -1,4 +1,4 @@
-﻿using Apps.Shopify.DataSourceHandlers.DictionaryHandlers;
+﻿using Apps.Shopify.DataSourceHandlers.Static;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Dictionaries;
 

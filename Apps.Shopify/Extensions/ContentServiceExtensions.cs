@@ -1,5 +1,4 @@
-﻿using Apps.Shopify.Models.Entities.Content;
-using Apps.Shopify.Models.Request.Content;
+﻿using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Response.Content;
 using Apps.Shopify.Services;
 
@@ -11,15 +10,10 @@ public static class ContentServiceExtensions
         this List<IContentService> contentServices,
         SearchContentRequest request)
     {
-        var result = new List<ContentItemEntity>();
+        var searchTasks = contentServices.Select(service => service.Search(request));
+        var results = await Task.WhenAll(searchTasks);
 
-        foreach (var contentService in contentServices)
-        {
-            var response = await contentService.Search(request);
-            var items = response.Items;
-            result.AddRange(items);
-        }
-
-        return new(result);
+        var allItems = results.SelectMany(x => x.Items).ToList();
+        return new(allItems);
     }
 }

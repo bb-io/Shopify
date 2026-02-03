@@ -14,7 +14,7 @@ public class ContentTests : TestBase
 		var action = new ContentActions(InvocationContext, FileManager);
 		var input = new SearchContentRequest
 		{
-			ContentTypes = ["Product"]
+			MetafieldOwnerType = "PRODUCT"
         };
 
 		// Act

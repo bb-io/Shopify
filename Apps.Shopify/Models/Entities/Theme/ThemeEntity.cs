@@ -4,10 +4,10 @@ namespace Apps.Shopify.Models.Entities.Theme;
 
 public class ThemeEntity
 {
-    [Display("ID")]
+    [Display("Theme ID")]
     public string Id { get; set; }
 
-    [Display("Name")]
+    [Display("Theme name")]
     public string Name { get; set; }
 
     [Display("Role")]

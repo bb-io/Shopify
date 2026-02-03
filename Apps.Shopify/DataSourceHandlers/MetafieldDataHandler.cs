@@ -23,7 +23,6 @@ public class MetafieldDataHandler(InvocationContext invocationContext)
         return response
             .Where(x => context.SearchString is null ||
                         x.Name.Contains(context.SearchString, StringComparison.OrdinalIgnoreCase))
-            .Take(50)
             .Select(x => new DataSourceItem(x.Id, x.Name))
             .ToList();
     }

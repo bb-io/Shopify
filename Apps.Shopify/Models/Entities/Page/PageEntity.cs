@@ -4,10 +4,10 @@ namespace Apps.Shopify.Models.Entities.Page;
 
 public class PageEntity
 {
-    [Display("ID")]
+    [Display("Page ID")]
     public string Id { get; set; }
 
-    [Display("Title")]
+    [Display("Page title")]
     public string Title { get; set; }
 
     [Display("Created at")] 

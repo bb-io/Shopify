@@ -2,7 +2,7 @@ using Apps.Shopify.Models.Entities.Resource;
 
 namespace Apps.Shopify.Models.Entities.Product;
 
-public class ProductOptions
+public class ProductOption
 {
     public string Id { get; set; }
     

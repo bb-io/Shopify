@@ -15,7 +15,7 @@ public class CollectionTests : TestBase
 		var actions = new CollectionActions(InvocationContext, FileManager);
 		var input = new SearchCollectionsRequest
 		{
-			TitleContains = "Collection"
+			UpdatedAfter = DateTime.UtcNow - TimeSpan.FromMinutes(5)
 		};
 
 		// Act

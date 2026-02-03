@@ -4,7 +4,7 @@ namespace Apps.Shopify.Models.Entities.Metafield;
 
 public class MetafieldDefinitionEntity
 {
-    [Display("ID")]
+    [Display("Metafield ID")]
     public string Id { get; set; }
     
     [Display("Key")]    

@@ -4,10 +4,10 @@ namespace Apps.Shopify.Models.Entities.Collection;
 
 public class CollectionEntity
 {
-    [Display("ID")]
+    [Display("Collection ID")]
     public string Id { get; set; }
 
-    [Display("Title")]
+    [Display("Collection title")]
     public string Title { get; set; }
 
     [Display("Description")]

@@ -13,11 +13,12 @@ public class ArticleDataHandler(InvocationContext invocationContext)
     public async Task<IEnumerable<DataSourceItem>> GetDataAsync(DataSourceContext context, CancellationToken cancellationToken)
     {
         var response = await Client.Paginate<ArticleEntity, ArticlesPaginationResponse>(
-            GraphQlQueries.Articles, 
+            GraphQlQueries.Articles,
             [],
             cancellationToken
         );
 
+        // Because API filtering by title does not work
         if (!string.IsNullOrEmpty(context.SearchString))
         {
             response = response.Where(x =>

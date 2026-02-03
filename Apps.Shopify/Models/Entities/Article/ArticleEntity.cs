@@ -4,10 +4,10 @@ namespace Apps.Shopify.Models.Entities.Article;
 
 public class ArticleEntity
 {
-    [Display("ID")]
+    [Display("Article ID")]
     public string Id { get; set; }
 
-    [Display("Title")]
+    [Display("Article title")]
     public string Title { get; set; }
 
     [Display("Created at")] 

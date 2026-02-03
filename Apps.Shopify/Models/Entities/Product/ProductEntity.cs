@@ -7,7 +7,7 @@ public class ProductEntity
     [Display("Product ID")]
     public string Id { get; set; }
     
-    [Display("Title")]
+    [Display("Product title")]
     public string Title { get; set; }
 
     [Display("Description")]
@@ -38,5 +38,5 @@ public class ProductEntity
     public ProductMetafield? Metafield { get; set; }
 
     [Display("Options")]
-    public IEnumerable<ProductOptions>? Options { get; set; }
+    public IEnumerable<ProductOption>? Options { get; set; }
 }

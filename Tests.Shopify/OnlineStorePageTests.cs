@@ -16,8 +16,7 @@ public class OnlineStorePageTests : TestBase
 		var action = new OnlineStorePageActions(InvocationContext, FileManager);
 		var input = new SearchPagesRequest
 		{
-            //PublishedAfter = new DateTime(2023, 12, 11, 00, 00, 00, DateTimeKind.Utc),
-			//PublishedBefore = new DateTime(2023, 12, 13, 00, 00, 00, DateTimeKind.Utc),
+            UpdatedAfter = DateTime.UtcNow - TimeSpan.FromMinutes(5),
         };
 
 		// Act

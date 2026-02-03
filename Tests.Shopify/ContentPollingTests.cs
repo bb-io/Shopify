@@ -14,7 +14,7 @@ public class ContentPollingTests : TestBase
     {
 		// Arrange
 		var polling = new ContentPollingList(InvocationContext);
-		var date = new DateMemory { LastInteractionDate = DateTime.UtcNow - TimeSpan.FromHours(1) };
+		var date = new DateMemory { LastInteractionDate = DateTime.UtcNow - TimeSpan.FromMinutes(5) };
         var request = new PollingEventRequest<DateMemory> { Memory = date };
         var input = new PollUpdatedContentRequest { };
 

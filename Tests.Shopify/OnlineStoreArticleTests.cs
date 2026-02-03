@@ -16,8 +16,7 @@ public class OnlineStoreArticleTests : TestBase
 		var action = new OnlineStoreArticleActions(InvocationContext, FileManager);
 		var input = new SearchArticlesRequest
 		{
-            //UpdatedAfter = new DateTime(2024, 07, 09, 0, 0, 0, DateTimeKind.Utc),
-			//UpdatedBefore = new DateTime(2024, 07, 12, 0, 0, 0, DateTimeKind.Utc),
+            UpdatedAfter = DateTime.UtcNow - TimeSpan.FromMinutes(5)
         };
 
 		// Act

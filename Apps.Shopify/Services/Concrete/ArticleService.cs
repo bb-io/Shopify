@@ -40,6 +40,7 @@ public class ArticleService(InvocationContext invocationContext, IFileManagement
             QueryHelper.QueryToDictionary(query)
         );
 
+        // API 'title' filter does not work
         if (!string.IsNullOrEmpty(input.NameContains))
         {
             response = response.Where(x =>

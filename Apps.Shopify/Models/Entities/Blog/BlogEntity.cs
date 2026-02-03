@@ -4,10 +4,10 @@ namespace Apps.Shopify.Models.Entities.Blog;
 
 public class BlogEntity
 {
-    [Display("ID")]
+    [Display("Blog ID")]
     public string Id { get; set; }
 
-    [Display("Title")]
+    [Display("Blog title")]
     public string Title { get; set; }
 
     [Display("Created at")]
