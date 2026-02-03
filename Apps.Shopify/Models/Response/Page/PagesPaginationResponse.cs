@@ -1,11 +1,11 @@
-using Apps.Shopify.Models.Entities;
+using Apps.Shopify.Models.Entities.Page;
 using Apps.Shopify.Models.Response.Pagination;
 using Newtonsoft.Json;
 
 namespace Apps.Shopify.Models.Response.Page;
 
-public class PagesPaginationResponse : IRestPaginationResponse<OnlineStorePageEntity>
+public class PagesPaginationResponse : IPaginationResponse<PageEntity>
 {
     [JsonProperty("pages")]
-    public IEnumerable<OnlineStorePageEntity> Items { get; set; }
+    public PaginationData<PageEntity> Items { get; set; }
 }

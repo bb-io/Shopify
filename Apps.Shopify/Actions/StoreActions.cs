@@ -1,27 +1,31 @@
-﻿using System.Net.Mime;
-using Apps.Shopify.Actions.Base;
-using Apps.Shopify.Constants;
+﻿using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
+using Apps.Shopify.Helper;
 using Apps.Shopify.HtmlConversion;
-using Apps.Shopify.Models.Entities;
-using Apps.Shopify.Models.Request;
+using Apps.Shopify.Invocables;
+using Apps.Shopify.Models.Entities.Resource;
+using Apps.Shopify.Models.Identifiers;
 using Apps.Shopify.Models.Request.OnlineStore;
-using Apps.Shopify.Models.Response;
 using Apps.Shopify.Models.Response.Locale;
+using Apps.Shopify.Models.Response.Store;
+using Apps.Shopify.Services;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using GraphQL;
+using System.Net.Mime;
 
 namespace Apps.Shopify.Actions;
 
 [ActionList("Stores")]
 public class StoreActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : TranslatableResourceActions(invocationContext, fileManagementClient)
+    : ShopifyInvocable(invocationContext)
 {
-    [Action("Get store locales information", Description = "Get primary and other locales")]
+    private readonly TranslatableResourceService _translatableResourceService = new(invocationContext, fileManagementClient);
+
+    [Action("Get store locales information", Description = "Get primary and additional store locales")]
     public async Task<StoreLocalesResponse> GetStoreLanguages()
     {
         var request = new GraphQLRequest()
@@ -30,24 +34,25 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
         };
         var response = await Client.ExecuteWithErrorHandling<ShopLocalesResponse>(request);
 
-        return new StoreLocalesResponse
-        {
-            Primary = response.ShopLocales.First(x => x.Primary).Locale,
-            OtherLocales = response.ShopLocales.Where(x => x.Primary is false).Select(x => x.Locale)
-        };
+        string primaryLocale = response.ShopLocales.First(x => x.Primary).Locale;
+        IEnumerable<string> otherLocales = response.ShopLocales.Where(x => x.Primary is false).Select(x => x.Locale);
+        return new StoreLocalesResponse(primaryLocale, otherLocales);
     }
 
-    [Action("Download store resources",
-        Description = "Get content of all store resource type items")]
-    public async Task<FileResponse> GetStoreResourcesContent([ActionParameter] ResourceTypeRequest input,
-        [ActionParameter] LocaleRequest locale, [ActionParameter] GetContentRequest getContentRequest)
-
+    [Action("Download store resources", Description = "Download content of all store resource type items")]
+    public async Task<DownloadStoreResourcesResponse> GetStoreResourcesContent(
+        [ActionParameter] ResourceTypeIdentifier input,
+        [ActionParameter] LocaleIdentifier locale, 
+        [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
         if (!Enum.TryParse(input.ResourceType, ignoreCase: true, out TranslatableResource resourceType))
             throw new PluginMisconfigurationException("Invalid resource type value specified. Please check the input");
 
-        var resources =
-            await ListTranslatableResources(resourceType, locale.Locale, getContentRequest.Outdated ?? default);
+        var resources = await _translatableResourceService.ListTranslatableResources(
+            resourceType, 
+            locale.Locale, 
+            getContentRequest.Outdated ?? default
+        );
         var contentEntities = resources.SelectMany(x =>
         {
             var content = x.GetTranslatableContent();
@@ -57,78 +62,98 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
             });
         });
         
-        var html = ShopifyHtmlConverter.ToHtml(contentEntities, HtmlContentTypes.StoreResourcesContent);
-        return new()
-        {
-            File = await FileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html,
-                $"{input.ResourceType}-{locale.Locale}.html")
-        };
+        var html = ShopifyHtmlConverter.ToHtml(contentEntities, TranslatableResources.Store);
+        var file = await fileManagementClient.UploadAsync(
+            html, 
+            MediaTypeNames.Text.Html, 
+            $"{input.ResourceType}-{locale.Locale}.html"
+        );
+        return new(file);
     }
 
-    [Action("Upload store resources",
-        Description = "Update content of all store resource type items")]
-    public async Task UpdateStoreResourcesContent([ActionParameter] LocaleRequest locale, FileRequest file)
-
+    [Action("Upload store resources", Description = "Upload content of all store resource type items")]
+    public async Task UpdateStoreResourcesContent(
+        [ActionParameter] LocaleIdentifier locale,
+        [ActionParameter] UploadStoreResourcesRequest input)
     {
-        var html = await GetHtmlFromFile(file.File);
+        var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, input.Content);
         var content = ShopifyHtmlConverter.ToJson(html, locale.Locale).ToList();
-        await UpdateIdentifiedContent(content);
+        await _translatableResourceService.UpdateIdentifiedContent(content);
     }
 
-
-    [Action("Download store content",
-        Description = "Get content of the store")]
-    public async Task<FileResponse> GetStoreContent([ActionParameter] StoreContentRequest input,
-        [ActionParameter] LocaleRequest locale, [ActionParameter] GetContentRequest getContentRequest)
-
+    [Action("Download store content", Description = "Download content of the store")]
+    public async Task<DownloadStoreContentResponse> GetStoreContent(
+        [ActionParameter] DownloadStoreContentRequest input,
+        [ActionParameter] LocaleIdentifier locale, 
+        [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
         if (NoneItemsIncluded(input))
             throw new PluginMisconfigurationException("You should include at least one content type. Please check your input and try again");
 
         var html = ShopifyHtmlConverter.StoreToHtml(new()
         {
-            ThemesContentEntities = input.IncludeThemes is true
-                ? await ListIdentifiedTranslatableResources(TranslatableResource.ONLINE_STORE_THEME, locale.Locale,
-                    getContentRequest.Outdated ?? default)
+            ThemesContentEntities = 
+                input.IncludeThemes is true 
+                ? await _translatableResourceService.ListIdentifiedTranslatableResources(
+                    TranslatableResource.ONLINE_STORE_THEME, 
+                    locale.Locale,
+                    getContentRequest.Outdated ?? default
+                )
                 : null,
-            MenuContentEntities = input.IncludeMenu is true
-                ? await ListIdentifiedTranslatableResources(TranslatableResource.ONLINE_STORE_MENU, locale.Locale,
-                    getContentRequest.Outdated ?? default)
+            MenuContentEntities = 
+                input.IncludeMenu is true
+                ? await _translatableResourceService.ListIdentifiedTranslatableResources(
+                    TranslatableResource.ONLINE_STORE_MENU, 
+                    locale.Locale,
+                    getContentRequest.Outdated ?? default
+                )
                 : null,
-            ShopContentEntities = input.IncludeShop is true
-                ? await ListIdentifiedTranslatableResources(TranslatableResource.SHOP, locale.Locale,
-                    getContentRequest.Outdated ?? default)
+            ShopContentEntities = 
+                input.IncludeShop is true
+                ? await _translatableResourceService.ListIdentifiedTranslatableResources(
+                    TranslatableResource.SHOP, 
+                    locale.Locale,
+                    getContentRequest.Outdated ?? default
+                )
                 : null,
-            ShopPolicyContentEntities = input.IncludeShopPolicy is true
-                ? await ListIdentifiedTranslatableResources(TranslatableResource.SHOP_POLICY, locale.Locale,
-                    getContentRequest.Outdated ?? default)
+            ShopPolicyContentEntities = 
+                input.IncludeShopPolicy is true
+                ? await _translatableResourceService.ListIdentifiedTranslatableResources(
+                    TranslatableResource.SHOP_POLICY, 
+                    locale.Locale,
+                    getContentRequest.Outdated ?? default
+                )
                 : null,
         });
 
-        return new()
-        {
-            File = await FileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html,
-                $"Shop-{locale.Locale}.html")
-        };
+        var file = await fileManagementClient.UploadAsync(
+            html,
+            MediaTypeNames.Text.Html,
+            $"Shop-{locale.Locale}.html"
+        );
+        return new(file);
     }
 
-    [Action("Upload store content",
-        Description = "Update content of the store from")]
-    public async Task UpdateStoreContent([ActionParameter] LocaleRequest locale, FileRequest file)
-
+    [Action("Upload store content", Description = "Upload content of the store")]
+    public async Task UpdateStoreContent(
+        [ActionParameter] LocaleIdentifier locale, 
+        [ActionParameter] UploadStoreContentRequest input)
     {
-        var html = await GetHtmlFromFile(file.File);
+        var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, input.Content);
         var content = ShopifyHtmlConverter.StoreToJson(html, locale.Locale);
 
-        await UpdateIdentifiedContent(content.ThemesContentEntities?.ToList());
-        await UpdateIdentifiedContent(content.MenuContentEntities?.ToList());
-        await UpdateIdentifiedContent(content.ShopContentEntities?.ToList());
-        await UpdateIdentifiedContent(content.ShopPolicyContentEntities?.ToList());
+        await _translatableResourceService.UpdateIdentifiedContent(content.ThemesContentEntities?.ToList());
+        await _translatableResourceService.UpdateIdentifiedContent(content.MenuContentEntities?.ToList());
+        await _translatableResourceService.UpdateIdentifiedContent(content.ShopContentEntities?.ToList());
+        await _translatableResourceService.UpdateIdentifiedContent(content.ShopPolicyContentEntities?.ToList());
     }
 
-    private bool NoneItemsIncluded(StoreContentRequest input)
+    private static bool NoneItemsIncluded(DownloadStoreContentRequest input)
     {
-        return input.IncludeThemes is not true && input.IncludeMenu is not true && input.IncludeShop is not true &&
-               input.IncludeShopPolicy is not true;
+        return 
+            input.IncludeThemes is not true && 
+            input.IncludeMenu is not true && 
+            input.IncludeShop is not true &&
+            input.IncludeShopPolicy is not true;
     }
 }

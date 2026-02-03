@@ -1,154 +1,80 @@
-using System.Net.Mime;
-using Apps.Shopify.Actions.Base;
-using Apps.Shopify.Api.Rest;
 using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
-using Apps.Shopify.Extensions;
-using Apps.Shopify.HtmlConversion;
-using Apps.Shopify.Models.Entities;
-using Apps.Shopify.Models.Request;
+using Apps.Shopify.Helper;
+using Apps.Shopify.Invocables;
+using Apps.Shopify.Models.Entities.Blog;
+using Apps.Shopify.Models.Identifiers;
+using Apps.Shopify.Models.Request.Blog;
+using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.OnlineStoreBlog;
-using Apps.Shopify.Models.Request.TranslatableResource;
-using Apps.Shopify.Models.Response;
-using Apps.Shopify.Models.Response.Article;
 using Apps.Shopify.Models.Response.Blog;
-using Apps.Shopify.Models.Response.TranslatableResource;
+using Apps.Shopify.Services;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
-using GraphQL;
-using RestSharp;
 
 namespace Apps.Shopify.Actions;
 
-[ActionList("Online store blogs")]
+[ActionList("Blogs")]
 public class OnlineStoreBlogActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : TranslatableResourceActions(invocationContext, fileManagementClient)
+    : ShopifyInvocable(invocationContext)
 {
-    [Action("List online store blogs", Description = "List all blogs in the online store")]
-    public async Task<ListBlogsResponse> SearchBlogs()
+    private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
+    private readonly string ContentType = TranslatableResources.Blog;
+
+    [Action("Search blogs", Description = "Search blogs with specific criteria")]
+    public async Task<SearchBlogsResponse> SearchBlogs([ActionParameter] SearchBlogsRequest input)
     {
-        var variables = new Dictionary<string, object>()
-        {
-            ["resourceType"] = TranslatableResource.ONLINE_STORE_BLOG
-        };
-        var response = await Client
-            .Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
-                GraphQlQueries.TranslatableResources,
-                variables);
-        return new ListBlogsResponse
-        {
-            Blogs = response.Select(x => new Blog
-            {
-                ResourceId = x.ResourceId,
-                Title = x.TranslatableContent.First(y => y.Key == "title").Value
-            })
-        };
+        input.ValidateDates();
+
+        string? query = new QueryBuilder()
+            .AddContains("title", input.TitleContains)
+            .AddDateRange("updated_at", input.UpdatedAfter, input.UpdatedBefore)
+            .AddDateRange("created_at", input.CreatedAfter, input.CreatedBefore)
+            .Build();
+
+        var response = await Client.Paginate<BlogEntity, BlogsPaginationResponse>(
+            GraphQlQueries.Blogs,
+            QueryHelper.QueryToDictionary(query)
+        );
+
+        return new(response);
     }
 
-    [Action("Download online store blog",
-        Description = "Get content of a specific online store blog")]
-    public async Task<FileResponse> GetOnlineStoreBlogTranslationContent(
-        [ActionParameter] OnlineStoreBlogRequest input, [ActionParameter] LocaleRequest locale,
-        [ActionParameter, Display("Include articles")]
-        bool? includeBlogsPosts,
-        [ActionParameter] GetContentRequest getContentRequest)
+    [Action("Download blog", Description = "Download content of a specific blog")]
+    public async Task<DownloadBlogResponse> GetOnlineStoreBlogTranslationContent(
+        [ActionParameter] BlogIdentifier blogId, 
+        [ActionParameter] LocaleIdentifier locale,
+        [ActionParameter] DownloadBlogRequest blogInput,
+        [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
-        var request = new GraphQLRequest()
+        var service = _factory.GetContentService(ContentType);
+        var request = new DownloadContentRequest
         {
-            Query = GraphQlQueries.TranslatableResourceTranslations,
-            Variables = new
-            {
-                resourceId = input.OnlineStoreBlogId,
-                locale = locale.Locale,
-                outdated = getContentRequest.Outdated ?? false
-            }
+            ContentId = blogId.BlogId,
+            IncludeBlogPosts = blogInput.IncludeBlogPosts,
+            Locale = locale.Locale,
+            Outdated = getContentRequest.Outdated,
         };
-        var blog = await Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
-        var blogTranslations = blog.TranslatableResource.GetTranslatableContent();
 
-        var blogPostTranslations = includeBlogsPosts is true
-            ? await GetBlogPostTranslations(input.OnlineStoreBlogId, locale.Locale,
-                getContentRequest.Outdated ?? default)
-            : [];
-
-        var html = ShopifyHtmlConverter.BlogToHtml(blogTranslations.Select(x => new IdentifiedContentEntity(x)
-        {
-            Id = input.OnlineStoreBlogId
-        }), blogPostTranslations, HtmlContentTypes.OnlineStoreBlogContent);
-
-        return new()
-        {
-            File = await FileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html,
-                $"{input.OnlineStoreBlogId.GetShopifyItemId()}.html")
-        };
+        var file = await service.Download(request);
+        return new(file);
     }
 
-    [Action("Upload online store blog",
-        Description = "Upload content of a specific online store blog")]
-    public async Task UpdateOnlineStoreBlogContent([ActionParameter] NonPrimaryLocaleRequest locale, [ActionParameter] FileRequest file)
+    [Action("Upload blog", Description = "Upload content of a specific blog")]
+    public async Task UpdateOnlineStoreBlogContent(
+        [ActionParameter] UploadBlogRequest input,
+        [ActionParameter] NonPrimaryLocaleIdentifier locale)
     {
-        var html = await GetHtmlFromFile(file.File);
-        var (blog, blogPosts) = ShopifyHtmlConverter.BlogToJson(html, locale.Locale);
-
-        var blogContent = blog.ToList();
-        await UpdateBlogContent(blogContent.First().ResourceId, blogContent);
-
-        var blogPostsContent = blogPosts.ToList();
-        if (blogPostsContent.Any())
-            await UpdateIdentifiedContent(blogPostsContent);
-    }
-
-    private async Task UpdateBlogContent(string blogId, ICollection<IdentifiedContentRequest> blogContents)
-    {
-        if (blogContents.Any(x => string.IsNullOrWhiteSpace(x.TranslatableContentDigest)))
+        var service = _factory.GetContentService(ContentType);
+        var request = new UploadContentRequest
         {
-            var sourceContent = await GetResourceSourceContent(blogId);
-            blogContents.ToList().ForEach(x =>
-                x.TranslatableContentDigest = sourceContent.TranslatableResource.TranslatableContent
-                    .First(y => y.Key == x.Key).Digest);
-        }
-
-        var request = new GraphQLRequest()
-        {
-            Query = GraphQlMutations.TranslationsRegister,
-            Variables = new
-            {
-                resourceId = blogId,
-                translations = blogContents.Select(x => new TranslatableResourceContentRequest(x))
-            }
+            Content = input.File,
+            ContentId = input.BlogId,
+            Locale = locale.Locale
         };
 
-        await Client.ExecuteWithErrorHandling(request);
-    }
-
-    private async Task<ICollection<IdentifiedContentEntity>> GetBlogPostTranslations(string blogId, string locale,
-        bool outdated = false)
-    {
-        var request = new ShopifyRestRequest($"blogs/{blogId.GetShopifyItemId()}/articles.json", Method.Get, Creds);
-        var response = await new ShopifyRestClient(Creds)
-            .Paginate<OnlineStoreArticleEntity, ArticlesPaginationResponse>(request);
-
-        var ids = response.Select(x => x.Id).ToArray();
-
-        var variables = new Dictionary<string, object>()
-        {
-            ["resourceIds"] = ids,
-            ["locale"] = locale,
-            ["outdated"] = outdated
-        };
-
-        var content = await Client.Paginate<TranslatableResourceEntity, TranslatableResourcesByIdsPaginationResponse>(
-            GraphQlQueries.TranslatableResourcesByIds,
-            variables);
-
-        return content
-            .Select(x => (x.ResourceId, x.GetTranslatableContent()))
-            .SelectMany(x => x.Item2.Select(y => new IdentifiedContentEntity(y)
-            {
-                Id = x.ResourceId
-            }))
-            .ToList();
+        await service.Upload(request);
     }
 }

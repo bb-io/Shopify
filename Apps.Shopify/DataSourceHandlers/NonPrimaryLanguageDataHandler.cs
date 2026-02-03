@@ -7,25 +7,18 @@ using GraphQL;
 
 namespace Apps.Shopify.DataSourceHandlers;
 
-public class NonPrimaryLanguageDataHandler : ShopifyInvocable, IAsyncDataSourceHandler
+public class NonPrimaryLanguageDataHandler(InvocationContext invocationContext) 
+    : ShopifyInvocable(invocationContext), IAsyncDataSourceItemHandler
 {
-    public NonPrimaryLanguageDataHandler(InvocationContext invocationContext) : base(invocationContext)
+    public async Task<IEnumerable<DataSourceItem>> GetDataAsync(DataSourceContext context, CancellationToken cancellationToken)
     {
-    }
-
-    public async Task<Dictionary<string, string>> GetDataAsync(DataSourceContext context,
-        CancellationToken cancellationToken)
-    {
-        var request = new GraphQLRequest()
-        {
-            Query = GraphQlQueries.Locales
-        };
+        var request = new GraphQLRequest() { Query = GraphQlQueries.Locales };
         var response = await Client.ExecuteWithErrorHandling<ShopLocalesResponse>(request, cancellationToken);
 
         return response.ShopLocales
             .Where(x => !x.Primary)
             .Where(x => context.SearchString is null ||
                         x.Name.Contains(context.SearchString, StringComparison.OrdinalIgnoreCase))
-            .ToDictionary(x => x.Locale, x => x.Name);
+            .Select(x => new DataSourceItem(x.Locale, x.Name));
     }
 }

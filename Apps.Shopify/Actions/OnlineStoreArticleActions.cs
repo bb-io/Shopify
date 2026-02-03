@@ -1,58 +1,86 @@
-using Apps.Shopify.Actions.Base;
 using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
-using Apps.Shopify.DataSourceHandlers;
-using Apps.Shopify.Models.Entities;
-using Apps.Shopify.Models.Request;
+using Apps.Shopify.Helper;
+using Apps.Shopify.Invocables;
+using Apps.Shopify.Models.Entities.Article;
+using Apps.Shopify.Models.Identifiers;
+using Apps.Shopify.Models.Request.Article;
+using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.OnlineStoreArticle;
-using Apps.Shopify.Models.Response;
 using Apps.Shopify.Models.Response.Article;
-using Apps.Shopify.Models.Response.TranslatableResource;
+using Apps.Shopify.Services;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
-using Blackbird.Applications.Sdk.Common.Dynamic;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
 namespace Apps.Shopify.Actions;
 
-[ActionList("Online store articles")]
+[ActionList("Articles")]
 public class OnlineStoreArticleActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : TranslatableResourceActions(invocationContext, fileManagementClient)
+    : ShopifyInvocable(invocationContext)
 {
-    [Action("List online store articles", Description = "List all aricles for the online store")]
-    public async Task<ListArticlesResponse> ListArticles()
+    private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
+    private readonly string ContentType = TranslatableResources.Article;
+
+    [Action("Search articles", Description = "Search articles with specific criteria")]
+    public async Task<SearchArticlesResponse> SearchArticles([ActionParameter] SearchArticlesRequest input)
     {
-        var variables = new Dictionary<string, object>()
+        input.ValidateDates();
+
+        string? query = new QueryBuilder()
+            .AddDateRange("published_at", input.PublishedAfter, input.PublishedBefore)
+            .AddDateRange("created_at", input.CreatedAfter, input.CreatedBefore)
+            .AddDateRange("updated_at", input.UpdatedAfter, input.UpdatedBefore)
+            .Build();
+
+        var response = await Client.Paginate<ArticleEntity, ArticlesPaginationResponse>(
+            GraphQlQueries.Articles,
+            QueryHelper.QueryToDictionary(query)
+        );
+
+        if (!string.IsNullOrEmpty(input.TitleContains))
         {
-            ["resourceType"] = TranslatableResource.ONLINE_STORE_ARTICLE
-        };
-        var response = await Client
-            .Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
-                GraphQlQueries.TranslatableResources,
-                variables);
-        return new ListArticlesResponse
-        {
-            Articles = response.Select(x => new Article
-            {
-                ResourceId = x.ResourceId,
-                Title = x.TranslatableContent.First(y => y.Key == "title").Value
-            })
-        };
+            response = response.Where(x =>
+                x.Title.Contains(input.TitleContains, StringComparison.OrdinalIgnoreCase)
+            ).ToList();
+        }
+
+        var result = response.Select(x => new GetArticleResponse(x));
+        return new(result);
     }
 
-    [Action("Download online store article",
-        Description = "Get content of a specific online store article")]
-    public Task<FileResponse> GetOnlineStoreArticleTranslationContent(
-        [ActionParameter] OnlineStoreArticleRequest input, [ActionParameter] LocaleRequest locale,
-        [ActionParameter] GetContentRequest getContentRequest)
-        => GetResourceContent(input.OnlineStoreArticleId, locale.Locale, getContentRequest.Outdated ?? default, HtmlContentTypes.OnlineStoreArticle);
+    [Action("Download article", Description = "Download content of a specific article")]
+    public async Task<DownloadArticleResponse> GetOnlineStoreArticleTranslationContent(
+        [ActionParameter] ArticleIdentifier input, 
+        [ActionParameter] LocaleIdentifier locale,
+        [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
+    {
+        var service = _factory.GetContentService(ContentType);
+        var request = new DownloadContentRequest
+        {
+            ContentId = input.ArticleId,
+            Locale = locale.Locale,
+            Outdated = getContentRequest.Outdated,
+        };
 
-    [Action("Upload online store article",
-        Description = "Upload content of a specific online store article")]
-    public Task UpdateOnlineStoreArticleContent(
-        [ActionParameter, DataSource(typeof(OnlineStoreArticleHandler)), Display("Online store article ID")]
-        string? onlineStoreArticleId,
-        [ActionParameter] NonPrimaryLocaleRequest locale, [ActionParameter] FileRequest file)
-        => UpdateResourceContent(onlineStoreArticleId, locale.Locale, file.File);
+        var file = await service.Download(request);
+        return new(file);
+    }
+
+    [Action("Upload article", Description = "Upload content of a specific article")]
+    public async Task UpdateOnlineStoreArticleContent(
+        [ActionParameter] UploadArticleRequest input,
+        [ActionParameter] NonPrimaryLocaleIdentifier locale)
+    {
+        var service = _factory.GetContentService(ContentType);
+        var request = new UploadContentRequest
+        {
+            ContentId = input.ArticleId,
+            Content = input.File,
+            Locale = locale.Locale,
+        };
+
+        await service.Upload(request);
+    }
 }

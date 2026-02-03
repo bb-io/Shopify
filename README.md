@@ -25,66 +25,89 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 ## Actions
 
 ### Store
-- **Get store locales information** Get primary and other locales setup in the store
-- **Get store resources content as HTML** returns content of all store resource type items in HTML format.
-- **Upload store resources** updates content of all store resource type items.
-- **Download store content** returns content of the store. You should specify what resources you want to export: theme, menu, shop or shop policy.
-- **Upload store content** updates content of the store.
+
+- **Get store locales information** Get primary and additional store locales
+- **Download store resources** Download content of all store resource type items
+- **Upload store resources** Upload content of all store resource type items
+- **Download store content** Download content of the store. You should specify what resources you want to export: theme, menu, shop or shop policy.
+- **Upload store content** Upload content of the store
 
 ### Articles
 
-- **List online store articles** List all articles in the online store
-- **Download online store article** Get content of a specific online store article
-- **Upload online store article** Update content of a specific online store article
+- **Search articles** Search articles with specific criteria
+- **Download article** Download content of a specific article
+- **Upload article** Upload content of a specific article
 
 ### Blogs
 
-- **List online store blogs** List all blogs in the online store
-- **Download online store blog** Get content of a specific online store blog. You can also specify `Include articles` to True to export all blog post's articles as well.
-- **Upload online store blog** Update content of a specific online store blog
+- **Search blogs** Search blogs with specific criteria
+- **Download blog** Download content of a specific blog
+- **Upload blog** Upload content of a specific blog
 
 ### Pages
 
-- **List online store pages** List all pages in the online store
-- **Download online store page** Get content of a specific online store page
-- **Upload online store page content** Update content of a specific online store page
+- **Search pages** Search pages with specific criteria
+- **Download page** Download content of a specific page
+- **Upload page** Upload content of a specific page
 
 ### Products
 
-- **Search products** Search for products based on provided criteria
-- **Download product** Get content of a specific product. You can also optionally specify more entities to export, f.e. metafields, options, option values.
-- **Uploade product** Update content of a specific product
+- **Search products** Search products with specific criteria
+- **Download product** Download content of a specific product
+- **Uploade product** Upload content of a specific product
 
 ### Metafields
 
-- **Download metafields** returns product metafield contents
-- **Upload metafields** updates product metafield contents from
-- **Get metafield** returns metafield details of a specific product
-- **Update metafield** updates metafield value of a specific product
+- **Download metafields** Download metafield content of a specific product
+- **Upload metafields** Upload metafield content of a specific product
+- **Search metafield definitions** Search metafield definitions with specific criteria
+- **Get metafield** Get metafield details of a specific product
+- **Update metafield** Update metafield value of a specific product
 
 ### Themes
 
-- **Download online store theme** returns specific theme's contents
-- **Upload online store theme** updates specific theme's contents
+- **Download heme** Download content of a specific theme
+- **Upload theme** Upload content of a specific theme
+- **Search themes** Search themes with specific criteria
 
-### General
+### Content
 
-- **Upload content** updates content of a specific content. You can specify the content type manually by using optional input;
+> **Note**: These actions support the following content types: collection, metafield, article, blog, page, theme, product.
+
+- **Upload content** Upload content of a specific content type from a file
+- **Download content** Download content of a specific content type
+- **Search content** Search through different content types with specific criteria
 
 ## Events
+
+### Articles
+
+- **On articles created**
+- **On articles updated**
+
+### Pages
+
+- **On pages created**
+- **On pages updated**
+
+### Products
 
 - **On product created**
 - **On product deleted**
 - **On product updated**
 - **On product publications added**
 - **On product publications deleted**
+
+### Locales
+
 - **On locale created**
 - **On locale updated**
-- **On articles created**
-- **On articles updated**
-- **On pages created**
-- **On pages updated**
-- **On content created or updated** (for article and pages)
+
+### Content
+
+> **Note**: These events support the following content types: collection, article, blog, page, product.
+
+- **On content updated**
 
 ## Example
 

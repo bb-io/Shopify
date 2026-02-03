@@ -1,4 +1,4 @@
-using Apps.Shopify.Models.Entities;
+using Apps.Shopify.Models.Entities.Metafield;
 using Apps.Shopify.Models.Response.Pagination;
 using Newtonsoft.Json;
 

@@ -1,37 +1,62 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ShopifyTests.Base;
 using Apps.Shopify.Actions;
-using Apps.Shopify.Models.Request;
+using Apps.Shopify.Models.Identifiers;
 using Apps.Shopify.Models.Request.Product;
-using Blackbird.Applications.Sdk.Common.Files;
-using ShopifyTests.Base;
 
-namespace Tests.Shopify
+namespace Tests.Shopify;
+
+[TestClass]
+public class ProductTests : TestBase
 {
-    [TestClass]
-    public class ProductTests : TestBase
+    [TestMethod]
+    public async Task SearchProducts_ReturnsProducts()
     {
-        [TestMethod]
-        public async Task SearchProduct_IsSuccess()
+        // Arrange
+        var action = new ProductActions(InvocationContext, FileManager);
+        var searchProductsRequest = new SearchProductsRequest
         {
-            var actions = new ProductActions(InvocationContext, FileManager);
+            UpdatedAfter = DateTime.UtcNow - TimeSpan.FromHours(1),
+            UpdatedBefore = DateTime.UtcNow
+        };
 
-            var searchProductsRequest = new SearchProductsRequest { MetafieldKey = "translate", MetafieldValue="true" };
+        // Act
+        var response = await action.SearchProducts(searchProductsRequest);
 
-            var response = await actions.SearchProducts(searchProductsRequest);
+        // Assert
+        PrintJsonResult(response);
+        Assert.IsNotNull(response);
+    }
 
-            Assert.IsNotNull(response);
-        }
+    [TestMethod]
+    public async Task GetProductTranslationContent_IsSuccess()
+    {
+        // Arrange
+        var action = new ProductActions(InvocationContext, FileManager);
+        var product = new ProductIdentifier { ProductId = "gid://shopify/Product/10745816351004" };
+        var locale = new LocaleIdentifier { Locale = "en" };
+        var input = new DownloadProductRequest { };
+        var outdated = new OutdatedOptionalIdentifier { Outdated = false };
 
-        [TestMethod]
-        public async Task Update_product()
-        {
-            var actions = new ProductActions(InvocationContext, FileManager);
-            var file = new FileReference() { Name = "10510521631004.html.xlf" };
-            await actions.UpdateProductContent(new NonPrimaryLocaleRequest { Locale = "nl" }, new FileRequest { File = file });
-        }
+        // Act
+        var response = await action.GetProductTranslationContent(product, locale, input, outdated);
+
+        // Assert
+        Console.WriteLine(response.File.Name);
+        Assert.IsNotNull(response);
+    }
+
+    [TestMethod]
+    public async Task UpdateProductContent_IsSuccess()
+    {
+        // Arrange
+        var action = new ProductActions(InvocationContext, FileManager);
+        var input = new UploadProductRequest
+        { 
+            File = new FileReference { Name = "test.html" } 
+        };
+        var locale = new NonPrimaryLocaleIdentifier { Locale = "nl" };
+
+        // Act
+        await action.UpdateProductContent(input, locale);
     }
 }

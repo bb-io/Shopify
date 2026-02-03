@@ -1,4 +1,4 @@
-using Apps.Shopify.Models.Entities;
+using Apps.Shopify.Models.Entities.Resource;
 
 namespace Apps.Shopify.Models.Dto;
 

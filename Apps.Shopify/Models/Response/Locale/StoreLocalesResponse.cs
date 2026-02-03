@@ -3,11 +3,11 @@
 
 namespace Apps.Shopify.Models.Response.Locale;
 
-public class StoreLocalesResponse
+public class StoreLocalesResponse(string primary, IEnumerable<string> secondary)
 {
     [Display("Primary locale")]
-    public string Primary { get; set; }
+    public string Primary { get; set; } = primary;
 
     [Display("Non-primary locales")]
-    public IEnumerable<string> OtherLocales { get; set;}
+    public IEnumerable<string> OtherLocales { get; set;} = secondary;
 }

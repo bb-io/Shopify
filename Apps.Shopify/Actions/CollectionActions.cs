@@ -1,12 +1,16 @@
-using Apps.Shopify.Actions.Base;
 using Apps.Shopify.Constants;
-using Apps.Shopify.DataSourceHandlers;
-using Apps.Shopify.Models.Request;
+using Apps.Shopify.Constants.GraphQL;
+using Apps.Shopify.Extensions;
+using Apps.Shopify.Helper;
+using Apps.Shopify.Invocables;
+using Apps.Shopify.Models.Entities.Collection;
+using Apps.Shopify.Models.Identifiers;
 using Apps.Shopify.Models.Request.Collection;
-using Apps.Shopify.Models.Response;
+using Apps.Shopify.Models.Request.Content;
+using Apps.Shopify.Models.Response.Collection;
+using Apps.Shopify.Services;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
-using Blackbird.Applications.Sdk.Common.Dynamic;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
@@ -14,20 +18,65 @@ namespace Apps.Shopify.Actions;
 
 [ActionList("Collections")]
 public class CollectionActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : TranslatableResourceActions(invocationContext, fileManagementClient)
+    : ShopifyInvocable(invocationContext)
 {
-    [Action("Download collection",
-        Description = "Get content of a specific collection")]
-    public Task<FileResponse> GetCollectionContent(
-        [ActionParameter] CollectionRequest input, [ActionParameter] LocaleRequest locale,
-        [ActionParameter] GetContentRequest getContentRequest)
-        => GetResourceContent(input.CollectionId, locale.Locale, getContentRequest.Outdated ?? default, HtmlContentTypes.Collection);
+    private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
+    private readonly string ContentType = TranslatableResources.Collection;
 
-    [Action("Upload collection",
-        Description = "Upload content of a specific collection")]
-    public Task UpdateCollectionContent(
-        [ActionParameter, DataSource(typeof(CollectionDataHandler)), Display("Collection ID")]
-        string? collectionId,
-        [ActionParameter] NonPrimaryLocaleRequest locale, [ActionParameter] FileRequest file)
-        => UpdateResourceContent(collectionId, locale.Locale, file.File);
+    [Action("Download collection", Description = "Download content of a specific collection")]
+    public async Task<DownloadCollectionResponse> GetCollectionContent(
+        [ActionParameter] CollectionIdentifier input, 
+        [ActionParameter] LocaleIdentifier locale,
+        [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
+    {
+        var service = _factory.GetContentService(ContentType);
+        var request = new DownloadContentRequest
+        {
+            ContentId = input.CollectionId,
+            Locale = locale.Locale,
+            Outdated = getContentRequest.Outdated,
+        };
+
+        var file = await service.Download(request);
+        return new(file);
+    }
+        
+    [Action("Upload collection", Description = "Upload content of a specific collection")]
+    public async Task UpdateCollectionContent(
+        [ActionParameter] UploadCollectionRequest input,
+        [ActionParameter] NonPrimaryLocaleIdentifier locale)
+    {
+        var service = _factory.GetContentService(ContentType);
+        var request = new UploadContentRequest
+        {
+            Content = input.File,
+            ContentId = input.CollectionId,
+            Locale = locale.Locale
+        };
+
+        await service.Upload(request);
+    }
+
+    [Action("Search collections", Description = "Search collections with specific criteria")]
+    public async Task<SearchCollectionsResponse> SearchCollections([ActionParameter] SearchCollectionsRequest input)
+    {
+        input.ValidateDates();
+
+        var cleanProductIds = input.ProductIds?
+            .Select(id => id.GetShopifyItemId())
+            .ToList();
+
+        string? query = new QueryBuilder()
+            .AddContains("title", input.TitleContains)
+            .AddDateRange("updated_at", input.UpdatedAfter, input.UpdatedBefore)
+            .AddOr("product_id", cleanProductIds)
+            .Build();
+
+        var response = await Client.Paginate<CollectionEntity, CollectionsPaginationResponse>(
+            GraphQlQueries.Collections,
+            QueryHelper.QueryToDictionary(query)
+        );
+
+        return new(response);
+    }
 }

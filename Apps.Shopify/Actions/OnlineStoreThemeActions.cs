@@ -1,52 +1,78 @@
-using System.Net.Mime;
-using Apps.Shopify.Actions.Base;
 using Apps.Shopify.Constants;
-using Apps.Shopify.DataSourceHandlers;
-using Apps.Shopify.Extensions;
-using Apps.Shopify.HtmlConversion;
-using Apps.Shopify.Models.Request;
-using Apps.Shopify.Models.Request.Assets;
-using Apps.Shopify.Models.Response;
+using Apps.Shopify.Constants.GraphQL;
+using Apps.Shopify.Invocables;
+using Apps.Shopify.Models.Entities.Theme;
+using Apps.Shopify.Models.Identifiers;
+using Apps.Shopify.Models.Request.Content;
+using Apps.Shopify.Models.Request.OnlineStoreTheme;
+using Apps.Shopify.Models.Request.Theme;
+using Apps.Shopify.Models.Response.Theme;
+using Apps.Shopify.Services;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
-using Blackbird.Applications.Sdk.Common.Dynamic;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
 namespace Apps.Shopify.Actions;
 
-[ActionList("Online store themes")]
+[ActionList("Themes")]
 public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : TranslatableResourceActions(invocationContext, fileManagementClient)
+    : ShopifyInvocable(invocationContext)
 {
-    [Action("Download online store theme",
-        Description = "Get content of a specific online store theme")]
-    public async Task<FileResponse> GetOnlineStoreThemeTranslationContent(
-        [ActionParameter] GetOnlineStoreThemeContentAsHtmlRequest input, 
-        [ActionParameter] LocaleRequest locale,
-        [ActionParameter] GetContentRequest getContentRequest)
+    private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
+    private readonly string ContentType = TranslatableResources.Theme;
+
+    [Action("Search themes", Description = "Search themes with specific criteria")]
+    public async Task<SearchThemesResponse> SearchThemes([ActionParameter] SearchThemesRequest input)
     {
-        var translatableContent = await GetTranslatableContent(input.OnlineStoreThemeId, locale.Locale, getContentRequest.Outdated ?? default);
-        if (input.AssetKeys != null)
-        {
-            translatableContent = translatableContent
-                .Where(x => input.AssetKeys.Any(y => x.Key.StartsWith(y)))
-                .ToList();
-        }
-        
-        var html = ShopifyHtmlConverter.ToHtml(translatableContent, HtmlContentTypes.OnlineStoreThemeContent);
-        return new()
-        {
-            File = await FileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html,
-                $"{input.OnlineStoreThemeId.GetShopifyItemId()}.html")
-        };
+        var variables = new Dictionary<string, object>();
+        if (!string.IsNullOrEmpty(input.Role))
+            variables["roles"] = new[] { input.Role };
+
+        var response = await Client.Paginate<ThemeEntity, ThemesPaginationResponse>(
+            GraphQlQueries.Themes,
+            variables
+        );
+
+        if (!string.IsNullOrEmpty(input.NameContains))
+            response = response.Where(x => x.Name.Contains(input.NameContains, StringComparison.OrdinalIgnoreCase)).ToList();
+
+        return new(response);
     }
 
-    [Action("Upload online store theme",
-        Description = "Update content of a specific online store theme")]
-    public Task UpdateOnlineStoreThemeContent(
-        [ActionParameter, DataSource(typeof(OnlineStoreThemeDataSourceHandler)), Display("Online store theme ID")]
-        string? onlineStoreThemeId,
-        [ActionParameter] NonPrimaryLocaleRequest locale, [ActionParameter] FileRequest file)
-        => UpdateResourceContent(onlineStoreThemeId, locale.Locale, file.File);
+    [Action("Download theme", Description = "Download content of a specific theme")]
+    public async Task<DownloadThemeResponse> GetOnlineStoreThemeTranslationContent(
+        [ActionParameter] ThemeIdentifier theme,
+        [ActionParameter] DownloadThemeRequest input,
+        [ActionParameter] LocaleIdentifier locale,
+        [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
+    {
+        var service = _factory.GetContentService(ContentType);
+        var request = new DownloadContentRequest
+        {
+            ContentId = theme.ThemeId,
+            AssetKeys = input.AssetKeys,
+            Locale = locale.Locale,
+            Outdated = getContentRequest.Outdated,
+        };
+
+        var file = await service.Download(request);
+        return new(file);
+    }
+
+    [Action("Upload theme", Description = "Upload content of a specific theme")]
+    public async Task UpdateOnlineStoreThemeContent(
+        [ActionParameter] UploadThemeRequest input,
+        [ActionParameter] NonPrimaryLocaleIdentifier locale)
+    {
+        var service = _factory.GetContentService(ContentType);
+        var request = new UploadContentRequest
+        {
+            Content = input.File,
+            ContentId = input.ThemeId,
+            Locale = locale.Locale
+        };
+
+        await service.Upload(request);
+    }
 }
