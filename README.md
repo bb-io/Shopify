@@ -118,10 +118,7 @@ The following example shows how a bird can be setup so that anytime a Shopify pr
 ## Demo video
 
 Shopify + DeepL + OpenAI: Multilingual Products in Minutes
-
-import { YouTube } from '@astro-community/astro-embed-youtube';
-
-<YouTube id="https://youtu.be/z7ILq75EVcY" />
+[![Watch the video](https://img.youtube.com/vi/z7ILq75EVcY/0.jpg)](https://www.youtube.com/watch?v=z7ILq75EVcY)
 
 ## Feedback
 
