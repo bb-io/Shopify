@@ -1,7 +1,8 @@
-﻿using Apps.Shopify.Api;
+using Apps.Shopify.Api;
 using Apps.Shopify.Constants.GraphQL;
 using Blackbird.Applications.Sdk.Common.Authentication;
 using Blackbird.Applications.Sdk.Common.Connections;
+using Blackbird.Applications.Sdk.Common.Exceptions;
 using GraphQL;
 
 namespace Apps.Shopify.Connections;
@@ -12,17 +13,28 @@ public class ConnectionValidator : IConnectionValidator
         IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders,
         CancellationToken cancellationToken)
     {
-        var client = new ShopifyClient(authenticationCredentialsProviders.ToArray());
-
-        var request = new GraphQLRequest()
+        try
         {
-            Query = GraphQlQueries.Locales
-        }; 
-        await client.ExecuteWithErrorHandling(request, cancellationToken);
+            var client = new ShopifyClient(authenticationCredentialsProviders.ToArray());
 
-        return new()
+            var request = new GraphQLRequest
+            {
+                Query = GraphQlQueries.Locales
+            };
+
+            await client.ExecuteWithErrorHandling(request, cancellationToken);
+
+            return new()
+            {
+                IsValid = true
+            };
+        }
+        catch (PluginApplicationException)
         {
-            IsValid = true
-        };
+            return new()
+            {
+                IsValid = false
+            };
+        }
     }
 }

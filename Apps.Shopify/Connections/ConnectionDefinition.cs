@@ -18,6 +18,18 @@ public class ConnectionDefinition : IConnectionDefinition
                 new(CredsNames.StoreName) { DisplayName = "Store name" },
                 new(CredsNames.Token) { DisplayName = "Admin API access token", Sensitive = true }
             }
+        },
+        new()
+        {
+            Name = "Client credentials",
+            AuthenticationType = ConnectionAuthenticationType.Undefined,
+            ConnectionUsage = ConnectionUsage.Actions,
+            ConnectionProperties = new List<ConnectionProperty>
+            {
+                new(CredsNames.StoreName) { DisplayName = "Store name" },
+                new(CredsNames.ClientId) { DisplayName = "Client ID", Sensitive = true },
+                new(CredsNames.ClientSecret) { DisplayName = "Client secret", Sensitive = true }
+            }
         }
     };
 

@@ -13,14 +13,13 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 1. In Blackbird, navigate to 'Apps' and search for Shopify.
 2. Click _Add Connection_.
 3. Name your connection for future reference e.g. 'My Shopify connection'.
-4. In Shopify, go to `Store settings -> Apps and sales channels -> Develop apps`.
-5. Create the develop app.
-6. Click `Configure Admin API scopes` to select the scopes you want to provide Blackbird with. Make sure to provide `read_locales` access scope. Other scopes that may be needed depending on desired actions are: `write_products`, `read_products`, `write_publications`, `read_publications`, `write_translations`, `read_translations`, `read_themes`, `read_content`.
-7. After selecting the scopes click `Save` and go to `API credentials` and install the newly created app.
-8. It will create the `Admin API access token` that you need to copy and paste it to the appropriate field in Blackbird.
-9. Next in store settings click `Domains` and copy the name of the store from the domain and paste it to the appropriate field in Blackbird. F.E. if your domain is `mystore.myshopify.com`, you need to take `mystore`
-10. Click _Connect_.
-11. Confirm that the connection has appeared and the status is _Connected_. 
+4. In Shopify, create or open an app and configure the Admin API scopes it needs. Make sure to provide `read_locales` access scope. Other scopes that may be needed depending on desired actions are: `write_products`, `read_products`, `write_publications`, `read_publications`, `write_translations`, `read_translations`, `read_themes`, `read_content`.
+5. Copy the store name from the store domain. For example, if your domain is `mystore.myshopify.com`, then the store name is `mystore`.
+6. In Blackbird, choose one of the supported connection methods:
+7. `Developer API key`: paste the `Admin API access token`.
+8. `Client credentials`: paste the `Client ID` and `Client secret` from the Shopify Dev Dashboard app settings. Blackbird exchanges them for a 24-hour access token automatically.
+9. Click _Connect_.
+10. Confirm that the connection has appeared and the status is _Connected_. 
 
 ## Actions
 
