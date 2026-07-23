@@ -366,3 +366,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /Tests.Shopify/appsettings.json
+/Tests.Shopify/appsettings.json
