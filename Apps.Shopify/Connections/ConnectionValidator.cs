@@ -2,7 +2,6 @@ using Apps.Shopify.Api;
 using Apps.Shopify.Constants.GraphQL;
 using Blackbird.Applications.Sdk.Common.Authentication;
 using Blackbird.Applications.Sdk.Common.Connections;
-using Blackbird.Applications.Sdk.Common.Exceptions;
 using GraphQL;
 
 namespace Apps.Shopify.Connections;
@@ -29,12 +28,21 @@ public class ConnectionValidator : IConnectionValidator
                 IsValid = true
             };
         }
-        catch (PluginApplicationException)
+        catch (Exception ex)
         {
             return new()
             {
-                IsValid = false
+                IsValid = !HasAuthorizationError(ex),
+                Message = ex.Message
             };
         }
+    }
+
+    private static bool HasAuthorizationError(Exception exception)
+    {
+        var errorText = exception.ToString();
+
+        return errorText.Contains("401", StringComparison.OrdinalIgnoreCase) ||
+               errorText.Contains("403", StringComparison.OrdinalIgnoreCase);
     }
 }

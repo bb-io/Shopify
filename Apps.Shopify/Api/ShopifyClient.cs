@@ -31,7 +31,7 @@ public class ShopifyClient : GraphQLHttpClient
         }
         catch (HttpRequestException ex)
         {
-            throw new PluginApplicationException($"HTTP error during GraphQL request: {ex.Message}");
+            throw new PluginApplicationException(FormatHttpErrorMessage("GraphQL request", ex));
         }
 
         if (response?.Errors is not null && response.Errors.Any())
@@ -46,7 +46,16 @@ public class ShopifyClient : GraphQLHttpClient
     public async Task<GraphQLResponse<JObject>> ExecuteWithErrorHandling(GraphQLRequest request,
         CancellationToken cancellationToken = default)
     {
-        var response = await SendQueryAsync<JObject>(request, cancellationToken);
+        GraphQLResponse<JObject> response;
+
+        try
+        {
+            response = await SendQueryAsync<JObject>(request, cancellationToken);
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new PluginApplicationException(FormatHttpErrorMessage("GraphQL request", ex));
+        }
 
         if (response.Errors is not null && response.Errors.Any())
             throw new PluginApplicationException(string.Join(';', response.Errors.Select(x => x.Message)));
@@ -120,7 +129,7 @@ public class ShopifyClient : GraphQLHttpClient
         }
         catch (HttpRequestException ex)
         {
-            throw new PluginApplicationException($"HTTP error during token request: {ex.Message}");
+            throw new PluginApplicationException(FormatHttpErrorMessage("token request", ex));
         }
 
         var responseContent = await response.Content.ReadAsStringAsync();
@@ -148,4 +157,13 @@ public class ShopifyClient : GraphQLHttpClient
 
     private static string? GetCredentialValue(AuthenticationCredentialsProvider[] creds, string keyName) =>
         creds.FirstOrDefault(x => x.KeyName == keyName)?.Value;
+
+    private static string FormatHttpErrorMessage(string operation, HttpRequestException ex)
+    {
+        var statusCode = ex.StatusCode.HasValue
+            ? $"{(int)ex.StatusCode.Value} {ex.StatusCode.Value}"
+            : "unknown status";
+
+        return $"HTTP error during {operation}: {statusCode}. {ex.Message}";
+    }
 }

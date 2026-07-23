@@ -1,5 +1,6 @@
 using Apps.Shopify.Connections;
 using Blackbird.Applications.Sdk.Common.Authentication;
+using Blackbird.Applications.Sdk.Common.Invocation;
 using ShopifyTests.Base;
 
 namespace Tests.Shopify;
