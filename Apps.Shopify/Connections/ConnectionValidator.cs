@@ -32,7 +32,8 @@ public class ConnectionValidator : IConnectionValidator
         {
             return new()
             {
-                IsValid = !HasAuthorizationError(ex)
+                IsValid = !HasAuthorizationError(ex),
+                Message = ex.Message
             };
         }
     }
