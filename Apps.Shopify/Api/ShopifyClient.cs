@@ -2,11 +2,11 @@ using Apps.Shopify.Constants;
 using Apps.Shopify.Models.Response.Pagination;
 using Blackbird.Applications.Sdk.Common.Authentication;
 using Blackbird.Applications.Sdk.Common.Exceptions;
-using Blackbird.Applications.Sdk.Utils.Extensions.Sdk;
 using GraphQL;
 using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.Newtonsoft;
 using Newtonsoft.Json.Linq;
+using System.Net.Http.Headers;
 
 namespace Apps.Shopify.Api;
 
@@ -16,7 +16,7 @@ public class ShopifyClient : GraphQLHttpClient
         endpoint ?? GenerateApiUrl(creds, ApiConstants.ApiVersion),
         new NewtonsoftJsonSerializer())
     {
-        var token = creds.Get(CredsNames.Token).Value;
+        var token = ResolveAccessToken(creds);
         HttpClient.DefaultRequestHeaders.Add("X-Shopify-Access-Token", token);
     }
 
@@ -83,5 +83,69 @@ public class ShopifyClient : GraphQLHttpClient
     }
 
     public static string GenerateApiUrl(AuthenticationCredentialsProvider[] creds, string apiVersion) =>
-        $"https://{creds.Get(CredsNames.StoreName).Value}.myshopify.com/admin/api/{apiVersion}/graphql.json";
+        $"https://{GetRequiredCredentialValue(creds, CredsNames.StoreName)}.myshopify.com/admin/api/{apiVersion}/graphql.json";
+
+    private static string ResolveAccessToken(AuthenticationCredentialsProvider[] creds)
+    {
+        var accessToken = GetCredentialValue(creds, CredsNames.Token);
+        if (!string.IsNullOrWhiteSpace(accessToken))
+            return accessToken;
+
+        var clientId = GetRequiredCredentialValue(creds, CredsNames.ClientId);
+        var clientSecret = GetRequiredCredentialValue(creds, CredsNames.ClientSecret);
+        var storeName = GetRequiredCredentialValue(creds, CredsNames.StoreName);
+
+        return RequestAccessTokenAsync(storeName, clientId, clientSecret).GetAwaiter().GetResult();
+    }
+
+    private static async Task<string> RequestAccessTokenAsync(string storeName, string clientId, string clientSecret)
+    {
+        using var httpClient = new HttpClient();
+        using var request = new HttpRequestMessage(HttpMethod.Post,
+            $"https://{storeName}.myshopify.com/admin/oauth/access_token");
+
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        request.Content = new FormUrlEncodedContent(new Dictionary<string, string>
+        {
+            ["grant_type"] = "client_credentials",
+            ["client_id"] = clientId,
+            ["client_secret"] = clientSecret
+        });
+
+        HttpResponseMessage response;
+
+        try
+        {
+            response = await httpClient.SendAsync(request);
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new PluginApplicationException($"HTTP error during token request: {ex.Message}");
+        }
+
+        var responseContent = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+            throw new PluginApplicationException(
+                $"Failed to retrieve Shopify access token: {(int)response.StatusCode} {response.ReasonPhrase}. {responseContent}");
+
+        var tokenResponse = JObject.Parse(responseContent);
+        var accessToken = tokenResponse.Value<string>("access_token");
+
+        if (string.IsNullOrWhiteSpace(accessToken))
+            throw new PluginApplicationException("Shopify token response did not include an access token.");
+
+        return accessToken;
+    }
+
+    private static string GetRequiredCredentialValue(AuthenticationCredentialsProvider[] creds, string keyName)
+    {
+        var value = GetCredentialValue(creds, keyName);
+        if (string.IsNullOrWhiteSpace(value))
+            throw new PluginApplicationException($"Missing required connection value: {keyName}");
+
+        return value;
+    }
+
+    private static string? GetCredentialValue(AuthenticationCredentialsProvider[] creds, string keyName) =>
+        creds.FirstOrDefault(x => x.KeyName == keyName)?.Value;
 }
