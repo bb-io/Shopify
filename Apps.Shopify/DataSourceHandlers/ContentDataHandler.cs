@@ -30,7 +30,7 @@ public class ContentDataHandler : ShopifyInvocable, IAsyncDataSourceItemHandler
             ["resourceType"] = TranslatableResources.GetApiType(_contentType.ContentType),
         };
 
-        var response = await Client.Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
+        var response = await Client.PaginateOnce<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
             GraphQlQueries.TranslatableResources,
             variables, 
             ct

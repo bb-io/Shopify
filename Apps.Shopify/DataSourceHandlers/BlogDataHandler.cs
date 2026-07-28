@@ -17,7 +17,7 @@ public class BlogDataHandler(InvocationContext invocationContext)
             .AddContains("title", context.SearchString)
             .Build();
 
-        var response = await Client.Paginate<BlogEntity, BlogsPaginationResponse>(
+        var response = await Client.PaginateOnce<BlogEntity, BlogsPaginationResponse>(
             GraphQlQueries.Blogs,
             QueryHelper.QueryToDictionary(query),
             cancellationToken

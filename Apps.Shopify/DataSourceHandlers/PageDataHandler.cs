@@ -16,9 +16,10 @@ public class PageDataHandler(InvocationContext context) : ShopifyInvocable(conte
             .AddContains("title", context.SearchString)
             .Build();
 
-        var response = await Client.Paginate<PageEntity, PagesPaginationResponse>(
+        var response = await Client.PaginateOnce<PageEntity, PagesPaginationResponse>(
             GraphQlQueries.Pages,
-            QueryHelper.QueryToDictionary(query)
+            QueryHelper.QueryToDictionary(query),
+            cancellationToken
         );
 
         var items = response.Select(x => new DataSourceItem(x.Id, x.Title)).ToList();

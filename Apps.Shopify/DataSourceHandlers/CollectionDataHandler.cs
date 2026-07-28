@@ -16,9 +16,10 @@ public class CollectionDataHandler(InvocationContext context) : ShopifyInvocable
             .AddContains("title", context.SearchString)
             .Build();
 
-        var response = await Client.Paginate<CollectionEntity, CollectionsPaginationResponse>(
+        var response = await Client.PaginateOnce<CollectionEntity, CollectionsPaginationResponse>(
             GraphQlQueries.Collections,
-            QueryHelper.QueryToDictionary(query)
+            QueryHelper.QueryToDictionary(query),
+            cancellationToken
         );
 
         var items = response.Select(x => new DataSourceItem(x.Id, x.Title)).ToList();

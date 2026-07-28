@@ -17,7 +17,7 @@ public class ProductDataHandler(InvocationContext invocationContext)
             .AddContains("title", context.SearchString)
             .Build();
         
-        var response =  await Client.Paginate<ProductEntity, ProductsPaginationResponse>(
+        var response =  await Client.PaginateOnce<ProductEntity, ProductsPaginationResponse>(
             GraphQlQueries.Products, 
             QueryHelper.QueryToDictionary(query), 
             cancellationToken

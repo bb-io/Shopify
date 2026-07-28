@@ -12,7 +12,7 @@ public class ArticleDataHandler(InvocationContext invocationContext)
 {
     public async Task<IEnumerable<DataSourceItem>> GetDataAsync(DataSourceContext context, CancellationToken cancellationToken)
     {
-        var response = await Client.Paginate<ArticleEntity, ArticlesPaginationResponse>(
+        var response = await Client.PaginateOnce<ArticleEntity, ArticlesPaginationResponse>(
             GraphQlQueries.Articles,
             [],
             cancellationToken
