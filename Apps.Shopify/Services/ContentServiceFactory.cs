@@ -9,7 +9,7 @@ public class ContentServiceFactory(InvocationContext invocationContext, IFileMan
 {
     public IContentService GetContentService(string contentType)
     {
-        string normalizedType = char.ToUpper(contentType[0]) + contentType.Substring(1).ToLower();
+        string normalizedType = TranslatableResources.Normalize(contentType);
         return normalizedType switch
         {
             TranslatableResources.Collection => new CollectionService(invocationContext, fileManagementClient),
