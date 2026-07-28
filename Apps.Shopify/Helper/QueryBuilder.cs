@@ -5,14 +5,6 @@ public class QueryBuilder
     private readonly List<string> _parts = [];
     private const string DateFormat = "yyyy-MM-ddTHH:mm:ssZ";
 
-    public QueryBuilder Add(string field, string? value)
-    {
-        if (!string.IsNullOrWhiteSpace(value))
-            _parts.Add($"{field}:{value}");
-
-        return this;
-    }
-
     public QueryBuilder AddEquals(string field, string? value)
     {
         if (!string.IsNullOrWhiteSpace(value))
