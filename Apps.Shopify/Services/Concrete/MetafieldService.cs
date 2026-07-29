@@ -16,7 +16,7 @@ public class MetafieldService(InvocationContext invocationContext, IFileManageme
     : ShopifyInvocable(invocationContext), IContentService
 {
     private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
-    private readonly string ContentType = TranslatableResources.Metafield;
+    private readonly string _contentType = TranslatableResources.Metafield;
 
     public async Task<FileReference> Download(DownloadContentRequest input)
     {
@@ -24,7 +24,7 @@ public class MetafieldService(InvocationContext invocationContext, IFileManageme
             input.ContentId,
             input.Locale,
             input.Outdated ?? false,
-            ContentType.ToLower()
+            _contentType.ToLower()
         );
     }
 
@@ -32,7 +32,7 @@ public class MetafieldService(InvocationContext invocationContext, IFileManageme
     {
         var variables = new Dictionary<string, object>
         {
-            ["resourceType"] = TranslatableResources.GetApiType(ContentType)
+            ["resourceType"] = TranslatableResources.GetApiType(_contentType)
         };
 
         var response = await Client.Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
@@ -41,7 +41,7 @@ public class MetafieldService(InvocationContext invocationContext, IFileManageme
         );
 
         var items = response
-            .Select(x => new ContentItemEntity(x.ResourceId, ContentType, x.ToString()))
+            .Select(x => new ContentItemEntity(x.ResourceId, _contentType, x.ToString()))
             .Where(x => string.IsNullOrEmpty(input.NameContains) ||
                         x.Name.Contains(input.NameContains, StringComparison.OrdinalIgnoreCase) ||
                         x.ContentId.Contains(input.NameContains, StringComparison.OrdinalIgnoreCase))
