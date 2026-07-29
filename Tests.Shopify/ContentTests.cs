@@ -1,5 +1,6 @@
 ﻿using ShopifyTests.Base;
 using Apps.Shopify.Actions;
+using Apps.Shopify.Constants;
 using Apps.Shopify.Models.Request.Content;
 
 namespace Tests.Shopify;
@@ -14,7 +15,7 @@ public class ContentTests : TestBase
 		var action = new ContentActions(InvocationContext, FileManager);
 		var input = new SearchContentRequest
 		{
-			MetafieldOwnerType = "PRODUCT"
+			ContentTypes = [TranslatableResources.Metafield]
         };
 
 		// Act
@@ -30,10 +31,10 @@ public class ContentTests : TestBase
 	{
         // Arrange
         var action = new ContentActions(InvocationContext, FileManager);
-		var contentType = new ContentTypeIdentifier { ContentType = "Product" };
+		var contentType = new ContentTypeIdentifier { ContentType = "Metafield" };
 		var input = new DownloadContentRequest
 		{
-			ContentId = "gid://shopify/Product/10745816351004",
+			ContentId = "gid://shopify/Metafield/31987107201308",
 			Locale = "en"
         };
 

@@ -62,13 +62,6 @@ public static class ShopifyHtmlConverter
         return GetMemoryStream(doc);
     }
 
-    public static IEnumerable<IdentifiedContentRequest> MetaFieldsToJson(string file,
-        string locale)
-    {
-        var contentNodes = GetContentNodes(file);
-        return GetIdentifiedResourceContent(contentNodes, locale);
-    }
-
     #endregion
 
     #region Blog
