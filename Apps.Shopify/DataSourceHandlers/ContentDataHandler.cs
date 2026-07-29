@@ -39,7 +39,7 @@ public class ContentDataHandler : ShopifyInvocable, IAsyncDataSourceItemHandler
         return response
             .Select(x => new DataSourceItem(
                 x.ResourceId,
-                x.TranslatableContent.FirstOrDefault(t => t.Key == "title")?.Value ?? x.ResourceId)
+                x.TranslatableContent.FirstOrDefault(t => t.Key == "title")?.Value ?? x.ToString())
             )
             .Where(x =>
                 context.SearchString is null ||
