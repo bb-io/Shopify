@@ -11,7 +11,7 @@ public class ThemeDataHandler(InvocationContext context) : ShopifyInvocable(cont
 {
     public async Task<IEnumerable<DataSourceItem>> GetDataAsync(DataSourceContext context, CancellationToken cancellationToken)
     {
-        var response = await Client.Paginate<ThemeEntity, ThemesPaginationResponse>(
+        var response = await Client.PaginateOnce<ThemeEntity, ThemesPaginationResponse>(
             GraphQlQueries.Themes,
             [],
             cancellationToken

@@ -63,11 +63,13 @@ public class ShopifyClient : GraphQLHttpClient
         return response;
     }
 
-    public async Task<List<T>> Paginate<T, TV>(string query, Dictionary<string, object> variables,
+    public async Task<List<T>> Paginate<T, TV>(
+        string query, 
+        Dictionary<string, object> variables,
         CancellationToken cancellationToken = default)
         where TV : IPaginationResponse<T>
     {
-        var limit = 250;
+        int limit = 250;
         string? cursor = null;
         TV response;
 
@@ -89,6 +91,26 @@ public class ShopifyClient : GraphQLHttpClient
         } while (response.Items.PageInfo.HasNextPage);
 
         return result;
+    }
+    
+    public async Task<List<T>> PaginateOnce<T, TV>(
+        string query, 
+        Dictionary<string, object> variables,
+        CancellationToken cancellationToken = default)
+        where TV : IPaginationResponse<T>
+    {
+        var request = new GraphQLRequest
+        {
+            Query = query,
+            Variables = new Dictionary<string, object>(variables)
+            {
+                ["after"] = null,
+                ["limit"] = 250
+            }
+        };
+
+        var response = await ExecuteWithErrorHandling<TV>(request, cancellationToken);
+        return response.Items.Nodes.ToList();
     }
 
     public static string GenerateApiUrl(AuthenticationCredentialsProvider[] creds, string apiVersion) =>

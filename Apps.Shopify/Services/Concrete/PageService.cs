@@ -17,7 +17,7 @@ public class PageService(InvocationContext invocationContext, IFileManagementCli
     : ShopifyInvocable(invocationContext), IContentService, IPollingContentService
 {
     private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
-    private readonly string ContentType = TranslatableResources.Page;
+    private readonly string _contentType = TranslatableResources.Page;
 
     public async Task<FileReference> Download(DownloadContentRequest input)
     {
@@ -25,7 +25,7 @@ public class PageService(InvocationContext invocationContext, IFileManagementCli
             input.ContentId, 
             input.Locale, 
             input.Outdated ?? default,
-            ContentType.ToLower()
+            _contentType.ToLower()
         );
     }
 
@@ -41,7 +41,7 @@ public class PageService(InvocationContext invocationContext, IFileManagementCli
             QueryHelper.QueryToDictionary(query)
         );
 
-        var items = response.Select(x => new PollingContentItemEntity(x.Id, ContentType, x.Title, x.UpdatedAt)).ToList();
+        var items = response.Select(x => new PollingContentItemEntity(x.Id, _contentType, x.Title, x.UpdatedAt)).ToList();
         return new(items);
     }
 
@@ -59,7 +59,7 @@ public class PageService(InvocationContext invocationContext, IFileManagementCli
             QueryHelper.QueryToDictionary(query)
         );
 
-        var items = response.Select(x => new ContentItemEntity(x.Id, ContentType, x.Title)).ToList();
+        var items = response.Select(x => new ContentItemEntity(x.Id, _contentType, x.Title)).ToList();
         return new(items);
     }
 

@@ -17,7 +17,7 @@ public class ProductMetafieldKeyDataHandler(InvocationContext invocationContext)
             ["ownerType"] = "PRODUCT"
         };
 
-        var response = await Client.Paginate<MetafieldDefinitionEntity, MetafieldDefinitionPaginationResponse>(
+        var response = await Client.PaginateOnce<MetafieldDefinitionEntity, MetafieldDefinitionPaginationResponse>(
             GraphQlQueries.MetafieldDefinitions, 
             variables, 
             cancellationToken
