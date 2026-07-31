@@ -1,6 +1,8 @@
 using System.Web;
 using Apps.Shopify.Constants;
+using Apps.Shopify.Extensions;
 using Apps.Shopify.HtmlConversion.Constants;
+using Apps.Shopify.HtmlConversion.Models;
 using Apps.Shopify.Models.Dto;
 using Apps.Shopify.Models.Entities.Resource;
 using Apps.Shopify.Models.Request.TranslatableResource;
@@ -37,29 +39,6 @@ public static class ShopifyHtmlConverter
             .GetAttributeValue("content", null);
 
         return contentType;
-    }
-
-    #endregion
-
-    #region Metafield
-
-    public static MemoryStream MetaFieldsToHtml(IEnumerable<(string ResourceId, ContentEntity)> metafields, string contentType)
-    {
-        var (doc, body) = PrepareEmptyHtmlDocument(contentType);
-
-        metafields.ToList().ForEach(x =>
-        {
-            var node = doc.CreateElement(HtmlConstants.Div);
-
-            node.InnerHtml = x.Item2.Value;
-            node.SetAttributeValue(ResourceAttr, x.ResourceId);
-            node.SetAttributeValue(KeyAttr, x.Item2.Key);
-            node.SetAttributeValue(DigestAttr, x.Item2.Digest);
-
-            body.AppendChild(node);
-        });
-
-        return GetMemoryStream(doc);
     }
 
     #endregion
@@ -109,7 +88,11 @@ public static class ShopifyHtmlConverter
 
     public static MemoryStream ProductToHtml(ProductContentDto contentDto)
     {
-        var (doc, body) = PrepareEmptyHtmlDocument(TranslatableResources.Product.ToLower());
+        var (doc, body) = PrepareEmptyHtmlDocument(new ShopifyMetadata
+        {
+            ContentType = TranslatableResources.Product.ToLower(),
+            MarketId = contentDto.MarketId
+        });
         FillInIdentifiedContentEntities(doc, body, contentDto.ProductContentEntities);
 
         if (contentDto.MetafieldsContentEntities is not null && contentDto.MetafieldsContentEntities.Any())
@@ -277,7 +260,7 @@ public static class ShopifyHtmlConverter
         return GetIdentifiedResourceContent(contentNodes, locale);
     }
 
-    private static (HtmlDocument document, HtmlNode bodyNode) PrepareEmptyHtmlDocument(string contentType)
+    private static (HtmlDocument document, HtmlNode bodyNode) PrepareEmptyHtmlDocument(ShopifyMetadata metadata)
     {
         var htmlDoc = new HtmlDocument();
         var htmlNode = htmlDoc.CreateElement(HtmlConstants.Html);
@@ -286,11 +269,9 @@ public static class ShopifyHtmlConverter
         var headNode = htmlDoc.CreateElement(HtmlConstants.Head);
         htmlNode.AppendChild(headNode);
 
-        var contentTypeMetaNode = htmlDoc.CreateElement("meta");
-        contentTypeMetaNode.SetAttributeValue("name", "blackbird-content-type");
-        contentTypeMetaNode.SetAttributeValue("content", contentType);
-        headNode.AppendChild(contentTypeMetaNode);
-
+        htmlDoc.AddMeta(headNode, HtmlMetadataConstants.BlackbirdContentType, metadata.ContentType);
+        htmlDoc.AddMeta(headNode, HtmlMetadataConstants.BlackbirdMarketId, metadata.MarketId);
+        
         var bodyNode = htmlDoc.CreateElement(HtmlConstants.Body);
         htmlNode.AppendChild(bodyNode);
 

@@ -115,18 +115,22 @@ public class TranslatableResourceService(InvocationContext invocationContext,
     }
 
     public async Task<ICollection<TranslatableResourceEntity>> ListTranslatableResources(
-        TranslatableResource resourceType, string? locale = default, bool outdated = false)
+        TranslatableResource resourceType, 
+        string? locale = null, 
+        bool outdated = false,
+        string? marketId = null)
     {
-        var variables = new Dictionary<string, object>()
+        var variables = new Dictionary<string, object>
         {
             ["resourceType"] = resourceType,
             ["locale"] = locale ?? string.Empty,
-            ["outdated"] = outdated
+            ["outdated"] = outdated,
+            ["marketId"] = marketId ?? string.Empty
         };
-        return await Client
-            .Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
-                GraphQlQueries.TranslatableResourcesWithTranslations,
-                variables, default);
+        
+        return await Client.Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
+            GraphQlQueries.TranslatableResourcesWithTranslations,
+            variables);
     }
 
     public async Task<ICollection<IdentifiedContentEntity>> ListIdentifiedTranslatableResources(

@@ -1,5 +1,4 @@
-﻿using Apps.Shopify.Api;
-using Apps.Shopify.Constants;
+﻿using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
@@ -31,38 +30,47 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
 
     public async Task<FileReference> Download(DownloadContentRequest input)
     {
-        var request = new GraphQLRequest()
+        var request = new GraphQLRequest
         {
             Query = GraphQlQueries.TranslatableResourceTranslations,
             Variables = new
             {
                 resourceId = input.ContentId,
                 locale = input.Locale,
-                outdated = input.Outdated ?? false
+                outdated = input.Outdated ?? false,
+                marketId = input.MarketId
             }
         };
+        
         var productContent = await Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
-
         var productInfo = 
             input.IncludeOptions is true || input.IncludeOptionValues is true
-            ? await GetProductInfo(input.ContentId, input.Locale)
+            ? await GetProductInfo(input.ContentId, input.Locale, input.MarketId)
             : new();
 
+        var productContentEntities = productContent.TranslatableResource.GetTranslatableContent()
+            .Select(x => new IdentifiedContentEntity(x) { Id = input.ContentId });
+        
+        var metafieldContentEntities = input.IncludeMetafields is true
+            ? await GetProductMetafields(input.ContentId, input.Locale, input.Outdated ?? default)
+            : [];
+
+        var optionsContentEntities = input.IncludeOptions is true ? GetProductOptions(productInfo) : [];
+        var optionValuesContentEntities = input.IncludeOptionValues is true ? GetProductOptionValues(productInfo) : [];
+        
         var html = ShopifyHtmlConverter.ProductToHtml(new()
         {
-            ProductContentEntities = productContent.TranslatableResource.GetTranslatableContent()
-                .Select(x => new IdentifiedContentEntity(x) { Id = input.ContentId }),
-            MetafieldsContentEntities = input.IncludeMetafields is true
-                ? await GetProductMetafields(input.ContentId, input.Locale, input.Outdated ?? default)
-                : [],
-            OptionsContentEntities = input.IncludeOptions is true ? GetProductOptions(productInfo) : [],
-            OptionValuesContentEntities = input.IncludeOptionValues is true ? GetProductOptionValues(productInfo) : [],
+            MarketId = input.MarketId,
+            ProductContentEntities = productContentEntities,
+            MetafieldsContentEntities = metafieldContentEntities,
+            OptionsContentEntities = optionsContentEntities,
+            OptionValuesContentEntities = optionValuesContentEntities,
         });
 
         return await fileManagementClient.UploadAsync(
             html, 
             MediaTypeNames.Text.Html,
-            $"{input.ContentId.GetShopifyItemId()}.html"
+            input.ContentId.GetFileName(input.MarketId)
         );
     }
 
@@ -157,15 +165,16 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
             }));
     }
 
-    private async Task<ProductEntity> GetProductInfo(string productId, string locale)
+    private async Task<ProductEntity> GetProductInfo(string productId, string locale, string? marketId)
     {
-        var request = new GraphQLRequest()
+        var request = new GraphQLRequest
         {
             Query = GraphQlQueries.Product,
             Variables = new
             {
                 resourceId = productId,
-                locale
+                locale,
+                marketId
             }
         };
 
@@ -173,33 +182,28 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
         return response.Product;
     }
 
-    private async Task<IEnumerable<IdentifiedContentEntity>?> GetProductMetafields(string productId, string locale, bool outdated = false)
+    private async Task<IEnumerable<IdentifiedContentEntity>?> GetProductMetafields(
+        string productId,
+        string locale,
+        bool outdated = false,
+        string? market = null)
     {
-        var productMetaFields = await GetProductMetafields(productId);
-        var metaFields = await _resourceService.ListTranslatableResources(TranslatableResource.METAFIELD, locale, outdated);
+        var productMetaFields = await Client.Paginate<MetafieldEntity, MetafieldPaginationResponse>(
+            GraphQlQueries.ProductMetaFields,
+            new Dictionary<string, object> { ["resourceId"] = productId }
+        );
+        
+        var metaFields = await _resourceService.ListTranslatableResources(
+            TranslatableResource.METAFIELD, 
+            locale, 
+            outdated,
+            market);
 
-        var resources = metaFields
-            .Where(x => productMetaFields.Any(y => x.ResourceId == y.Id))
-            .ToArray();
-
+        var resources = metaFields.Where(x => productMetaFields.Any(y => x.ResourceId == y.Id)).ToArray();
         var content = resources.All(x => !x.Translations.Any())
             ? resources.Select(x => (x.ResourceId, x.TranslatableContent.FirstOrDefault())).ToArray()
             : resources.Select(x => (x.ResourceId, x.Translations.FirstOrDefault())).ToArray();
 
         return content.Select(x => new IdentifiedContentEntity(x.Item2) { Id = x.ResourceId });
-    }
-
-    private async Task<ICollection<MetafieldEntity>> GetProductMetafields(string productId)
-    {
-        var variables = new Dictionary<string, object>()
-        {
-            ["resourceId"] = productId
-        };
-
-        var client = new ShopifyClient(Creds, ShopifyClient.GenerateApiUrl(Creds, "unstable"));
-        return await client.Paginate<MetafieldEntity, MetafieldPaginationResponse>(
-            GraphQlQueries.ProductMetaFields,
-            variables
-        );
     }
 }
