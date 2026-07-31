@@ -148,11 +148,11 @@ public static class ShopifyHtmlConverter
             .FirstOrDefault(x => x.Attributes[TypeAttr]?.Value == OptionValueType)?
             .ChildNodes.Where(x => x.Attributes[KeyAttr]?.Value != null);
 
-        var product = GetIdentifiedResourceContent(productContentNodes, locale);
-        var metafields = GetIdentifiedResourceContent(metafieldContentNodes, locale);
-        var options = GetIdentifiedResourceContent(optionContentNodes, locale);
-        var optionValues = GetIdentifiedResourceContent(optionValuesContentNodes, locale);
         marketId ??= doc.GetMeta(HtmlMetadataConstants.BlackbirdMarketId);
+        var product = GetIdentifiedResourceContent(productContentNodes, locale, marketId);
+        var metafields = GetIdentifiedResourceContent(metafieldContentNodes, locale, marketId);
+        var options = GetIdentifiedResourceContent(optionContentNodes, locale, marketId);
+        var optionValues = GetIdentifiedResourceContent(optionValuesContentNodes, locale, marketId);
 
         return new()
         {

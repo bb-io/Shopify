@@ -55,7 +55,7 @@ public class ContentTests : TestBase
 		var input = new UploadContentRequest
 		{
 			Content = new FileReference { Name = "test.html" },
-			Locale = "en"
+			Locale = "fr"
 		};
 
         // Act
