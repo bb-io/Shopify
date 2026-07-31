@@ -8,10 +8,13 @@ namespace Apps.Shopify.Models.Request.Content;
 public class DownloadContentRequest : IDownloadContentInput
 {
     [Display("Content ID"), DataSource(typeof(ContentDataHandler))]
-    public string ContentId { get; set; }
+    public string ContentId { get; set; } = string.Empty;
 
-    [DataSource(typeof(LanguageDataHandler))]
-    public string Locale { get; set; }
+    [Display("Locale"), DataSource(typeof(LanguageDataHandler))]
+    public string Locale { get; set; } = string.Empty;
+
+    [Display("Market ID"), DataSource(typeof(MarketDataHandler))]
+    public string? MarketId { get; set; }
 
     [Display("Outdated", Description = "False by default")]
     public bool? Outdated { get; set; }

@@ -2,6 +2,23 @@ namespace Apps.Shopify.Constants.GraphQL;
 
 public static class GraphQlQueries
 {
+    public const string Markets =
+      """
+      query ($limit: Int!, $after: String, $query: String) {
+        markets (first: $limit, after: $after, query: $query) {
+          nodes {
+            id
+            name
+          }
+          pageInfo {
+            endCursor
+            hasNextPage
+            startCursor
+          }
+        }
+      }
+      """;
+  
     public const string Locales =
         @"query {
           shopLocales {
@@ -138,13 +155,13 @@ public static class GraphQlQueries
         }";
 
     public const string TranslatableResourceTranslations =
-        @"query ($outdated: Boolean, $resourceId: ID!, $locale: String!) {
+        @"query ($outdated: Boolean, $resourceId: ID!, $locale: String!, $marketId: ID) {
           translatableResource(resourceId: $resourceId) {
-               translations(locale: $locale, outdated: $outdated) {
+               translations(locale: $locale, outdated: $outdated, marketId: $marketId) {
                   key
                   value
                 }
-                translatableContent {
+                translatableContent(marketId: $marketId) {
                   key
                   value
                   digest

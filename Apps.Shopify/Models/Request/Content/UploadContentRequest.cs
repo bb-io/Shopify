@@ -16,6 +16,9 @@ public class UploadContentRequest : IUploadContentInput
     [Display("Content type"), StaticDataSource(typeof(ContentTypeDataHandler))]
     public string? ContentType { get; set; }
 
+    [Display("Market ID"), DataSource(typeof(MarketDataHandler))]
+    public string? MarketId { get; set; }
+
     [Display("Content ID"), DataSource(typeof(ContentDataHandler))]
     public string? ContentId { get; set; }
 

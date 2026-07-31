@@ -13,7 +13,10 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 1. In Blackbird, navigate to 'Apps' and search for Shopify.
 2. Click _Add Connection_.
 3. Name your connection for future reference e.g. 'My Shopify connection'.
-4. In Shopify, create or open an app and configure the Admin API scopes it needs. Make sure to provide `read_locales` access scope. Other scopes that may be needed depending on desired actions are: `write_products`, `read_products`, `write_publications`, `read_publications`, `write_translations`, `read_translations`, `read_themes`, `read_content`.
+4. In Shopify, create or open an app and configure the Admin API scopes it needs. Make sure to provide `read_locales` access scope. 
+Other scopes that may be needed depending on desired actions are: 
+`write_products`, `read_products`, `write_publications`, `read_publications`, `write_translations`, `read_translations`, 
+`read_themes`, `read_content`, `read_markets`.
 5. Copy the store name from the store domain. For example, if your domain is `mystore.myshopify.com`, then the store name is `mystore`.
 6. In Blackbird, choose one of the supported connection methods:
 7. `Developer API key`: paste the `Admin API access token`.
