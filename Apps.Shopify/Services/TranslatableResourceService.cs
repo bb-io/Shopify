@@ -60,7 +60,10 @@ public class TranslatableResourceService(InvocationContext invocationContext,
         await UpdateIdentifiedContent(items, resourceId);
     }
 
-    public async Task UpdateIdentifiedContent(ICollection<IdentifiedContentRequest>? items, string? resourceId = null)
+    public async Task UpdateIdentifiedContent(
+        ICollection<IdentifiedContentRequest>? items, 
+        string? resourceId = null,
+        string? marketId = null)
     {
         if (items is null || items.Count == 0) 
             return;
@@ -87,7 +90,7 @@ public class TranslatableResourceService(InvocationContext invocationContext,
 
             if (groupItems.Any(x => string.IsNullOrWhiteSpace(x.TranslatableContentDigest)))
             {
-                var sourceContent = await GetResourceSourceContent(id);
+                var sourceContent = await GetResourceSourceContent(id, marketId);
                 groupItems.ForEach(x =>
                     x.TranslatableContentDigest = sourceContent.TranslatableResource.TranslatableContent
                         .FirstOrDefault(y => y.Key == x.Key)?.Digest ?? string.Empty);
@@ -145,14 +148,15 @@ public class TranslatableResourceService(InvocationContext invocationContext,
             .ToList();
     }
 
-    public Task<TranslatableResourceResponse> GetResourceSourceContent(string resourceId)
+    public Task<TranslatableResourceResponse> GetResourceSourceContent(string resourceId, string? marketId = null)
     {
-        var request = new GraphQLRequest()
+        var request = new GraphQLRequest
         {
             Query = GraphQlQueries.TranslatableResourceContent,
             Variables = new
             {
-                resourceId
+                resourceId,
+                marketId
             }
         };
         return Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);

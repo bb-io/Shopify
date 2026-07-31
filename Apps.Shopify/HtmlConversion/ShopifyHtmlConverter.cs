@@ -125,11 +125,11 @@ public static class ShopifyHtmlConverter
         return GetMemoryStream(doc);
     }
 
-    public static ProductTranslatableResourceDto ProductToJson(string file, string locale)
+    public static ProductTranslatableResourceDto ProductToJson(string file, string locale, string? marketId = null)
     {
         var doc = new HtmlDocument();
         doc.LoadHtml(file);
-
+        
         var productContentNodes = doc.DocumentNode.Descendants()
             .Where(x => x.Attributes[KeyAttr]?.Value != null && x.ParentNode.Name == "body");
 
@@ -152,6 +152,7 @@ public static class ShopifyHtmlConverter
         var metafields = GetIdentifiedResourceContent(metafieldContentNodes, locale);
         var options = GetIdentifiedResourceContent(optionContentNodes, locale);
         var optionValues = GetIdentifiedResourceContent(optionValuesContentNodes, locale);
+        marketId ??= doc.GetMeta(HtmlMetadataConstants.BlackbirdMarketId);
 
         return new()
         {
@@ -314,15 +315,17 @@ public static class ShopifyHtmlConverter
 
     private static IEnumerable<IdentifiedContentRequest> GetIdentifiedResourceContent(
         IEnumerable<HtmlNode>? nodes,
-        string locale)
+        string locale,
+        string? marketId = null)
     {
-        return nodes?.Select(x => new IdentifiedContentRequest()
+        return nodes?.Select(x => new IdentifiedContentRequest
         {
             ResourceId = x.Attributes[ResourceAttr]?.Value,
             Key = x.Attributes[KeyAttr].Value,
             TranslatableContentDigest = x.Attributes[DigestAttr]?.Value,
             Value = HttpUtility.HtmlDecode(x.InnerHtml),
-            Locale = locale
+            Locale = locale,
+            MarketId = marketId
         }) ?? [];
     }
 }

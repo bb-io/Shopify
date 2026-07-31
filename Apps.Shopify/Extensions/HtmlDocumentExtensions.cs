@@ -16,4 +16,11 @@ public static class HtmlDocumentExtensions
 
         return htmlDoc;
     }
+    
+    public static string? GetMeta(this HtmlDocument htmlDoc, string metaName)
+    {
+        return htmlDoc.DocumentNode
+            .SelectSingleNode($"//meta[@name='{metaName}']")?
+            .GetAttributeValue("content", string.Empty);
+    }
 }

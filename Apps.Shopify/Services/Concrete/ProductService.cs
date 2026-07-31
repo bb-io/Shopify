@@ -111,7 +111,7 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
     public async Task Upload(UploadContentRequest input)
     {
         var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, input.Content);
-        var dto = ShopifyHtmlConverter.ProductToJson(html, input.Locale);
+        var dto = ShopifyHtmlConverter.ProductToJson(html, input.Locale, input.MarketId);
 
         var allItems = new List<IdentifiedContentRequest>();
         var productItems = dto.ProductContentEntities.ToList();
@@ -127,7 +127,7 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
         if (dto.OptionValuesContentEntities != null) 
             allItems.AddRange(dto.OptionValuesContentEntities);
 
-        await _resourceService.UpdateIdentifiedContent(allItems, null);
+        await _resourceService.UpdateIdentifiedContent(allItems, null, input.MarketId);
     }
 
     private static IEnumerable<IdentifiedContentEntity> GetProductOptions(ProductEntity product)

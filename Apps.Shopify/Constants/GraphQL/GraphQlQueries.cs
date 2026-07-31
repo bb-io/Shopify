@@ -142,9 +142,9 @@ public static class GraphQlQueries
         }";
 
     public const string TranslatableResourceContent =
-        @"query ($resourceId: ID!) {
+        @"query ($resourceId: ID!, $marketId: ID) {
           translatableResource(resourceId: $resourceId) {
-            translatableContent {
+            translatableContent(marketId: $marketId) {
               key
               value
               digest
@@ -167,18 +167,6 @@ public static class GraphQlQueries
                   digest
                   locale
                   type
-                }
-          }
-        }";
-    
-    public const string TranslatableResourceTranslationKeys =
-        @"query ($outdated: Boolean, $resourceId: ID!, $locale: String!) {
-          translatableResource(resourceId: $resourceId) {
-               translations(locale: $locale, outdated: $outdated) {
-                  key
-                }
-                translatableContent {
-                  key
                 }
           }
         }";
