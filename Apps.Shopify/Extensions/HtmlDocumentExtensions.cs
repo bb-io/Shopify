@@ -1,3 +1,5 @@
+using Apps.Shopify.Constants;
+using Apps.Shopify.HtmlConversion.Models;
 using HtmlAgilityPack;
 
 namespace Apps.Shopify.Extensions;
@@ -22,5 +24,14 @@ public static class HtmlDocumentExtensions
         return htmlDoc.DocumentNode
             .SelectSingleNode($"//meta[@name='{metaName}']")?
             .GetAttributeValue("content", string.Empty);
+    }
+
+    public static ShopifyMetadata GetAllMeta(this HtmlDocument htmlDoc)
+    {
+        return new ShopifyMetadata
+        {
+            ContentType = htmlDoc.GetMeta(HtmlMetadataConstants.BlackbirdContentType),
+            MarketId = htmlDoc.GetMeta(HtmlMetadataConstants.BlackbirdMarketId)
+        };
     }
 }

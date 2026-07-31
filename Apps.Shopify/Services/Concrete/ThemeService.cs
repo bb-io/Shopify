@@ -26,7 +26,8 @@ public class ThemeService(InvocationContext invocationContext, IFileManagementCl
         var translatableContent = await _resourceService.GetTranslatableContent(
             input.ContentId, 
             input.Locale, 
-            input.Outdated ?? default
+            input.Outdated ?? false,
+            input.MarketId
         );
 
         if (input.AssetKeys != null)

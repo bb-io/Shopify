@@ -16,6 +16,7 @@ using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using GraphQL;
 using System.Net.Mime;
+using Apps.Shopify.HtmlConversion.Models;
 
 namespace Apps.Shopify.Actions;
 
@@ -77,7 +78,7 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
         [ActionParameter] UploadStoreResourcesRequest input)
     {
         var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, input.Content);
-        var content = ShopifyHtmlConverter.ToJson(html, locale.Locale).ToList();
+        var content = ShopifyHtmlConverter.ToJson(html, locale.Locale, new ShopifyMetadata()).ToList();
         await _translatableResourceService.UpdateIdentifiedContent(content);
     }
 
