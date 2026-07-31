@@ -91,14 +91,16 @@ public class ProductActions(InvocationContext invocationContext, IFileManagement
     [Action("Upload product", Description = "Upload content of a specific product")]
     public async Task UpdateProductContent(
         [ActionParameter] UploadProductRequest input,
-        [ActionParameter] NonPrimaryLocaleIdentifier locale)
+        [ActionParameter] NonPrimaryLocaleIdentifier locale,
+        [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
         var service = _factory.GetContentService(ContentType);
         var request = new UploadContentRequest
         {
             Content = input.File,
             ContentId = input.ProductId,
-            Locale = locale.Locale
+            Locale = locale.Locale,
+            MarketId = marketIdentifier.MarketId
         };
 
         await service.Upload(request);
