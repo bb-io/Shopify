@@ -1,5 +1,6 @@
 ﻿using Apps.Shopify.Actions;
 using Apps.Shopify.Models.Identifiers;
+using Apps.Shopify.Models.Identifiers.Optional;
 using Apps.Shopify.Models.Request.Blog;
 using Apps.Shopify.Models.Request.OnlineStoreBlog;
 using ShopifyTests.Base;
@@ -39,9 +40,10 @@ public class OnlineStoreBlogTests : TestBase
 			IncludeBlogPosts = true
 		};
 		var outdated = new OutdatedOptionalIdentifier { Outdated = false };
+		var marketId = new OptionalMarketIdentifier { };
 
         // Act
-		var result = await action.GetOnlineStoreBlogTranslationContent(blog, locale, input, outdated);
+		var result = await action.GetOnlineStoreBlogTranslationContent(blog, locale, input, outdated, marketId);
 
         // Assert
         Console.WriteLine(result.File.Name);
@@ -58,8 +60,9 @@ public class OnlineStoreBlogTests : TestBase
 			File = new FileReference { Name = "test.html" }
 		};
 		var locale = new NonPrimaryLocaleIdentifier { Locale = "nl" };
+		var marketId = new OptionalMarketIdentifier { };
 
         // Act
-		await action.UpdateOnlineStoreBlogContent(input, locale);
+		await action.UpdateOnlineStoreBlogContent(input, locale, marketId);
     }
 }

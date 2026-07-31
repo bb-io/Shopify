@@ -45,10 +45,12 @@ public static class ShopifyHtmlConverter
 
     #region Blog
 
-    public static MemoryStream BlogToHtml(IEnumerable<IdentifiedContentEntity> contentEntities,
-        ICollection<IdentifiedContentEntity> blogPostsEntities, string contentType)
+    public static MemoryStream BlogToHtml(
+        IEnumerable<IdentifiedContentEntity> contentEntities,
+        ICollection<IdentifiedContentEntity> blogPostsEntities, 
+        ShopifyMetadata metadata)
     {
-        var (doc, body) = PrepareEmptyHtmlDocument(contentType);
+        var (doc, body) = PrepareEmptyHtmlDocument(metadata);
         FillInIdentifiedContentEntities(doc, body, contentEntities);
 
         if (blogPostsEntities.Any())
@@ -63,12 +65,13 @@ public static class ShopifyHtmlConverter
         return GetMemoryStream(doc);
     }
 
-    public static (IEnumerable<IdentifiedContentRequest> blog,
-        IEnumerable<IdentifiedContentRequest> blogPosts) BlogToJson(string file, string locale)
+    public static (IEnumerable<IdentifiedContentRequest> blog, IEnumerable<IdentifiedContentRequest> blogPosts) BlogToJson(
+        string file,
+        string locale,
+        ShopifyMetadata overrides)
     {
-        var doc = new HtmlDocument();
-        doc.LoadHtml(file);
-
+        var (doc, metadata) = LoadDocument(file, overrides);
+        
         var blogContentNodes = doc.DocumentNode.Descendants()
             .Where(x => x.Attributes[KeyAttr]?.Value != null && x.ParentNode.Name == "body");
 
@@ -76,8 +79,8 @@ public static class ShopifyHtmlConverter
             .FirstOrDefault(x => x.Attributes[TypeAttr]?.Value == BlogPostType)?
             .ChildNodes.Where(x => x.Attributes[KeyAttr]?.Value != null);
 
-        var blog = GetIdentifiedResourceContent(blogContentNodes, locale);
-        var blogPosts = GetIdentifiedResourceContent(blogPostsContentNodes, locale);
+        var blog = GetIdentifiedResourceContent(blogContentNodes, locale, metadata.MarketId);
+        var blogPosts = GetIdentifiedResourceContent(blogPostsContentNodes, locale, metadata.MarketId);
 
         return (blog, blogPosts);
     }
@@ -255,10 +258,9 @@ public static class ShopifyHtmlConverter
         return GetMemoryStream(doc);
     }
     
-    public static IEnumerable<IdentifiedContentRequest> ToJson(string file, string locale, ShopifyMetadata metadata)
+    public static IEnumerable<IdentifiedContentRequest> ToJson(string file, string locale, ShopifyMetadata overrides)
     {
-        var doc = new HtmlDocument();
-        doc.LoadHtml(file);
+        var (doc, metadata) = LoadDocument(file, overrides);
 
         var mergedMetadata = doc.GetAllMeta().Merge(metadata);
         var contentNodes = doc.DocumentNode.Descendants().Where(x => x.Attributes[KeyAttr]?.Value != null);
@@ -323,5 +325,14 @@ public static class ShopifyHtmlConverter
             Locale = locale,
             MarketId = marketId
         }) ?? [];
+    }
+    
+    private static (HtmlDocument doc, ShopifyMetadata metadata) LoadDocument(string file, ShopifyMetadata? overrides = null)
+    {
+        var doc = new HtmlDocument();
+        doc.LoadHtml(file);
+
+        var mergedMeta = doc.GetAllMeta().Merge(overrides);
+        return (doc, mergedMeta);
     }
 }

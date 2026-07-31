@@ -13,7 +13,7 @@ public record ShopifyMetadata
         return new()
         {
             ContentType = overrides?.ContentType ?? ContentType,
-            MarketId = overrides?.MarketId ?? MarketId
+            MarketId = overrides?.MarketId ?? MarketId,
         };
     }
 }

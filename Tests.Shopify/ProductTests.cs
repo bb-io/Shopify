@@ -57,8 +57,9 @@ public class ProductTests : TestBase
             File = new FileReference { Name = "test.html" } 
         };
         var locale = new NonPrimaryLocaleIdentifier { Locale = "nl" };
+        var marketId = new OptionalMarketIdentifier { MarketId = "" };
 
         // Act
-        await action.UpdateProductContent(input, locale);
+        await action.UpdateProductContent(input, locale, marketId);
     }
 }

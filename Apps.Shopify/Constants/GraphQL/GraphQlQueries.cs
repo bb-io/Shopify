@@ -119,27 +119,29 @@ public static class GraphQlQueries
         }";
 
     public const string TranslatableResourcesByIds =
-        @"query ($outdated: Boolean, $resourceIds: [ID!]!, $after: String, $limit: Int!, $locale: String!) {
-          translatableResourcesByIds(first: $limit, after: $after, resourceIds: $resourceIds) {
-              nodes {
-                 resourceId
-                 translations(locale: $locale, outdated: $outdated) {
-                    key
-                    value
-                 }
-                 translatableContent {
-                    key
-                    value
-                    digest
-                 }
-               }
-              pageInfo {
-                 endCursor
-                 hasNextPage
-                 startCursor
-              }
+      """
+      query ($outdated: Boolean, $resourceIds: [ID!]!, $after: String, $limit: Int!, $locale: String!, $marketId: ID) {
+        translatableResourcesByIds(first: $limit, after: $after, resourceIds: $resourceIds) {
+          nodes {
+            resourceId
+            ranslations(locale: $locale, outdated: $outdated, marketId: $marketId) {
+              key
+              value
+           }
+           translatableContent(marketId: $marketId) {
+              key
+              value
+              digest
+           }
           }
-        }";
+          pageInfo {
+             endCursor
+             hasNextPage
+             startCursor
+          }
+        }
+      }
+      """;
 
     public const string TranslatableResourceContent =
         @"query ($resourceId: ID!, $marketId: ID) {
