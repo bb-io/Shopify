@@ -2,6 +2,7 @@
 using Apps.Shopify.Actions;
 using Apps.Shopify.Models.Request.Page;
 using Apps.Shopify.Models.Identifiers;
+using Apps.Shopify.Models.Identifiers.Optional;
 using Apps.Shopify.Models.Request.OnlineStorePage;
 
 namespace Tests.Shopify;
@@ -35,9 +36,10 @@ public class OnlineStorePageTests : TestBase
 		var page = new PageIdentifier { PageId = "gid://shopify/Page/151751328028" };
 		var locale = new LocaleIdentifier { Locale = "en" };
 		var outdated = new OutdatedOptionalIdentifier { Outdated = false };
+		var marketId = new OptionalMarketIdentifier { };
 
         // Act
-		var result = await action.GetOnlineStorePageTranslationContent(page, locale, outdated);
+		var result = await action.GetOnlineStorePageTranslationContent(page, locale, outdated, marketId);
 
         // Assert
         Console.WriteLine(result.File.Name);
@@ -54,8 +56,9 @@ public class OnlineStorePageTests : TestBase
 			File = new FileReference { Name = "test.html" } 
 		};
 		var locale = new NonPrimaryLocaleIdentifier { Locale = "nl" };
+		var marketId = new OptionalMarketIdentifier { };
 
 		// Act
-		await action.UpdateOnlineStorePageContent(input, locale);
+		await action.UpdateOnlineStorePageContent(input, locale, marketId);
     }
 }

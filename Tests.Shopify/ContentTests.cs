@@ -31,10 +31,10 @@ public class ContentTests : TestBase
 	{
         // Arrange
         var action = new ContentActions(InvocationContext, FileManager);
-		var contentType = new ContentTypeIdentifier { ContentType = "Metafield" };
+		var contentType = new ContentTypeIdentifier { ContentType = "Page" };
 		var input = new DownloadContentRequest
 		{
-			ContentId = "gid://shopify/Metafield/31987107201308",
+			ContentId = "gid://shopify/Page/136069284124",
 			Locale = "en",
 			MarketId = "gid://shopify/Market/94465523996"
         };
