@@ -52,7 +52,7 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
             .Select(x => new IdentifiedContentEntity(x) { Id = input.ContentId });
         
         var metafieldContentEntities = input.IncludeMetafields is true
-            ? await GetProductMetafields(input.ContentId, input.Locale, input.Outdated ?? default)
+            ? await GetProductMetafields(input.ContentId, input.Locale, input.Outdated ?? false, input.MarketId)
             : [];
 
         var optionsContentEntities = input.IncludeOptions is true ? GetProductOptions(productInfo) : [];

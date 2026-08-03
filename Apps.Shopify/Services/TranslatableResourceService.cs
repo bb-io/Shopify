@@ -138,9 +138,11 @@ public class TranslatableResourceService(InvocationContext invocationContext, IF
         {
             ["resourceType"] = resourceType,
             ["locale"] = locale ?? string.Empty,
-            ["outdated"] = outdated,
-            ["marketId"] = marketId ?? string.Empty
+            ["outdated"] = outdated
         };
+        
+        if (!string.IsNullOrEmpty(marketId))
+            variables["marketId"] = marketId;
         
         return await Client.Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
             GraphQlQueries.TranslatableResourcesWithTranslations,

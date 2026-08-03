@@ -96,7 +96,7 @@ public static class GraphQlQueries
         }";
 
     public const string TranslatableResourcesWithTranslations =
-        @"query ($outdated: Boolean, $resourceType: TranslatableResourceType!, $after: String, $limit: Int!, $locale: String!) {
+        @"query ($outdated: Boolean, $resourceType: TranslatableResourceType!, $after: String, $limit: Int!, $locale: String!, $marketId: ID) {
           translatableResources(first: $limit, after: $after, resourceType: $resourceType) {
               nodes {
                  resourceId
@@ -124,11 +124,11 @@ public static class GraphQlQueries
         translatableResourcesByIds(first: $limit, after: $after, resourceIds: $resourceIds) {
           nodes {
             resourceId
-            ranslations(locale: $locale, outdated: $outdated, marketId: $marketId) {
+            translations(locale: $locale, outdated: $outdated, marketId: $marketId) {
               key
               value
            }
-           translatableContent(marketId: $marketId) {
+           translatableContent {
               key
               value
               digest
@@ -210,33 +210,35 @@ public static class GraphQlQueries
         }";
 
     public const string Product =
-        @"query ($resourceId: ID!, $locale: String!) {
-          product(id: $resourceId) {
-            id
-            title
-            handle
-            options{
-             id            
-             name            
-             optionValues {
-               id
-               name
-               translations(locale: $locale){
+      """
+      query ($resourceId: ID!, $locale: String!, $marketId: ID) {
+        product(id: $resourceId) {
+          id
+          title
+          handle
+          options {
+            id            
+            name            
+            optionValues {
+              id
+              name
+              translations(locale: $locale, marketId: $marketId) {
                 key
                 value
-               }  
-             }            
-             translations(locale: $locale){
-                key
-                value
-             }            
-            }
-            translations(locale: $locale){
-                key
-                value
-             }  
+              }  
+            }            
+            translations(locale: $locale, marketId: $marketId) {
+              key
+              value
+            }            
           }
-        }";
+          translations(locale: $locale, marketId: $marketId) {
+            key
+            value
+          }  
+        }
+      }
+      """;
 
     public const string MetafieldDefinitions =
         @"query ($limit: Int!, $after: String, $ownerType: MetafieldOwnerType!, $query: String) {
