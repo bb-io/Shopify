@@ -31,10 +31,10 @@ public class ContentTests : TestBase
 	{
         // Arrange
         var action = new ContentActions(InvocationContext, FileManager);
-		var contentType = new ContentTypeIdentifier { ContentType = "Blog" };
+		var contentType = new ContentTypeIdentifier { ContentType = "Collection" };
 		var input = new DownloadContentRequest
 		{
-			ContentId = "gid://shopify/Blog/107159126300",
+			ContentId = "gid://shopify/Collection/465108861212",
 			Locale = "en",
 			MarketId = "gid://shopify/Market/94465523996"
         };

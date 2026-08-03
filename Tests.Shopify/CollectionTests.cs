@@ -1,6 +1,7 @@
 ﻿using ShopifyTests.Base;
 using Apps.Shopify.Actions;
 using Apps.Shopify.Models.Identifiers;
+using Apps.Shopify.Models.Identifiers.Optional;
 using Apps.Shopify.Models.Request.Collection;
 
 namespace Tests.Shopify;
@@ -34,9 +35,10 @@ public class CollectionTests : TestBase
 		var collection = new CollectionIdentifier { CollectionId = "gid://shopify/Collection/500406124828" };
 		var locale = new LocaleIdentifier { Locale = "en" };
 		var outdated = new OutdatedOptionalIdentifier { Outdated = false };
+		var marketId = new OptionalMarketIdentifier { };
 
         // Act
-		var result = await actions.GetCollectionContent(collection, locale, outdated);
+		var result = await actions.GetCollectionContent(collection, locale, outdated, marketId);
 
         // Assert
         Console.WriteLine(result.File.Name);
@@ -54,8 +56,9 @@ public class CollectionTests : TestBase
 			File = new FileReference { Name = "test.html" }
 		};
 		var locale = new NonPrimaryLocaleIdentifier { Locale = "nl" };
+		var marketId = new OptionalMarketIdentifier { };
 
 		// Act
-		await actions.UpdateCollectionContent(input, locale);
+		await actions.UpdateCollectionContent(input, locale, marketId);
     }
 }
