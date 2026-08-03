@@ -172,7 +172,8 @@ public static class ShopifyHtmlConverter
 
     public static MemoryStream StoreToHtml(StoreContentDto contentDto)
     {
-        var (doc, body) = PrepareEmptyHtmlDocument(TranslatableResources.Store);
+        var metadata = new ShopifyMetadata { ContentType = TranslatableResources.Store.ToLower() };
+        var (doc, body) = PrepareEmptyHtmlDocument(metadata);
 
         if (contentDto.ThemesContentEntities is not null && contentDto.ThemesContentEntities.Any())
         {

@@ -48,11 +48,12 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
     {
         if (!Enum.TryParse(input.ResourceType, ignoreCase: true, out TranslatableResource resourceType))
             throw new PluginMisconfigurationException("Invalid resource type value specified. Please check the input");
-
+        
+        var metadata = new ShopifyMetadata { ContentType = TranslatableResources.Store.ToLower() };
         var resources = await _translatableResourceService.ListTranslatableResources(
             resourceType, 
             locale.Locale, 
-            getContentRequest.Outdated ?? default
+            getContentRequest.Outdated ?? false
         );
         var contentEntities = resources.SelectMany(x =>
         {
@@ -63,7 +64,7 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
             });
         });
         
-        var html = ShopifyHtmlConverter.ToHtml(contentEntities, TranslatableResources.Store);
+        var html = ShopifyHtmlConverter.ToHtml(contentEntities, metadata);
         var file = await fileManagementClient.UploadAsync(
             html, 
             MediaTypeNames.Text.Html, 
