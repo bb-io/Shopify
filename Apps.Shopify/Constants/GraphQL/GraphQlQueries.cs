@@ -100,7 +100,7 @@ public static class GraphQlQueries
           translatableResources(first: $limit, after: $after, resourceType: $resourceType) {
               nodes {
                  resourceId
-                 translations(locale: $locale, outdated: $outdated) {
+                 translations(locale: $locale, outdated: $outdated, marketId: $marketId) {
                     key
                     value
                  }
@@ -144,17 +144,19 @@ public static class GraphQlQueries
       """;
 
     public const string TranslatableResourceContent =
-        @"query ($resourceId: ID!, $marketId: ID) {
-          translatableResource(resourceId: $resourceId) {
-            translatableContent(marketId: $marketId) {
-              key
-              value
-              digest
-              locale
-              type
-            }
+      """
+      query ($resourceId: ID!) {
+        translatableResource(resourceId: $resourceId) {
+          translatableContent {
+            key
+            value
+            digest
+            locale
+            type
           }
-        }";
+        }
+      }
+      """;
 
     public const string TranslatableResourceTranslations =
         @"query ($outdated: Boolean, $resourceId: ID!, $locale: String!, $marketId: ID) {
@@ -163,7 +165,7 @@ public static class GraphQlQueries
                   key
                   value
                 }
-                translatableContent(marketId: $marketId) {
+                translatableContent {
                   key
                   value
                   digest

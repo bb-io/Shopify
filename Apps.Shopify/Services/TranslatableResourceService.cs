@@ -19,8 +19,6 @@ namespace Apps.Shopify.Services;
 public class TranslatableResourceService(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
     : ShopifyInvocable(invocationContext)
 {
-    private const int MaxUpdateChunkSize = 250;
-
     public async Task<FileReference> GetResourceContent(string resourceId, string locale, bool outdated, ShopifyMetadata metadata)
     {
         var translatableContent = await GetTranslatableContent(resourceId, locale, outdated, metadata.MarketId);
@@ -57,7 +55,9 @@ public class TranslatableResourceService(InvocationContext invocationContext, IF
     public async Task UpdateResourceContent(string? resourceId, string locale, FileReference file, string? marketId = null)
     {
         var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, file);
-        var items = ShopifyHtmlConverter.ToJson(html, locale, marketId).ToList();
+        var items = ShopifyHtmlConverter
+            .ToJson(html, locale, new ShopifyMetadata { MarketId = marketId })
+            .ToList();
 
         await UpdateIdentifiedContent(items, resourceId, marketId);
     }
@@ -80,28 +80,37 @@ public class TranslatableResourceService(InvocationContext invocationContext, IF
 
         foreach (var group in groupedItems)
         {
-            var id = group.Key;
+            string id = group.Key;
             if (string.IsNullOrWhiteSpace(id))
-            {
-                throw new PluginMisconfigurationException(
-                    $"Content ID is missing. Please it in the input or include it in the file"
-                );
-            }
+                throw new PluginMisconfigurationException("Content ID is missing. Please provide it in the input");
 
             var groupItems = group.ToList();
 
-            if (groupItems.Any(x => string.IsNullOrWhiteSpace(x.TranslatableContentDigest)))
+            var sourceContent = await GetResourceSourceContent(id);
+            var sourceByKey = sourceContent.TranslatableResource.TranslatableContent
+                .GroupBy(x => x.Key)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            foreach (var item in groupItems)
             {
-                var sourceContent = await GetResourceSourceContent(id, marketId);
-                groupItems.ForEach(x =>
-                    x.TranslatableContentDigest = sourceContent.TranslatableResource.TranslatableContent
-                        .FirstOrDefault(y => y.Key == x.Key)?.Digest ?? string.Empty);
+                if (string.IsNullOrWhiteSpace(item.TranslatableContentDigest))
+                    item.TranslatableContentDigest = sourceByKey.GetValueOrDefault(item.Key)?.Digest ?? string.Empty;
             }
 
-            var validItems = groupItems
+            var withDigest = groupItems
                 .Where(x => !string.IsNullOrWhiteSpace(x.TranslatableContentDigest))
+                .ToArray();
+
+            if (withDigest.Length == 0)
+                throw new PluginApplicationException($"Could not resolve content digests for {id}. Nothing was uploaded");
+
+            var validItems = withDigest
+                .Where(x => x.Value?.Trim() != sourceByKey.GetValueOrDefault(x.Key)?.Value?.Trim())
                 .Select(x => new TranslatableResourceContentRequest(x))
-                .Chunk(MaxUpdateChunkSize);
+                .ToArray();
+
+            if (validItems.Length == 0)
+                continue;
 
             foreach (var chunk in validItems)
             {
@@ -150,16 +159,12 @@ public class TranslatableResourceService(InvocationContext invocationContext, IF
             .ToList();
     }
 
-    public Task<TranslatableResourceResponse> GetResourceSourceContent(string resourceId, string? marketId = null)
+    public Task<TranslatableResourceResponse> GetResourceSourceContent(string resourceId)
     {
         var request = new GraphQLRequest
         {
             Query = GraphQlQueries.TranslatableResourceContent,
-            Variables = new
-            {
-                resourceId,
-                marketId
-            }
+            Variables = new { resourceId }
         };
         return Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
     }
