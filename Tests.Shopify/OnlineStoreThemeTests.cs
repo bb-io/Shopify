@@ -1,5 +1,6 @@
 ﻿using Apps.Shopify.Actions;
 using Apps.Shopify.Models.Identifiers;
+using Apps.Shopify.Models.Identifiers.Optional;
 using Apps.Shopify.Models.Request.OnlineStoreTheme;
 using Apps.Shopify.Models.Request.Theme;
 using ShopifyTests.Base;
@@ -39,9 +40,10 @@ public class OnlineStoreThemeTests : TestBase
 		};
 		var locale = new LocaleIdentifier { Locale = "en" };
 		var outdated = new OutdatedOptionalIdentifier { Outdated = false };
+		var marketId = new OptionalMarketIdentifier { };
 
         // Act
-		var result = await action.GetOnlineStoreThemeTranslationContent(theme, input, locale, outdated);
+		var result = await action.GetOnlineStoreThemeTranslationContent(theme, input, locale, outdated, marketId);
 
         // Assert
         Console.WriteLine(result.File.Name);
@@ -58,8 +60,9 @@ public class OnlineStoreThemeTests : TestBase
 			File = new FileReference { Name = "test.html" }
 		};
 		var locale = new NonPrimaryLocaleIdentifier { Locale = "nl" };
+		var marketId = new OptionalMarketIdentifier { };
 
         // Act
-		await action.UpdateOnlineStoreThemeContent(input, locale);
+		await action.UpdateOnlineStoreThemeContent(input, locale, marketId);
     }
 }

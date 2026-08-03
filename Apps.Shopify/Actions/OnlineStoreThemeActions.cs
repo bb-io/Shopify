@@ -3,6 +3,7 @@ using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Theme;
 using Apps.Shopify.Models.Identifiers;
+using Apps.Shopify.Models.Identifiers.Optional;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.OnlineStoreTheme;
 using Apps.Shopify.Models.Request.Theme;
@@ -45,7 +46,8 @@ public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileM
         [ActionParameter] ThemeIdentifier theme,
         [ActionParameter] DownloadThemeRequest input,
         [ActionParameter] LocaleIdentifier locale,
-        [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
+        [ActionParameter] OutdatedOptionalIdentifier getContentRequest,
+        [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
         var service = _factory.GetContentService(ContentType);
         var request = new DownloadContentRequest
@@ -54,6 +56,7 @@ public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileM
             AssetKeys = input.AssetKeys,
             Locale = locale.Locale,
             Outdated = getContentRequest.Outdated,
+            MarketId = marketIdentifier.MarketId
         };
 
         var file = await service.Download(request);
@@ -63,14 +66,16 @@ public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileM
     [Action("Upload theme", Description = "Upload content of a specific theme")]
     public async Task UpdateOnlineStoreThemeContent(
         [ActionParameter] UploadThemeRequest input,
-        [ActionParameter] NonPrimaryLocaleIdentifier locale)
+        [ActionParameter] NonPrimaryLocaleIdentifier locale,
+        [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
         var service = _factory.GetContentService(ContentType);
         var request = new UploadContentRequest
         {
             Content = input.File,
             ContentId = input.ThemeId,
-            Locale = locale.Locale
+            Locale = locale.Locale,
+            MarketId = marketIdentifier.MarketId
         };
 
         await service.Upload(request);
