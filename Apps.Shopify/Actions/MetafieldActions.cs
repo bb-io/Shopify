@@ -5,6 +5,7 @@ using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Metafield;
 using Apps.Shopify.Models.Identifiers;
+using Apps.Shopify.Models.Identifiers.Optional;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.Metafield;
 using Apps.Shopify.Models.Response.Metafield;
@@ -29,7 +30,8 @@ public class MetafieldActions(InvocationContext invocationContext, IFileManageme
     public async Task<DownloadMetafieldResponse> GetMetafieldContent(
         [ActionParameter] ProductIdentifier resourceRequest,
         [ActionParameter] LocaleIdentifier locale, 
-        [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
+        [ActionParameter] OutdatedOptionalIdentifier getContentRequest,
+        [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
         var service = _factory.GetContentService(ContentType);
         var request = new DownloadContentRequest
@@ -37,6 +39,7 @@ public class MetafieldActions(InvocationContext invocationContext, IFileManageme
             ContentId = resourceRequest.ProductId,
             Locale = locale.Locale,
             Outdated = getContentRequest.Outdated,
+            MarketId = marketIdentifier.MarketId
         };
 
         var file = await service.Download(request);
@@ -46,14 +49,16 @@ public class MetafieldActions(InvocationContext invocationContext, IFileManageme
     [Action("Upload metafields", Description = "Upload metafield content of a specific product")]
     public async Task UpdateMetaFieldContent(
         [ActionParameter] UploadMetafieldRequest input,
-        [ActionParameter] NonPrimaryLocaleIdentifier locale)
+        [ActionParameter] NonPrimaryLocaleIdentifier locale,
+        [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
         var service = _factory.GetContentService(ContentType);
         var request = new UploadContentRequest
         {
             ContentId = input.MetafieldId,
             Content = input.File,
-            Locale = locale.Locale
+            Locale = locale.Locale,
+            MarketId = marketIdentifier.MarketId
         };
 
         await service.Upload(request);
