@@ -19,6 +19,8 @@ namespace Apps.Shopify.Services;
 public class TranslatableResourceService(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
     : ShopifyInvocable(invocationContext)
 {
+    private const int MaxUpdateChunkSize = 250;
+    
     public async Task<FileReference> GetResourceContent(string resourceId, string locale, bool outdated, ShopifyMetadata metadata)
     {
         var translatableContent = await GetTranslatableContent(resourceId, locale, outdated, metadata.MarketId);
@@ -75,6 +77,12 @@ public class TranslatableResourceService(InvocationContext invocationContext, IF
             foreach (var item in items)
                 item.ResourceId = resourceId;
         }
+        
+        if (!string.IsNullOrWhiteSpace(marketId))
+        {
+            foreach (var item in items)
+                item.MarketId = marketId;
+        }
 
         var groupedItems = items.GroupBy(x => x.ResourceId).ToArray();
 
@@ -87,6 +95,9 @@ public class TranslatableResourceService(InvocationContext invocationContext, IF
             var groupItems = group.ToList();
 
             var sourceContent = await GetResourceSourceContent(id);
+            if (sourceContent.TranslatableResource is null)
+                throw new PluginMisconfigurationException($"Could not find source content for resource {id}. Please check the input");
+            
             var sourceByKey = sourceContent.TranslatableResource.TranslatableContent
                 .GroupBy(x => x.Key)
                 .ToDictionary(g => g.Key, g => g.First());
@@ -102,7 +113,7 @@ public class TranslatableResourceService(InvocationContext invocationContext, IF
                 .ToArray();
 
             if (withDigest.Length == 0)
-                throw new PluginApplicationException($"Could not resolve content digests for {id}. Nothing was uploaded");
+                throw new PluginMisconfigurationException($"Could not resolve content digests for {id}. Nothing was uploaded");
 
             var validItems = withDigest
                 .Where(x => x.Value?.Trim() != sourceByKey.GetValueOrDefault(x.Key)?.Value?.Trim())
@@ -112,7 +123,7 @@ public class TranslatableResourceService(InvocationContext invocationContext, IF
             if (validItems.Length == 0)
                 continue;
 
-            foreach (var chunk in validItems)
+            foreach (var chunk in validItems.Chunk(MaxUpdateChunkSize))
             {
                 var request = new GraphQLRequest
                 {
