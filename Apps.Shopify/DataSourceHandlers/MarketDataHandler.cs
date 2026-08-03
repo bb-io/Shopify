@@ -1,3 +1,4 @@
+using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
@@ -22,7 +23,8 @@ public class MarketDataHandler(InvocationContext context) : ShopifyInvocable(con
             cancellationToken
         );
 
-        var items = response.Select(x => new DataSourceItem(x.Id, x.Name)).ToList();
+        var globalMarket = new DataSourceItem(MarketConstants.Global, "Global (all markets)");
+        var items = response.Select(x => new DataSourceItem(x.Id, x.Name)).ToList().Prepend(globalMarket);
         return items;
     }
 }

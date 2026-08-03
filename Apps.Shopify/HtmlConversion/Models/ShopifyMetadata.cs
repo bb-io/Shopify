@@ -1,3 +1,5 @@
+using Apps.Shopify.Constants;
+
 namespace Apps.Shopify.HtmlConversion.Models;
 
 public record ShopifyMetadata
@@ -8,10 +10,12 @@ public record ShopifyMetadata
     
     public ShopifyMetadata Merge(ShopifyMetadata? overrides)
     {
+        string? market = overrides?.MarketId ?? MarketId;
+
         return new()
         {
             ContentType = overrides?.ContentType ?? ContentType,
-            MarketId = overrides?.MarketId ?? MarketId,
+            MarketId = market == MarketConstants.Global ? null : market
         };
     }
 }
