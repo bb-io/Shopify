@@ -16,6 +16,7 @@ using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using GraphQL;
 using System.Net.Mime;
+using Apps.Shopify.HtmlConversion.Models;
 
 namespace Apps.Shopify.Actions;
 
@@ -47,11 +48,12 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
     {
         if (!Enum.TryParse(input.ResourceType, ignoreCase: true, out TranslatableResource resourceType))
             throw new PluginMisconfigurationException("Invalid resource type value specified. Please check the input");
-
+        
+        var metadata = new ShopifyMetadata { ContentType = TranslatableResources.Store.ToLower() };
         var resources = await _translatableResourceService.ListTranslatableResources(
             resourceType, 
             locale.Locale, 
-            getContentRequest.Outdated ?? default
+            getContentRequest.Outdated ?? false
         );
         var contentEntities = resources.SelectMany(x =>
         {
@@ -62,7 +64,7 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
             });
         });
         
-        var html = ShopifyHtmlConverter.ToHtml(contentEntities, TranslatableResources.Store);
+        var html = ShopifyHtmlConverter.ToHtml(contentEntities, metadata);
         var file = await fileManagementClient.UploadAsync(
             html, 
             MediaTypeNames.Text.Html, 
@@ -77,7 +79,7 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
         [ActionParameter] UploadStoreResourcesRequest input)
     {
         var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, input.Content);
-        var content = ShopifyHtmlConverter.ToJson(html, locale.Locale).ToList();
+        var content = ShopifyHtmlConverter.ToJson(html, locale.Locale, new ShopifyMetadata()).ToList();
         await _translatableResourceService.UpdateIdentifiedContent(content);
     }
 

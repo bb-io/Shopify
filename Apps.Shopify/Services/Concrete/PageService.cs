@@ -1,6 +1,7 @@
 ﻿using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Helper;
+using Apps.Shopify.HtmlConversion.Models;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Content;
 using Apps.Shopify.Models.Entities.Page;
@@ -19,14 +20,15 @@ public class PageService(InvocationContext invocationContext, IFileManagementCli
     private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
     private readonly string _contentType = TranslatableResources.Page;
 
-    public async Task<FileReference> Download(DownloadContentRequest input)
+    public Task<FileReference> Download(DownloadContentRequest input)
     {
-        return await _resourceService.GetResourceContent(
-            input.ContentId, 
-            input.Locale, 
-            input.Outdated ?? default,
-            _contentType.ToLower()
-        );
+        var metadata = new ShopifyMetadata
+        {
+            MarketId = input.MarketId,
+            ContentType = _contentType.ToLower()
+        };
+        
+        return _resourceService.GetResourceContent(input.ContentId, input.Locale, input.Outdated ?? false, metadata);
     }
 
     public async Task<ContentUpdatedResponse> PollUpdated(DateTime after, DateTime before, PollUpdatedContentRequest input)
@@ -65,6 +67,6 @@ public class PageService(InvocationContext invocationContext, IFileManagementCli
 
     public async Task Upload(UploadContentRequest input)
     {
-        await _resourceService.UpdateResourceContent(input.ContentId, input.Locale, input.Content);
+        await _resourceService.UpdateResourceContent(input.ContentId, input.Locale, input.Content, input.MarketId);
     }
 }

@@ -4,6 +4,7 @@ namespace Apps.Shopify.Models.Dto;
 
 public class ProductContentDto
 {
+    public string? MarketId { get; set; }
     public IEnumerable<IdentifiedContentEntity> ProductContentEntities { get; set; }
     public IEnumerable<IdentifiedContentEntity>? MetafieldsContentEntities { get; set; }
     public IEnumerable<IdentifiedContentEntity>? OptionsContentEntities { get; set; }

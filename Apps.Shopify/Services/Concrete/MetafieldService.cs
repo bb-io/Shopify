@@ -1,5 +1,6 @@
 ﻿using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
+using Apps.Shopify.HtmlConversion.Models;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Content;
 using Apps.Shopify.Models.Request.Content;
@@ -20,12 +21,13 @@ public class MetafieldService(InvocationContext invocationContext, IFileManageme
 
     public async Task<FileReference> Download(DownloadContentRequest input)
     {
-        return await _resourceService.GetResourceContent(
-            input.ContentId,
-            input.Locale,
-            input.Outdated ?? false,
-            _contentType.ToLower()
-        );
+        var metadata = new ShopifyMetadata
+        {
+            MarketId = input.MarketId,
+            ContentType = _contentType.ToLower()
+        };
+        
+        return await _resourceService.GetResourceContent(input.ContentId, input.Locale, input.Outdated ?? false, metadata);
     }
 
     public async Task<SearchContentResponse> Search(SearchContentRequest input)
@@ -52,6 +54,6 @@ public class MetafieldService(InvocationContext invocationContext, IFileManageme
 
     public async Task Upload(UploadContentRequest input)
     {
-        await _resourceService.UpdateResourceContent(input.ContentId, input.Locale, input.Content);
+        await _resourceService.UpdateResourceContent(input.ContentId, input.Locale, input.Content, input.MarketId);
     }
 }

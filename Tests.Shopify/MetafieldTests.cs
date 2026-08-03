@@ -2,6 +2,7 @@
 using Apps.Shopify.Actions;
 using Apps.Shopify.Models.Request.Metafield;
 using Apps.Shopify.Models.Identifiers;
+using Apps.Shopify.Models.Identifiers.Optional;
 
 namespace Tests.Shopify;
 
@@ -46,9 +47,10 @@ public class MetafieldTests : TestBase
         var product = new ProductIdentifier { ProductId = "gid://shopify/Product/10745816351004" };
         var locale = new LocaleIdentifier { Locale = "en" };
         var outdated = new OutdatedOptionalIdentifier { Outdated = false };
+        var marketId = new OptionalMarketIdentifier { };
 
         // Act
-        var result = await action.GetMetafieldContent(product, locale, outdated);
+        var result = await action.GetMetafieldContent(product, locale, outdated, marketId);
 
         // Assert
         Console.WriteLine(result.File.Name);
@@ -65,8 +67,9 @@ public class MetafieldTests : TestBase
             File = new FileReference { Name = "test.html" },
         };
         var locale = new NonPrimaryLocaleIdentifier { Locale = "nl" };
+        var marketId = new OptionalMarketIdentifier { };
 
         // Act
-        await action.UpdateMetaFieldContent(input, locale);
+        await action.UpdateMetaFieldContent(input, locale, marketId);
     }
 }

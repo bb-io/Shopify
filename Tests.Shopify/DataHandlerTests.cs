@@ -83,4 +83,7 @@ public class DataHandlerTests : TestBase
     [TestMethod]
     public async Task ProductMetafieldDefinitionDataHandler_ReturnsProductMetafieldDefinitions() 
         => await TestHandler<ProductMetafieldDefinitionDataHandler>();
+
+    [TestMethod]
+    public async Task MarketDataHandler_ReturnsMarkets() => await TestHandler<MarketDataHandler>();
 }

@@ -31,11 +31,12 @@ public class ContentTests : TestBase
 	{
         // Arrange
         var action = new ContentActions(InvocationContext, FileManager);
-		var contentType = new ContentTypeIdentifier { ContentType = "Metafield" };
+		var contentType = new ContentTypeIdentifier { ContentType = "Product" };
 		var input = new DownloadContentRequest
 		{
-			ContentId = "gid://shopify/Metafield/31987107201308",
-			Locale = "en"
+			ContentId = "gid://shopify/Product/10509813973276",
+			Locale = "en",
+			MarketId = "gid://shopify/Market/94465523996"
         };
 
 		// Act
@@ -54,7 +55,7 @@ public class ContentTests : TestBase
 		var input = new UploadContentRequest
 		{
 			Content = new FileReference { Name = "test.html" },
-			Locale = "en"
+			Locale = "fr"
 		};
 
         // Act

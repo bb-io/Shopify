@@ -12,6 +12,7 @@ using Blackbird.Applications.Sdk.Common.Files;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using System.Net.Mime;
+using Apps.Shopify.HtmlConversion.Models;
 
 namespace Apps.Shopify.Services.Concrete;
 
@@ -26,8 +27,8 @@ public class ThemeService(InvocationContext invocationContext, IFileManagementCl
         var translatableContent = await _resourceService.GetTranslatableContent(
             input.ContentId, 
             input.Locale, 
-            input.Outdated ?? default
-        );
+            input.Outdated ?? false,
+            input.MarketId);
 
         if (input.AssetKeys != null)
         {
@@ -36,12 +37,14 @@ public class ThemeService(InvocationContext invocationContext, IFileManagementCl
                 .ToList();
         }
 
-        var html = ShopifyHtmlConverter.ToHtml(translatableContent, _contentType.ToLower());
-        return await fileManagementClient.UploadAsync(
-            html, 
-            MediaTypeNames.Text.Html, 
-            $"{input.ContentId.GetShopifyItemId()}.html"
-        );
+        var metadata = new ShopifyMetadata
+        {
+            MarketId = input.MarketId,
+            ContentType = _contentType.ToLower()
+        };
+        
+        var html = ShopifyHtmlConverter.ToHtml(translatableContent, metadata);
+        return await fileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html, input.ContentId.GetFileName(metadata.MarketId));
     }
 
     public async Task<SearchContentResponse> Search(SearchContentRequest input)
@@ -57,6 +60,6 @@ public class ThemeService(InvocationContext invocationContext, IFileManagementCl
 
     public async Task Upload(UploadContentRequest input)
     {
-        await _resourceService.UpdateResourceContent(input.ContentId, input.Locale, input.Content);
+        await _resourceService.UpdateResourceContent(input.ContentId, input.Locale, input.Content, input.MarketId);
     }
 }

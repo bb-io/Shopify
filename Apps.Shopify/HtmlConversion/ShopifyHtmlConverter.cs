@@ -1,6 +1,8 @@
 using System.Web;
 using Apps.Shopify.Constants;
+using Apps.Shopify.Extensions;
 using Apps.Shopify.HtmlConversion.Constants;
+using Apps.Shopify.HtmlConversion.Models;
 using Apps.Shopify.Models.Dto;
 using Apps.Shopify.Models.Entities.Resource;
 using Apps.Shopify.Models.Request.TranslatableResource;
@@ -41,35 +43,14 @@ public static class ShopifyHtmlConverter
 
     #endregion
 
-    #region Metafield
-
-    public static MemoryStream MetaFieldsToHtml(IEnumerable<(string ResourceId, ContentEntity)> metafields, string contentType)
-    {
-        var (doc, body) = PrepareEmptyHtmlDocument(contentType);
-
-        metafields.ToList().ForEach(x =>
-        {
-            var node = doc.CreateElement(HtmlConstants.Div);
-
-            node.InnerHtml = x.Item2.Value;
-            node.SetAttributeValue(ResourceAttr, x.ResourceId);
-            node.SetAttributeValue(KeyAttr, x.Item2.Key);
-            node.SetAttributeValue(DigestAttr, x.Item2.Digest);
-
-            body.AppendChild(node);
-        });
-
-        return GetMemoryStream(doc);
-    }
-
-    #endregion
-
     #region Blog
 
-    public static MemoryStream BlogToHtml(IEnumerable<IdentifiedContentEntity> contentEntities,
-        ICollection<IdentifiedContentEntity> blogPostsEntities, string contentType)
+    public static MemoryStream BlogToHtml(
+        IEnumerable<IdentifiedContentEntity> contentEntities,
+        ICollection<IdentifiedContentEntity> blogPostsEntities, 
+        ShopifyMetadata metadata)
     {
-        var (doc, body) = PrepareEmptyHtmlDocument(contentType);
+        var (doc, body) = PrepareEmptyHtmlDocument(metadata);
         FillInIdentifiedContentEntities(doc, body, contentEntities);
 
         if (blogPostsEntities.Any())
@@ -84,12 +65,13 @@ public static class ShopifyHtmlConverter
         return GetMemoryStream(doc);
     }
 
-    public static (IEnumerable<IdentifiedContentRequest> blog,
-        IEnumerable<IdentifiedContentRequest> blogPosts) BlogToJson(string file, string locale)
+    public static (IEnumerable<IdentifiedContentRequest> blog, IEnumerable<IdentifiedContentRequest> blogPosts) BlogToJson(
+        string file,
+        string locale,
+        ShopifyMetadata overrides)
     {
-        var doc = new HtmlDocument();
-        doc.LoadHtml(file);
-
+        var (doc, metadata) = LoadDocument(file, overrides);
+        
         var blogContentNodes = doc.DocumentNode.Descendants()
             .Where(x => x.Attributes[KeyAttr]?.Value != null && x.ParentNode.Name == "body");
 
@@ -97,8 +79,8 @@ public static class ShopifyHtmlConverter
             .FirstOrDefault(x => x.Attributes[TypeAttr]?.Value == BlogPostType)?
             .ChildNodes.Where(x => x.Attributes[KeyAttr]?.Value != null);
 
-        var blog = GetIdentifiedResourceContent(blogContentNodes, locale);
-        var blogPosts = GetIdentifiedResourceContent(blogPostsContentNodes, locale);
+        var blog = GetIdentifiedResourceContent(blogContentNodes, locale, metadata.MarketId);
+        var blogPosts = GetIdentifiedResourceContent(blogPostsContentNodes, locale, metadata.MarketId);
 
         return (blog, blogPosts);
     }
@@ -109,7 +91,11 @@ public static class ShopifyHtmlConverter
 
     public static MemoryStream ProductToHtml(ProductContentDto contentDto)
     {
-        var (doc, body) = PrepareEmptyHtmlDocument(TranslatableResources.Product.ToLower());
+        var (doc, body) = PrepareEmptyHtmlDocument(new ShopifyMetadata
+        {
+            ContentType = TranslatableResources.Product.ToLower(),
+            MarketId = contentDto.MarketId
+        });
         FillInIdentifiedContentEntities(doc, body, contentDto.ProductContentEntities);
 
         if (contentDto.MetafieldsContentEntities is not null && contentDto.MetafieldsContentEntities.Any())
@@ -142,11 +128,11 @@ public static class ShopifyHtmlConverter
         return GetMemoryStream(doc);
     }
 
-    public static ProductTranslatableResourceDto ProductToJson(string file, string locale)
+    public static ProductTranslatableResourceDto ProductToJson(string file, string locale, string? marketId = null)
     {
         var doc = new HtmlDocument();
         doc.LoadHtml(file);
-
+        
         var productContentNodes = doc.DocumentNode.Descendants()
             .Where(x => x.Attributes[KeyAttr]?.Value != null && x.ParentNode.Name == "body");
 
@@ -165,10 +151,11 @@ public static class ShopifyHtmlConverter
             .FirstOrDefault(x => x.Attributes[TypeAttr]?.Value == OptionValueType)?
             .ChildNodes.Where(x => x.Attributes[KeyAttr]?.Value != null);
 
-        var product = GetIdentifiedResourceContent(productContentNodes, locale);
-        var metafields = GetIdentifiedResourceContent(metafieldContentNodes, locale);
-        var options = GetIdentifiedResourceContent(optionContentNodes, locale);
-        var optionValues = GetIdentifiedResourceContent(optionValuesContentNodes, locale);
+        marketId ??= doc.GetMeta(HtmlMetadataConstants.BlackbirdMarketId);
+        var product = GetIdentifiedResourceContent(productContentNodes, locale, marketId);
+        var metafields = GetIdentifiedResourceContent(metafieldContentNodes, locale, marketId);
+        var options = GetIdentifiedResourceContent(optionContentNodes, locale, marketId);
+        var optionValues = GetIdentifiedResourceContent(optionValuesContentNodes, locale, marketId);
 
         return new()
         {
@@ -185,7 +172,8 @@ public static class ShopifyHtmlConverter
 
     public static MemoryStream StoreToHtml(StoreContentDto contentDto)
     {
-        var (doc, body) = PrepareEmptyHtmlDocument(TranslatableResources.Store);
+        var metadata = new ShopifyMetadata { ContentType = TranslatableResources.Store.ToLower() };
+        var (doc, body) = PrepareEmptyHtmlDocument(metadata);
 
         if (contentDto.ThemesContentEntities is not null && contentDto.ThemesContentEntities.Any())
         {
@@ -263,21 +251,25 @@ public static class ShopifyHtmlConverter
 
     #endregion
     
-    public static MemoryStream ToHtml(IEnumerable<IdentifiedContentEntity> contentEntities, string contentType)
+    public static MemoryStream ToHtml(IEnumerable<IdentifiedContentEntity> contentEntities, ShopifyMetadata metadata)
     {
-        var (doc, body) = PrepareEmptyHtmlDocument(contentType);
+        var (doc, body) = PrepareEmptyHtmlDocument(metadata);
         FillInIdentifiedContentEntities(doc, body, contentEntities);
 
         return GetMemoryStream(doc);
     }
     
-    public static IEnumerable<IdentifiedContentRequest> ToJson(string file, string locale)
+    public static IEnumerable<IdentifiedContentRequest> ToJson(string file, string locale, ShopifyMetadata overrides)
     {
-        var contentNodes = GetContentNodes(file);
-        return GetIdentifiedResourceContent(contentNodes, locale);
+        var (doc, metadata) = LoadDocument(file, overrides);
+
+        var mergedMetadata = doc.GetAllMeta().Merge(metadata);
+        var contentNodes = doc.DocumentNode.Descendants().Where(x => x.Attributes[KeyAttr]?.Value != null);
+
+        return GetIdentifiedResourceContent(contentNodes, locale, mergedMetadata.MarketId);
     }
 
-    private static (HtmlDocument document, HtmlNode bodyNode) PrepareEmptyHtmlDocument(string contentType)
+    private static (HtmlDocument document, HtmlNode bodyNode) PrepareEmptyHtmlDocument(ShopifyMetadata metadata)
     {
         var htmlDoc = new HtmlDocument();
         var htmlNode = htmlDoc.CreateElement(HtmlConstants.Html);
@@ -286,11 +278,9 @@ public static class ShopifyHtmlConverter
         var headNode = htmlDoc.CreateElement(HtmlConstants.Head);
         htmlNode.AppendChild(headNode);
 
-        var contentTypeMetaNode = htmlDoc.CreateElement("meta");
-        contentTypeMetaNode.SetAttributeValue("name", "blackbird-content-type");
-        contentTypeMetaNode.SetAttributeValue("content", contentType);
-        headNode.AppendChild(contentTypeMetaNode);
-
+        htmlDoc.AddMeta(headNode, HtmlMetadataConstants.BlackbirdContentType, metadata.ContentType);
+        htmlDoc.AddMeta(headNode, HtmlMetadataConstants.BlackbirdMarketId, metadata.MarketId);
+        
         var bodyNode = htmlDoc.CreateElement(HtmlConstants.Body);
         htmlNode.AppendChild(bodyNode);
 
@@ -304,15 +294,6 @@ public static class ShopifyHtmlConverter
 
         result.Position = 0;
         return result;
-    }
-
-    private static IEnumerable<HtmlNode> GetContentNodes(string file)
-    {
-        var doc = new HtmlDocument();
-        doc.LoadHtml(file);
-
-        return doc.DocumentNode.Descendants()
-            .Where(x => x.Attributes[KeyAttr]?.Value != null);
     }
     
     private static void FillInIdentifiedContentEntities(HtmlDocument doc, HtmlNode body,
@@ -333,15 +314,26 @@ public static class ShopifyHtmlConverter
 
     private static IEnumerable<IdentifiedContentRequest> GetIdentifiedResourceContent(
         IEnumerable<HtmlNode>? nodes,
-        string locale)
+        string locale,
+        string? marketId = null)
     {
-        return nodes?.Select(x => new IdentifiedContentRequest()
+        return nodes?.Select(x => new IdentifiedContentRequest
         {
             ResourceId = x.Attributes[ResourceAttr]?.Value,
             Key = x.Attributes[KeyAttr].Value,
             TranslatableContentDigest = x.Attributes[DigestAttr]?.Value,
             Value = HttpUtility.HtmlDecode(x.InnerHtml),
-            Locale = locale
+            Locale = locale,
+            MarketId = marketId
         }) ?? [];
+    }
+    
+    private static (HtmlDocument doc, ShopifyMetadata metadata) LoadDocument(string file, ShopifyMetadata? overrides = null)
+    {
+        var doc = new HtmlDocument();
+        doc.LoadHtml(file);
+
+        var mergedMeta = doc.GetAllMeta().Merge(overrides);
+        return (doc, mergedMeta);
     }
 }

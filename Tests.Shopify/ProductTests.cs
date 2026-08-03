@@ -1,6 +1,7 @@
 ﻿using ShopifyTests.Base;
 using Apps.Shopify.Actions;
 using Apps.Shopify.Models.Identifiers;
+using Apps.Shopify.Models.Identifiers.Optional;
 using Apps.Shopify.Models.Request.Product;
 
 namespace Tests.Shopify;
@@ -36,9 +37,10 @@ public class ProductTests : TestBase
         var locale = new LocaleIdentifier { Locale = "en" };
         var input = new DownloadProductRequest { };
         var outdated = new OutdatedOptionalIdentifier { Outdated = false };
+        var marketId = new OptionalMarketIdentifier { };
 
         // Act
-        var response = await action.GetProductTranslationContent(product, locale, input, outdated);
+        var response = await action.GetProductTranslationContent(product, locale, input, outdated, marketId);
 
         // Assert
         Console.WriteLine(response.File.Name);
@@ -55,8 +57,9 @@ public class ProductTests : TestBase
             File = new FileReference { Name = "test.html" } 
         };
         var locale = new NonPrimaryLocaleIdentifier { Locale = "nl" };
+        var marketId = new OptionalMarketIdentifier { MarketId = "" };
 
         // Act
-        await action.UpdateProductContent(input, locale);
+        await action.UpdateProductContent(input, locale, marketId);
     }
 }

@@ -12,27 +12,28 @@ using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using GraphQL;
 using System.Net.Mime;
+using Apps.Shopify.HtmlConversion.Models;
 
 namespace Apps.Shopify.Services;
 
-public class TranslatableResourceService(InvocationContext invocationContext,
-    IFileManagementClient fileManagementClient) : ShopifyInvocable(invocationContext)
+public class TranslatableResourceService(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
+    : ShopifyInvocable(invocationContext)
 {
     private const int MaxUpdateChunkSize = 250;
-
-    public async Task<FileReference> GetResourceContent(string resourceId, string locale, bool outdated, string contentType)
+    
+    public async Task<FileReference> GetResourceContent(string resourceId, string locale, bool outdated, ShopifyMetadata metadata)
     {
-        var translatableContent = await GetTranslatableContent(resourceId, locale, outdated);
-        var html = ShopifyHtmlConverter.ToHtml(translatableContent, contentType);
+        var translatableContent = await GetTranslatableContent(resourceId, locale, outdated, metadata.MarketId);
+        var html = ShopifyHtmlConverter.ToHtml(translatableContent, metadata);
 
-        return await fileManagementClient.UploadAsync(
-            html,
-            MediaTypeNames.Text.Html,
-            $"{resourceId.GetShopifyItemId()}.html"
-        );
+        return await fileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html, resourceId.GetFileName(metadata.MarketId));
     }
 
-    public async Task<List<IdentifiedContentEntity>> GetTranslatableContent(string resourceId, string locale, bool outdated)
+    public async Task<List<IdentifiedContentEntity>> GetTranslatableContent(
+        string resourceId, 
+        string locale, 
+        bool outdated,
+        string? marketId)
     {
         var request = new GraphQLRequest
         {
@@ -41,7 +42,8 @@ public class TranslatableResourceService(InvocationContext invocationContext,
             {
                 resourceId,
                 locale,
-                outdated
+                outdated,
+                marketId
             }
         };
         var response = await Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
@@ -52,15 +54,20 @@ public class TranslatableResourceService(InvocationContext invocationContext,
             }).ToList();
     }
 
-    public async Task UpdateResourceContent(string? resourceId, string locale, FileReference file)
+    public async Task UpdateResourceContent(string? resourceId, string locale, FileReference file, string? marketId = null)
     {
         var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, file);
-        var items = ShopifyHtmlConverter.ToJson(html, locale).ToList();
+        var items = ShopifyHtmlConverter
+            .ToJson(html, locale, new ShopifyMetadata { MarketId = marketId })
+            .ToList();
 
-        await UpdateIdentifiedContent(items, resourceId);
+        await UpdateIdentifiedContent(items, resourceId, marketId);
     }
 
-    public async Task UpdateIdentifiedContent(ICollection<IdentifiedContentRequest>? items, string? resourceId = null)
+    public async Task UpdateIdentifiedContent(
+        ICollection<IdentifiedContentRequest>? items, 
+        string? resourceId = null,
+        string? marketId = null)
     {
         if (items is null || items.Count == 0) 
             return;
@@ -70,35 +77,53 @@ public class TranslatableResourceService(InvocationContext invocationContext,
             foreach (var item in items)
                 item.ResourceId = resourceId;
         }
+        
+        if (!string.IsNullOrWhiteSpace(marketId))
+        {
+            foreach (var item in items)
+                item.MarketId = marketId;
+        }
 
         var groupedItems = items.GroupBy(x => x.ResourceId).ToArray();
 
         foreach (var group in groupedItems)
         {
-            var id = group.Key;
+            string id = group.Key;
             if (string.IsNullOrWhiteSpace(id))
-            {
-                throw new PluginMisconfigurationException(
-                    $"Content ID is missing. Please it in the input or include it in the file"
-                );
-            }
+                throw new PluginMisconfigurationException("Content ID is missing. Please provide it in the input");
 
             var groupItems = group.ToList();
 
-            if (groupItems.Any(x => string.IsNullOrWhiteSpace(x.TranslatableContentDigest)))
+            var sourceContent = await GetResourceSourceContent(id);
+            if (sourceContent.TranslatableResource is null)
+                throw new PluginMisconfigurationException($"Could not find source content for resource {id}. Please check the input");
+            
+            var sourceByKey = sourceContent.TranslatableResource.TranslatableContent
+                .GroupBy(x => x.Key)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            foreach (var item in groupItems)
             {
-                var sourceContent = await GetResourceSourceContent(id);
-                groupItems.ForEach(x =>
-                    x.TranslatableContentDigest = sourceContent.TranslatableResource.TranslatableContent
-                        .FirstOrDefault(y => y.Key == x.Key)?.Digest ?? string.Empty);
+                if (string.IsNullOrWhiteSpace(item.TranslatableContentDigest))
+                    item.TranslatableContentDigest = sourceByKey.GetValueOrDefault(item.Key)?.Digest ?? string.Empty;
             }
 
-            var validItems = groupItems
+            var withDigest = groupItems
                 .Where(x => !string.IsNullOrWhiteSpace(x.TranslatableContentDigest))
-                .Select(x => new TranslatableResourceContentRequest(x))
-                .Chunk(MaxUpdateChunkSize);
+                .ToArray();
 
-            foreach (var chunk in validItems)
+            if (withDigest.Length == 0)
+                throw new PluginMisconfigurationException($"Could not resolve content digests for {id}. Nothing was uploaded");
+
+            var validItems = withDigest
+                .Where(x => x.Value?.Trim() != sourceByKey.GetValueOrDefault(x.Key)?.Value?.Trim())
+                .Select(x => new TranslatableResourceContentRequest(x))
+                .ToArray();
+
+            if (validItems.Length == 0)
+                continue;
+
+            foreach (var chunk in validItems.Chunk(MaxUpdateChunkSize))
             {
                 var request = new GraphQLRequest
                 {
@@ -115,18 +140,24 @@ public class TranslatableResourceService(InvocationContext invocationContext,
     }
 
     public async Task<ICollection<TranslatableResourceEntity>> ListTranslatableResources(
-        TranslatableResource resourceType, string? locale = default, bool outdated = false)
+        TranslatableResource resourceType, 
+        string? locale = null, 
+        bool outdated = false,
+        string? marketId = null)
     {
-        var variables = new Dictionary<string, object>()
+        var variables = new Dictionary<string, object>
         {
             ["resourceType"] = resourceType,
             ["locale"] = locale ?? string.Empty,
             ["outdated"] = outdated
         };
-        return await Client
-            .Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
-                GraphQlQueries.TranslatableResourcesWithTranslations,
-                variables, default);
+        
+        if (!string.IsNullOrEmpty(marketId))
+            variables["marketId"] = marketId;
+        
+        return await Client.Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
+            GraphQlQueries.TranslatableResourcesWithTranslations,
+            variables);
     }
 
     public async Task<ICollection<IdentifiedContentEntity>> ListIdentifiedTranslatableResources(
@@ -143,13 +174,10 @@ public class TranslatableResourceService(InvocationContext invocationContext,
 
     public Task<TranslatableResourceResponse> GetResourceSourceContent(string resourceId)
     {
-        var request = new GraphQLRequest()
+        var request = new GraphQLRequest
         {
             Query = GraphQlQueries.TranslatableResourceContent,
-            Variables = new
-            {
-                resourceId
-            }
+            Variables = new { resourceId }
         };
         return Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
     }

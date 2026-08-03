@@ -18,6 +18,7 @@ using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using GraphQL;
 using System.Net.Mime;
+using Apps.Shopify.HtmlConversion.Models;
 
 namespace Apps.Shopify.Services.Concrete;
 
@@ -29,34 +30,36 @@ public class BlogService(InvocationContext invocationContext, IFileManagementCli
 
     public async Task<FileReference> Download(DownloadContentRequest input)
     {
-        var request = new GraphQLRequest()
+        var request = new GraphQLRequest
         {
             Query = GraphQlQueries.TranslatableResourceTranslations,
             Variables = new
             {
                 resourceId = input.ContentId,
                 locale = input.Locale,
-                outdated = input.Outdated ?? false
+                outdated = input.Outdated ?? false,
+                marketId = input.MarketId
             }
         };
         var blog = await Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
         var blogTranslations = blog.TranslatableResource.GetTranslatableContent();
-
-        var blogPostTranslations = 
-            input.IncludeBlogPosts is true
-            ? await GetBlogPostTranslations(input.ContentId, input.Locale, input.Outdated ?? default)
-            : [];
-
-        var html = ShopifyHtmlConverter.BlogToHtml(blogTranslations.Select(x => new IdentifiedContentEntity(x)
+        
+        var metadata = new ShopifyMetadata
         {
-            Id = input.ContentId
-        }), blogPostTranslations, _contentType.ToLower());
+            ContentType = _contentType.ToLower(),
+            MarketId = input.MarketId
+        };
+        
+        var blogPostTranslations = input.IncludeBlogPosts is true
+            ? await GetBlogPostTranslations(input.ContentId, input.Locale, metadata, input.Outdated ?? false)
+            : [];
+        
+        var html = ShopifyHtmlConverter.BlogToHtml(
+            blogTranslations.Select(x => new IdentifiedContentEntity(x) { Id = input.ContentId }), 
+            blogPostTranslations,
+            metadata);
 
-        return await fileManagementClient.UploadAsync(
-            html, 
-            MediaTypeNames.Text.Html, 
-            $"{input.ContentId.GetShopifyItemId()}.html"
-        );
+        return await fileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html, input.ContentId.GetFileName(metadata.MarketId));
     }
 
     public async Task<ContentUpdatedResponse> PollUpdated(DateTime after, DateTime before, PollUpdatedContentRequest input)
@@ -97,7 +100,13 @@ public class BlogService(InvocationContext invocationContext, IFileManagementCli
     public async Task Upload(UploadContentRequest input)
     {
         var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, input.Content);
-        var (blogItems, blogPostItems) = ShopifyHtmlConverter.BlogToJson(html, input.Locale);
+        var metadata = new ShopifyMetadata
+        {
+            ContentType = _contentType,
+            MarketId = input.MarketId
+        };
+        
+        var (blogItems, blogPostItems) = ShopifyHtmlConverter.BlogToJson(html, input.Locale, metadata);
 
         if (!string.IsNullOrWhiteSpace(input.ContentId))
         {
@@ -106,10 +115,14 @@ public class BlogService(InvocationContext invocationContext, IFileManagementCli
         }
 
         var allContent = blogItems.Concat(blogPostItems).ToList();
-        await _resourceService.UpdateIdentifiedContent(allContent, null);
+        await _resourceService.UpdateIdentifiedContent(allContent, null, metadata.MarketId);
     }
 
-    private async Task<ICollection<IdentifiedContentEntity>> GetBlogPostTranslations(string blogId, string locale, bool outdated = false)
+    private async Task<ICollection<IdentifiedContentEntity>> GetBlogPostTranslations(
+        string blogId, 
+        string locale, 
+        ShopifyMetadata metadata,
+        bool outdated = false)
     {
         var variables = new Dictionary<string, object>
         {
@@ -132,6 +145,9 @@ public class BlogService(InvocationContext invocationContext, IFileManagementCli
             ["locale"] = locale,
             ["outdated"] = outdated
         };
+
+        if (!string.IsNullOrEmpty(metadata.MarketId))
+            translationVariables["marketId"] = metadata.MarketId;
 
         var content = await Client.Paginate<TranslatableResourceEntity, TranslatableResourcesByIdsPaginationResponse>(
             GraphQlQueries.TranslatableResourcesByIds,

@@ -2,6 +2,23 @@ namespace Apps.Shopify.Constants.GraphQL;
 
 public static class GraphQlQueries
 {
+    public const string Markets =
+      """
+      query ($limit: Int!, $after: String, $query: String) {
+        markets (first: $limit, after: $after, query: $query) {
+          nodes {
+            id
+            name
+          }
+          pageInfo {
+            endCursor
+            hasNextPage
+            startCursor
+          }
+        }
+      }
+      """;
+  
     public const string Locales =
         @"query {
           shopLocales {
@@ -79,11 +96,11 @@ public static class GraphQlQueries
         }";
 
     public const string TranslatableResourcesWithTranslations =
-        @"query ($outdated: Boolean, $resourceType: TranslatableResourceType!, $after: String, $limit: Int!, $locale: String!) {
+        @"query ($outdated: Boolean, $resourceType: TranslatableResourceType!, $after: String, $limit: Int!, $locale: String!, $marketId: ID) {
           translatableResources(first: $limit, after: $after, resourceType: $resourceType) {
               nodes {
                  resourceId
-                 translations(locale: $locale, outdated: $outdated) {
+                 translations(locale: $locale, outdated: $outdated, marketId: $marketId) {
                     key
                     value
                  }
@@ -102,45 +119,49 @@ public static class GraphQlQueries
         }";
 
     public const string TranslatableResourcesByIds =
-        @"query ($outdated: Boolean, $resourceIds: [ID!]!, $after: String, $limit: Int!, $locale: String!) {
-          translatableResourcesByIds(first: $limit, after: $after, resourceIds: $resourceIds) {
-              nodes {
-                 resourceId
-                 translations(locale: $locale, outdated: $outdated) {
-                    key
-                    value
-                 }
-                 translatableContent {
-                    key
-                    value
-                    digest
-                 }
-               }
-              pageInfo {
-                 endCursor
-                 hasNextPage
-                 startCursor
-              }
-          }
-        }";
-
-    public const string TranslatableResourceContent =
-        @"query ($resourceId: ID!) {
-          translatableResource(resourceId: $resourceId) {
-            translatableContent {
+      """
+      query ($outdated: Boolean, $resourceIds: [ID!]!, $after: String, $limit: Int!, $locale: String!, $marketId: ID) {
+        translatableResourcesByIds(first: $limit, after: $after, resourceIds: $resourceIds) {
+          nodes {
+            resourceId
+            translations(locale: $locale, outdated: $outdated, marketId: $marketId) {
+              key
+              value
+           }
+           translatableContent {
               key
               value
               digest
-              locale
-              type
-            }
+           }
           }
-        }";
+          pageInfo {
+             endCursor
+             hasNextPage
+             startCursor
+          }
+        }
+      }
+      """;
+
+    public const string TranslatableResourceContent =
+      """
+      query ($resourceId: ID!) {
+        translatableResource(resourceId: $resourceId) {
+          translatableContent {
+            key
+            value
+            digest
+            locale
+            type
+          }
+        }
+      }
+      """;
 
     public const string TranslatableResourceTranslations =
-        @"query ($outdated: Boolean, $resourceId: ID!, $locale: String!) {
+        @"query ($outdated: Boolean, $resourceId: ID!, $locale: String!, $marketId: ID) {
           translatableResource(resourceId: $resourceId) {
-               translations(locale: $locale, outdated: $outdated) {
+               translations(locale: $locale, outdated: $outdated, marketId: $marketId) {
                   key
                   value
                 }
@@ -150,18 +171,6 @@ public static class GraphQlQueries
                   digest
                   locale
                   type
-                }
-          }
-        }";
-    
-    public const string TranslatableResourceTranslationKeys =
-        @"query ($outdated: Boolean, $resourceId: ID!, $locale: String!) {
-          translatableResource(resourceId: $resourceId) {
-               translations(locale: $locale, outdated: $outdated) {
-                  key
-                }
-                translatableContent {
-                  key
                 }
           }
         }";
@@ -201,33 +210,35 @@ public static class GraphQlQueries
         }";
 
     public const string Product =
-        @"query ($resourceId: ID!, $locale: String!) {
-          product(id: $resourceId) {
-            id
-            title
-            handle
-            options{
-             id            
-             name            
-             optionValues {
-               id
-               name
-               translations(locale: $locale){
+      """
+      query ($resourceId: ID!, $locale: String!, $marketId: ID) {
+        product(id: $resourceId) {
+          id
+          title
+          handle
+          options {
+            id            
+            name            
+            optionValues {
+              id
+              name
+              translations(locale: $locale, marketId: $marketId) {
                 key
                 value
-               }  
-             }            
-             translations(locale: $locale){
-                key
-                value
-             }            
-            }
-            translations(locale: $locale){
-                key
-                value
-             }  
+              }  
+            }            
+            translations(locale: $locale, marketId: $marketId) {
+              key
+              value
+            }            
           }
-        }";
+          translations(locale: $locale, marketId: $marketId) {
+            key
+            value
+          }  
+        }
+      }
+      """;
 
     public const string MetafieldDefinitions =
         @"query ($limit: Int!, $after: String, $ownerType: MetafieldOwnerType!, $query: String) {

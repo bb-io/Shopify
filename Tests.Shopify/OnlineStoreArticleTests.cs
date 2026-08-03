@@ -1,6 +1,7 @@
 ﻿using ShopifyTests.Base;
 using Apps.Shopify.Actions;
 using Apps.Shopify.Models.Identifiers;
+using Apps.Shopify.Models.Identifiers.Optional;
 using Apps.Shopify.Models.Request.Article;
 using Apps.Shopify.Models.Request.OnlineStoreArticle;
 
@@ -35,9 +36,10 @@ public class OnlineStoreArticleTests : TestBase
 		var article = new ArticleIdentifier { ArticleId = "gid://shopify/Article/610979545372" };
 		var locale = new LocaleIdentifier { Locale = "en" };
 		var outdated = new OutdatedOptionalIdentifier { Outdated = false };
+		var marketId = new OptionalMarketIdentifier { MarketId = "" };
 
 		// Act
-		var result = await action.GetOnlineStoreArticleTranslationContent(article, locale, outdated);
+		var result = await action.GetOnlineStoreArticleTranslationContent(article, locale, outdated, marketId);
 
         // Assert
         PrintJsonResult(result);
@@ -54,8 +56,9 @@ public class OnlineStoreArticleTests : TestBase
 			File = new FileReference { Name = "test.html" }
 		};
 		var locale = new NonPrimaryLocaleIdentifier { Locale = "nl" };
+		var marketId = new OptionalMarketIdentifier { MarketId = "" };
 
 		// Act
-		await action.UpdateOnlineStoreArticleContent(input, locale);
+		await action.UpdateOnlineStoreArticleContent(input, locale, marketId);
     }
 }
