@@ -26,9 +26,9 @@ public class DownloadStoreContentRequest
     private bool HasItemsIncluded()
     {
         return 
-            IncludeThemes is true && 
-            IncludeMenu is true && 
-            IncludeShop is true &&
+            IncludeThemes is true ||
+            IncludeMenu is true ||
+            IncludeShop is true ||
             IncludeShopPolicy is true;
     }
 }
