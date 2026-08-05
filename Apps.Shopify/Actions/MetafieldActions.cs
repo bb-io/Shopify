@@ -1,4 +1,3 @@
-using Apps.Shopify.Api;
 using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Helper;
@@ -90,9 +89,13 @@ public class MetafieldActions(InvocationContext invocationContext, IFileManageme
         [ActionParameter] MetafieldKeyIdentifier metafieldKey,
         [ActionParameter] ProductIdentifier product)
     {
-        var productMetaFields = await GetProductMetafields(product.ProductId);
-        return productMetaFields.FirstOrDefault(x => x.Key == metafieldKey.MetafieldKey) ??
-               throw new PluginMisconfigurationException("No metafield with the provided key found for the project");
+        var productMetaFields = await Client.Paginate<MetafieldEntity, ProductMetafieldsPaginationResponse>(
+            GraphQlQueries.ProductMetaFields,
+            new Dictionary<string, object> { ["resourceId"] = product.ProductId }
+        );
+        
+        return productMetaFields.FirstOrDefault(x => x.ToString() == metafieldKey.MetafieldKey) ??
+               throw new PluginMisconfigurationException("No metafield with the provided key found for the product");
     }
 
     [Action("Update metafield", Description = "Update metafield value of a specific product")]
@@ -148,14 +151,5 @@ public class MetafieldActions(InvocationContext invocationContext, IFileManageme
 
         var response = await Client.ExecuteWithErrorHandling<MetafieldDefinitionResponse>(request);
         return response.MetafieldDefinition;
-    }
-
-    private async Task<ICollection<MetafieldEntity>> GetProductMetafields(string productId)
-    {
-        var client = new ShopifyClient(Creds, ShopifyClient.GenerateApiUrl(Creds, "unstable"));
-        return await client.Paginate<MetafieldEntity, MetafieldPaginationResponse>(
-            GraphQlQueries.ProductMetaFields,
-            new Dictionary<string, object>() { ["resourceId"] = productId }
-        );
     }
 }

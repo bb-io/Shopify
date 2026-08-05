@@ -72,4 +72,20 @@ public class MetafieldTests : TestBase
         // Act
         await action.UpdateMetaFieldContent(input, locale, marketId);
     }
+
+    [TestMethod]
+    public async Task GetMetafield_ReturnsMetafield()
+    {
+        // Arrange
+        var action = new MetafieldActions(InvocationContext, FileManager);
+        var product = new ProductIdentifier { ProductId = "gid://shopify/Product/10745816351004" };
+        var metafieldKey = new MetafieldKeyIdentifier { MetafieldKey = "test_data.binding_mount" };
+
+        // Act
+        var result = await action.GetMetafield(metafieldKey, product);
+
+        // Assert
+        PrintJsonResult(result);
+        Assert.IsNotNull(result);
+    }
 }

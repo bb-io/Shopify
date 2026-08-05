@@ -18,4 +18,9 @@ public class MetafieldEntity
     
     [Display("Compare digest")]
     public string CompareDigest { get; set; }
+    
+    public override string ToString()
+    {
+        return $"{Namespace}.{Key}";
+    }
 }
