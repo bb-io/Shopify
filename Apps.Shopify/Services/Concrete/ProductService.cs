@@ -188,7 +188,7 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
         bool outdated = false,
         string? market = null)
     {
-        var productMetaFields = await Client.Paginate<MetafieldEntity, MetafieldPaginationResponse>(
+        var productMetaFields = await Client.Paginate<MetafieldEntity, ProductMetafieldsPaginationResponse>(
             GraphQlQueries.ProductMetaFields,
             new Dictionary<string, object> { ["resourceId"] = productId }
         );

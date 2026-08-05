@@ -192,22 +192,26 @@ public static class GraphQlQueries
         }";
 
     public const string ProductMetaFields =
-        @"query ($resourceId: ID!, $after: String, $limit: Int!) {
-          metafields(first: $limit, after: $after, owner: $resourceId) {
+      """
+      query ($resourceId: ID!, $after: String, $limit: Int!) {
+        product(id: $resourceId) {
+          metafields(first: $limit, after: $after) {
             nodes {
               id
               namespace
               key
               value
               compareDigest
-            },
+            }
             pageInfo {
-               endCursor
-               hasNextPage
-               startCursor
+              endCursor
+              hasNextPage
+              startCursor
             }
           }
-        }";
+        }
+      }
+      """;
 
     public const string Product =
       """

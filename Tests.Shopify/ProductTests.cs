@@ -16,8 +16,8 @@ public class ProductTests : TestBase
         var action = new ProductActions(InvocationContext, FileManager);
         var searchProductsRequest = new SearchProductsRequest
         {
-            UpdatedAfter = DateTime.UtcNow - TimeSpan.FromHours(1),
-            UpdatedBefore = DateTime.UtcNow
+            MetafieldKey = "test_data.binding_mount",
+            MetafieldValueContains = "12345657"
         };
 
         // Act
@@ -35,7 +35,12 @@ public class ProductTests : TestBase
         var action = new ProductActions(InvocationContext, FileManager);
         var product = new ProductIdentifier { ProductId = "gid://shopify/Product/10745816351004" };
         var locale = new LocaleIdentifier { Locale = "en" };
-        var input = new DownloadProductRequest { };
+        var input = new DownloadProductRequest
+        {
+            IncludeMetafields = true,
+            IncludeOptions = true,
+            IncludeOptionValues = true
+        };
         var outdated = new OutdatedOptionalIdentifier { Outdated = false };
         var marketId = new OptionalMarketIdentifier { };
 
