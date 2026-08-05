@@ -26,7 +26,7 @@ public class ProductMetafieldKeyDataHandler(InvocationContext invocationContext)
         return response
             .Where(x => context.SearchString is null ||
                         x.Name.Contains(context.SearchString, StringComparison.OrdinalIgnoreCase))
-            .Select(x => new DataSourceItem($"{x.Namespace}.{x.Key}", $"{x.Name} (Namespace: {x.Namespace})"))
+            .Select(x => new DataSourceItem(x.ToString(), $"{x.Name} (Namespace: {x.Namespace})"))
             .ToList();
     }
 }

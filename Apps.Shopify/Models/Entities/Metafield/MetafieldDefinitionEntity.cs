@@ -18,4 +18,9 @@ public class MetafieldDefinitionEntity
 
     [Display("Namespace")]
     public string Namespace { get; set; }
+    
+    public override string ToString()
+    {
+        return $"{Namespace}.{Key}";
+    }
 }

@@ -89,9 +89,8 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
         [ActionParameter] LocaleIdentifier locale, 
         [ActionParameter] OutdatedOptionalIdentifier getContentRequest)
     {
-        if (NoneItemsIncluded(input))
-            throw new PluginMisconfigurationException("You should include at least one content type. Please check your input and try again");
-
+        input.Validate();
+        
         var html = ShopifyHtmlConverter.StoreToHtml(new()
         {
             ThemesContentEntities = 
@@ -148,14 +147,5 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
         await _translatableResourceService.UpdateIdentifiedContent(content.MenuContentEntities?.ToList());
         await _translatableResourceService.UpdateIdentifiedContent(content.ShopContentEntities?.ToList());
         await _translatableResourceService.UpdateIdentifiedContent(content.ShopPolicyContentEntities?.ToList());
-    }
-
-    private static bool NoneItemsIncluded(DownloadStoreContentRequest input)
-    {
-        return 
-            input.IncludeThemes is not true && 
-            input.IncludeMenu is not true && 
-            input.IncludeShop is not true &&
-            input.IncludeShopPolicy is not true;
     }
 }

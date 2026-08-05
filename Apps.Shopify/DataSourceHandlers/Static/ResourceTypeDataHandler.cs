@@ -10,6 +10,7 @@ public class ResourceTypeDataHandler : IStaticDataSourceItemHandler
         return [
             new DataSourceItem("LINK", "Link"),
             new DataSourceItem("METAOBJECT", "Metaobject"),
+            new DataSourceItem("METAFIELD", "Metafield"),
         ];
     }
 }
