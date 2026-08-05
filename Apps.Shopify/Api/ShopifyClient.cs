@@ -113,8 +113,18 @@ public class ShopifyClient : GraphQLHttpClient
         return response.Items.Nodes.ToList();
     }
 
-    public static string GenerateApiUrl(AuthenticationCredentialsProvider[] creds, string apiVersion) =>
-        $"https://{GetRequiredCredentialValue(creds, CredsNames.StoreName)}.myshopify.com/admin/api/{apiVersion}/graphql.json";
+    public static string GenerateApiUrl(AuthenticationCredentialsProvider[] creds, string apiVersion)
+    {
+        string storeName = GetRequiredCredentialValue(creds, CredsNames.StoreName);
+        if (Uri.TryCreate(storeName, UriKind.Absolute, out _))
+        {
+            throw new PluginMisconfigurationException(
+                "The store name connection input should not be in the URL format. " +
+                "Please use only the store prefix (e.g. 'my-store')");
+        }
+        
+        return $"https://{storeName}.myshopify.com/admin/api/{apiVersion}/graphql.json";
+    }
 
     private static string ResolveAccessToken(AuthenticationCredentialsProvider[] creds)
     {
