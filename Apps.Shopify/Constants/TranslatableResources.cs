@@ -34,7 +34,8 @@ public static class TranslatableResources
         Blog,
         Page,
         Theme,
-        Product
+        Product,
+        Menu
     ];
 
     public static readonly IEnumerable<string> SupportedPollingContentTypes = [
