@@ -12,6 +12,7 @@ public enum TranslatableResource
     PRODUCT,
     SHOP,
     SHOP_POLICY,
+    MENU,
     
     // Do not delete - we TryParse some string inputs to these
     METAOBJECT,

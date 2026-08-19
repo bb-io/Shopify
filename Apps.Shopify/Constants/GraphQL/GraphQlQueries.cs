@@ -382,4 +382,42 @@ public static class GraphQlQueries
             }
           }
         }";
+
+    public const string Menus =
+      """
+      query ($limit: Int!, $after: String, $query: String) {
+        menus(first: $limit, after: $after, query: $query) {
+          nodes {
+            id
+            title
+            handle
+          }
+          pageInfo {
+            endCursor
+            hasNextPage
+            startCursor
+          }
+        }
+      }
+      """;
+
+    public const string Menu =
+      """
+      query ($resourceId: ID!) {
+        menu(id: $resourceId) {
+          id
+          title
+          handle
+          items {
+            id
+            title
+            items {
+              id
+              title
+              items { id title }
+            }
+          }
+        }
+      }
+      """;
 }

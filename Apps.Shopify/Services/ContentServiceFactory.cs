@@ -19,6 +19,7 @@ public class ContentServiceFactory(InvocationContext invocationContext, IFileMan
             TranslatableResources.Page => new PageService(invocationContext, fileManagementClient),
             TranslatableResources.Theme => new ThemeService(invocationContext, fileManagementClient),
             TranslatableResources.Product => new ProductService(invocationContext, fileManagementClient),
+            TranslatableResources.Menu => new MenuService(invocationContext, fileManagementClient),
             _ => throw new Exception($"Unsupported content type '{contentType}' was passed in ContentServiceFactory")
         };
     }

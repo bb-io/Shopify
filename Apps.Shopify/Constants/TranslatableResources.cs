@@ -12,6 +12,7 @@ public static class TranslatableResources
     public const string Theme = "Theme";
     public const string Product = "Product";
     public const string Store = "Store";
+    public const string Menu = "Menu";
 
     private static readonly Dictionary<string, TranslatableResource> ApiTypes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -23,6 +24,7 @@ public static class TranslatableResources
         [Theme] = TranslatableResource.ONLINE_STORE_THEME,
         [Product] = TranslatableResource.PRODUCT,
         [Store] = TranslatableResource.SHOP,
+        [Menu] = TranslatableResource.MENU
     };
 
     public static readonly IEnumerable<string> SupportedContentTypes = [
