@@ -14,4 +14,6 @@ public static class StringExtensions
         
         return $"{contentId}{market}.html";
     }
+    
+    public static string ToLinkGid(this string menuItemGid) => $"gid://shopify/Link/{menuItemGid.Split('/')[^1]}";
 }

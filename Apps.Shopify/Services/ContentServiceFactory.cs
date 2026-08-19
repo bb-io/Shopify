@@ -19,6 +19,7 @@ public class ContentServiceFactory(InvocationContext invocationContext, IFileMan
             TranslatableResources.Page => new PageService(invocationContext, fileManagementClient),
             TranslatableResources.Theme => new ThemeService(invocationContext, fileManagementClient),
             TranslatableResources.Product => new ProductService(invocationContext, fileManagementClient),
+            TranslatableResources.Menu => new MenuService(invocationContext, fileManagementClient),
             _ => throw new Exception($"Unsupported content type '{contentType}' was passed in ContentServiceFactory")
         };
     }
@@ -41,6 +42,17 @@ public class ContentServiceFactory(InvocationContext invocationContext, IFileMan
 
             if (service is IPollingContentService pollingService)
                 yield return pollingService;
+        }
+    }
+    
+    public IEnumerable<IDigestPollingContentService> GetDigestPollingContentServices(IEnumerable<string> contentTypes)
+    {
+        foreach (var contentType in contentTypes)
+        {
+            var service = GetContentService(contentType);
+            
+            if (service is IDigestPollingContentService digestService)
+                yield return digestService;
         }
     }
 }

@@ -31,7 +31,7 @@ public class DataHandlerTests : TestBase
     {
         var contentType = new ContentTypeIdentifier
         {
-            ContentType = TranslatableResources.Metafield
+            ContentType = TranslatableResources.Menu
         };
 
         await TestHandler<ContentDataHandler>(contentType);
@@ -86,4 +86,7 @@ public class DataHandlerTests : TestBase
 
     [TestMethod]
     public async Task MarketDataHandler_ReturnsMarkets() => await TestHandler<MarketDataHandler>();
+    
+    [TestMethod]
+    public async Task MenuDataHandler_ReturnsMenus() => await TestHandler<MenuDataHandler>();
 }

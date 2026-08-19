@@ -16,7 +16,8 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 4. In Shopify, create or open an app and configure the Admin API scopes it needs. Make sure to provide `read_locales` access scope. 
 Other scopes that may be needed depending on desired actions are: 
 `write_products`, `read_products`, `write_publications`, `read_publications`, `write_translations`, `read_translations`, 
-`read_themes`, `read_content`, `read_markets`, `read_metaobjects`, `read_metaobject_definitions`.
+`read_themes`, `read_content`, `read_markets`, `read_metaobjects`, `read_metaobject_definitions`,
+`write_online_store_navigation`, `read_online_store_navigation`.
 5. Copy the store name from the store domain. For example, if your domain is `mystore.myshopify.com`, then the store name is `mystore`.
 6. In Blackbird, choose one of the supported connection methods:
 7. `Developer API key`: paste the `Admin API access token`.
@@ -72,9 +73,15 @@ Other scopes that may be needed depending on desired actions are:
 - **Upload theme** Upload content of a specific theme
 - **Search themes** Search themes with specific criteria
 
+### Menus
+
+- **Download menu** Download content of a specific menu
+- **Upload menu** Upload content of a specific menu
+- **Search menus** Search menus with specific criteria
+
 ### Content
 
-> **Note**: These actions support the following content types: collection, metafield, article, blog, page, theme, product.
+> **Note**: These actions support the following content types: collection, metafield, article, blog, page, theme, product, menu.
 
 - **Upload content** Upload content of a specific content type from a file
 - **Download content** Download content of a specific content type
@@ -107,7 +114,9 @@ Other scopes that may be needed depending on desired actions are:
 
 ### Content
 
-> **Note**: These events support the following content types: collection, article, blog, page, product.
+> **Note**: These events support the following content types: collection, article, blog, page, product, menu.
+>
+> Menu's 'Updated at' output will always be empty since Shopify does not expose this value.
 
 - **On content updated**
 

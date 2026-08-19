@@ -10,5 +10,5 @@ public class PollUpdatedContentRequest
     public string? NameContains { get; set; }
 
     [Display("Content types"), StaticDataSource(typeof(PollingContentTypeDataHandler))]
-    public IEnumerable<string>? ContentTypes { get; set; }
+    public List<string>? ContentTypes { get; set; }
 }
