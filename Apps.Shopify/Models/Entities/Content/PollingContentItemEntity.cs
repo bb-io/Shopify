@@ -2,9 +2,9 @@
 
 namespace Apps.Shopify.Models.Entities.Content;
 
-public class PollingContentItemEntity(string contentId, string contentType, string name, DateTime updatedAt) 
+public class PollingContentItemEntity(string contentId, string contentType, string name, DateTime? updatedAt = null) 
     : ContentItemEntity(contentId, contentType, name)
 {
     [Display("Updated at")]
-    public DateTime UpdatedAt { get; set; } = updatedAt;
+    public DateTime? UpdatedAt { get; set; } = updatedAt;
 }

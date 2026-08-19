@@ -78,22 +78,25 @@ public static class GraphQlQueries
           }";
 
     public const string TranslatableResources =
-        @"query ($resourceType: TranslatableResourceType!, $after: String, $limit: Int!) {
-          translatableResources(first: $limit, after: $after, resourceType: $resourceType) {
-              nodes {
-                 resourceId
-                 translatableContent {
-                    key
-                    value
-                 }
-               }
-              pageInfo {
-                 endCursor
-                 hasNextPage
-                 startCursor
-              }
+      """
+      query ($resourceType: TranslatableResourceType!, $after: String, $limit: Int!) {
+        translatableResources(first: $limit, after: $after, resourceType: $resourceType) {
+          nodes {
+            resourceId
+            translatableContent {
+              key
+              value
+              digest
+            }
           }
-        }";
+          pageInfo {
+            endCursor
+            hasNextPage
+            startCursor
+          }
+        }
+      }
+      """;
 
     public const string TranslatableResourcesWithTranslations =
         @"query ($outdated: Boolean, $resourceType: TranslatableResourceType!, $after: String, $limit: Int!, $locale: String!, $marketId: ID) {
@@ -416,6 +419,32 @@ public static class GraphQlQueries
               title
               items { id title }
             }
+          }
+        }
+      }
+      """;
+    
+    public const string MenusWithItems =
+      """
+      query ($limit: Int!, $after: String, $query: String) {
+        menus(first: $limit, after: $after, query: $query) {
+          nodes {
+            id
+            title
+            items { 
+              id 
+              items { 
+                id 
+                items { 
+                  id 
+                } 
+              } 
+            }
+          }
+          pageInfo { 
+            endCursor 
+            hasNextPage 
+            startCursor 
           }
         }
       }

@@ -27,7 +27,7 @@ public static class TranslatableResources
         [Menu] = TranslatableResource.MENU
     };
 
-    public static readonly IEnumerable<string> SupportedContentTypes = [
+    public static readonly List<string> SupportedContentTypes = [
         Collection,
         Article,
         Metafield,
@@ -38,12 +38,13 @@ public static class TranslatableResources
         Menu
     ];
 
-    public static readonly IEnumerable<string> SupportedPollingContentTypes = [
+    public static readonly List<string> SupportedPollingContentTypes = [
         Collection,
         Article,
         Blog,
         Page,
-        Product
+        Product,
+        Menu
     ];
 
     public static bool TryGetApiType(string? contentType, out TranslatableResource apiType)

@@ -44,4 +44,15 @@ public class ContentServiceFactory(InvocationContext invocationContext, IFileMan
                 yield return pollingService;
         }
     }
+    
+    public IEnumerable<IDigestPollingContentService> GetDigestPollingContentServices(IEnumerable<string> contentTypes)
+    {
+        foreach (var contentType in contentTypes)
+        {
+            var service = GetContentService(contentType);
+            
+            if (service is IDigestPollingContentService digestService)
+                yield return digestService;
+        }
+    }
 }

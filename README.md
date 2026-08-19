@@ -114,7 +114,9 @@ Other scopes that may be needed depending on desired actions are:
 
 ### Content
 
-> **Note**: These events support the following content types: collection, article, blog, page, product.
+> **Note**: These events support the following content types: collection, article, blog, page, product, menu.
+>
+> Menu's 'Updated at' output will always be empty since Shopify does not expose this value.
 
 - **On content updated**
 
