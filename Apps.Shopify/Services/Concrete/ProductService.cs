@@ -14,6 +14,7 @@ using Apps.Shopify.Models.Response.Content;
 using Apps.Shopify.Models.Response.Metafield;
 using Apps.Shopify.Models.Response.Product;
 using Apps.Shopify.Models.Response.TranslatableResource;
+using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Common.Files;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
@@ -43,6 +44,10 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
         };
         
         var productContent = await Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
+        if (productContent.TranslatableResource is null)
+            throw new PluginMisconfigurationException(
+                $"Could not find translatable content for product {input.ContentId}. Please check the input");
+
         var productInfo = 
             input.IncludeOptions is true || input.IncludeOptionValues is true
             ? await GetProductInfo(input.ContentId, input.Locale, input.MarketId)
@@ -132,14 +137,15 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
 
     private static IEnumerable<IdentifiedContentEntity> GetProductOptions(ProductEntity product)
     {
-        var options = product.Options.SelectMany(x => x.Translations.Select(y => new IdentifiedContentEntity(y)
+        var productOptions = product.Options ?? [];
+        var options = productOptions.SelectMany(x => x.Translations.Select(y => new IdentifiedContentEntity(y)
         {
             Id = x.Id
         })).ToArray();
 
         return options.Any()
             ? options
-            : product.Options.Select(x => new IdentifiedContentEntity()
+            : productOptions.Select(x => new IdentifiedContentEntity()
             {
                 Id = x.Id,
                 Key = "name",
@@ -149,7 +155,8 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
 
     private static IEnumerable<IdentifiedContentEntity>? GetProductOptionValues(ProductEntity product)
     {
-        var values = product.Options.SelectMany(x => x.OptionValues.SelectMany(y => y.Translations.Select(x =>
+        var productOptions = product.Options ?? [];
+        var values = productOptions.SelectMany(x => x.OptionValues.SelectMany(y => y.Translations.Select(x =>
             new IdentifiedContentEntity(x)
             {
                 Id = y.Id
@@ -157,7 +164,7 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
 
         return values.Any()
             ? values
-            : product.Options.SelectMany(x => x.OptionValues.Select(x => new IdentifiedContentEntity()
+            : productOptions.SelectMany(x => x.OptionValues.Select(x => new IdentifiedContentEntity()
             {
                 Id = x.Id,
                 Key = "name",
@@ -179,7 +186,8 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
         };
 
         var response = await Client.ExecuteWithErrorHandling<ProductResponse>(request);
-        return response.Product;
+        return response.Product ?? throw new PluginMisconfigurationException(
+            $"Could not find product {productId}. Please check the input");
     }
 
     private async Task<IEnumerable<IdentifiedContentEntity>?> GetProductMetafields(
