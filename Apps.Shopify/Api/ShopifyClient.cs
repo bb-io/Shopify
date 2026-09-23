@@ -6,12 +6,30 @@ using GraphQL;
 using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.Newtonsoft;
 using Newtonsoft.Json.Linq;
+using Polly;
+using Polly.Retry;
+using System.Net;
 using System.Net.Http.Headers;
 
 namespace Apps.Shopify.Api;
 
 public class ShopifyClient : GraphQLHttpClient
 {
+    private const int TokenRequestRetryCount = 3;
+    private const int BaseBackoffSeconds = 1;
+    private const int MaxBackoffSeconds = 8;
+
+    private static readonly AsyncRetryPolicy<HttpResponseMessage> TokenRetryPolicy = Policy
+        .Handle<HttpRequestException>()
+        .OrResult<HttpResponseMessage>(response => IsTransientStatusCode(response.StatusCode))
+        .WaitAndRetryAsync(TokenRequestRetryCount,
+            (retryAttempt, outcome, _) => GetRetryDelay(retryAttempt, outcome.Result),
+            (outcome, _, _, _) =>
+            {
+                outcome.Result?.Dispose();
+                return Task.CompletedTask;
+            });
+
     public ShopifyClient(AuthenticationCredentialsProvider[] creds, string? endpoint = default) : base(
         endpoint ?? GenerateApiUrl(creds, ApiConstants.ApiVersion),
         new NewtonsoftJsonSerializer())
@@ -113,7 +131,7 @@ public class ShopifyClient : GraphQLHttpClient
         return response.Items.Nodes.ToList();
     }
 
-    public static string GenerateApiUrl(AuthenticationCredentialsProvider[] creds, string apiVersion)
+    private static string GenerateApiUrl(AuthenticationCredentialsProvider[] creds, string apiVersion)
     {
         string storeName = GetRequiredCredentialValue(creds, CredsNames.StoreName);
         if (Uri.TryCreate(storeName, UriKind.Absolute, out _))
@@ -142,29 +160,15 @@ public class ShopifyClient : GraphQLHttpClient
     private static async Task<string> RequestAccessTokenAsync(string storeName, string clientId, string clientSecret)
     {
         using var httpClient = new HttpClient();
-        using var request = new HttpRequestMessage(HttpMethod.Post,
-            $"https://{storeName}.myshopify.com/admin/oauth/access_token");
+        using var response = await SendTokenRequestWithRetryAsync(httpClient, storeName, clientId, clientSecret);
 
-        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        request.Content = new FormUrlEncodedContent(new Dictionary<string, string>
-        {
-            ["grant_type"] = "client_credentials",
-            ["client_id"] = clientId,
-            ["client_secret"] = clientSecret
-        });
-
-        HttpResponseMessage response;
-
-        try
-        {
-            response = await httpClient.SendAsync(request);
-        }
-        catch (HttpRequestException ex)
-        {
-            throw new PluginApplicationException(FormatHttpErrorMessage("token request", ex));
-        }
+        if (IsTransientStatusCode(response.StatusCode))
+            throw new PluginApplicationException(
+                $"Shopify is temporarily unavailable ({(int)response.StatusCode} {response.ReasonPhrase}) " +
+                $"and the access token could not be retrieved after {TokenRequestRetryCount + 1} attempts. Please try again later.");
 
         var responseContent = await response.Content.ReadAsStringAsync();
+
         if (!response.IsSuccessStatusCode)
             throw new PluginApplicationException(
                 $"Failed to retrieve Shopify access token: {(int)response.StatusCode} {response.ReasonPhrase}. {responseContent}");
@@ -177,6 +181,52 @@ public class ShopifyClient : GraphQLHttpClient
 
         return accessToken;
     }
+
+    private static async Task<HttpResponseMessage> SendTokenRequestWithRetryAsync(HttpClient httpClient,
+        string storeName, string clientId, string clientSecret)
+    {
+        try
+        {
+            return await TokenRetryPolicy.ExecuteAsync(async () =>
+            {
+                using var request = CreateTokenRequest(storeName, clientId, clientSecret);
+                return await httpClient.SendAsync(request);
+            });
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new PluginApplicationException(FormatHttpErrorMessage("token request", ex));
+        }
+    }
+
+    private static TimeSpan GetRetryDelay(int retryAttempt, HttpResponseMessage? response)
+    {
+        var retryAfter = response?.Headers.RetryAfter?.Delta;
+        if (retryAfter > TimeSpan.Zero)
+            return retryAfter.Value;
+
+        var backoff = Math.Min(BaseBackoffSeconds * Math.Pow(2, retryAttempt - 1), MaxBackoffSeconds);
+        return TimeSpan.FromSeconds(backoff) + TimeSpan.FromMilliseconds(Random.Shared.Next(0, 500));
+    }
+
+    private static HttpRequestMessage CreateTokenRequest(string storeName, string clientId, string clientSecret)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post,
+            $"https://{storeName}.myshopify.com/admin/oauth/access_token");
+
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        request.Content = new FormUrlEncodedContent(new Dictionary<string, string>
+        {
+            ["grant_type"] = "client_credentials",
+            ["client_id"] = clientId,
+            ["client_secret"] = clientSecret
+        });
+
+        return request;
+    }
+
+    private static bool IsTransientStatusCode(HttpStatusCode statusCode) =>
+        statusCode == HttpStatusCode.TooManyRequests || (int)statusCode >= 500;
 
     private static string GetRequiredCredentialValue(AuthenticationCredentialsProvider[] creds, string keyName)
     {
