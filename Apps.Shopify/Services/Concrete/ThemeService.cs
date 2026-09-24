@@ -20,7 +20,7 @@ public class ThemeService(InvocationContext invocationContext, IFileManagementCl
     : ShopifyInvocable(invocationContext), IContentService
 {
     private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
-    private readonly string _contentType = TranslatableResources.Theme;
+    public string ContentType => TranslatableResources.Theme;
 
     public async Task<FileReference> Download(DownloadContentRequest input)
     {
@@ -40,7 +40,7 @@ public class ThemeService(InvocationContext invocationContext, IFileManagementCl
         var metadata = new ShopifyMetadata
         {
             MarketId = input.MarketId,
-            ContentType = _contentType.ToLower()
+            ContentType = ContentType.ToLower()
         };
         
         var html = ShopifyHtmlConverter.ToHtml(translatableContent, metadata);
@@ -54,7 +54,7 @@ public class ThemeService(InvocationContext invocationContext, IFileManagementCl
         if (!string.IsNullOrEmpty(input.NameContains))
             response = response.Where(x => x.Name.Contains(input.NameContains, StringComparison.OrdinalIgnoreCase)).ToList();
 
-        var items = response.Select(x => new ContentItemEntity(x.Id, _contentType, x.Name)).ToList();
+        var items = response.Select(x => new ContentItemEntity(x.Id, ContentType, x.Name)).ToList();
         return new(items);
     }
 

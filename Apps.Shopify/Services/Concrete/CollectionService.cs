@@ -18,14 +18,14 @@ public class CollectionService(InvocationContext invocationContext, IFileManagem
     : ShopifyInvocable(invocationContext), IContentService, IPollingContentService
 {
     private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
-    private readonly string _contentType = TranslatableResources.Collection;
+    public string ContentType => TranslatableResources.Collection;
 
     public async Task<FileReference> Download(DownloadContentRequest input)
     {
         var metadata = new ShopifyMetadata
         {
             MarketId = input.MarketId,
-            ContentType = _contentType.ToLower()
+            ContentType = ContentType.ToLower()
         };
         
         return await _resourceService.GetResourceContent(input.ContentId, input.Locale, input.Outdated ?? false, metadata);
@@ -43,7 +43,7 @@ public class CollectionService(InvocationContext invocationContext, IFileManagem
             QueryHelper.QueryToDictionary(query)
         );
 
-        var items = response.Select(x => new PollingContentItemEntity(x.Id, _contentType, x.Title, x.UpdatedAt)).ToList();
+        var items = response.Select(x => new PollingContentItemEntity(x.Id, ContentType, x.Title, x.UpdatedAt)).ToList();
         return new(items);
     }
 
@@ -59,7 +59,7 @@ public class CollectionService(InvocationContext invocationContext, IFileManagem
             QueryHelper.QueryToDictionary(query)
         );
 
-        var items = response.Select(x => new ContentItemEntity(x.Id, _contentType, x.Title)).ToList();
+        var items = response.Select(x => new ContentItemEntity(x.Id, ContentType, x.Title)).ToList();
         return new(items);
     }
 

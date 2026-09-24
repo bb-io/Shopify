@@ -27,8 +27,8 @@ public class MenuService(InvocationContext invocationContext, IFileManagementCli
     : ShopifyInvocable(invocationContext), IContentService, IDigestPollingContentService
 {
     private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
-    private readonly string _contentType = TranslatableResources.Menu;
-    
+    public string ContentType => TranslatableResources.Menu;
+
     public async Task<FileReference> Download(DownloadContentRequest input)
     {
         var resourceIdsRequest = new GraphQLRequest
@@ -56,7 +56,7 @@ public class MenuService(InvocationContext invocationContext, IFileManagementCli
         var metadata = new ShopifyMetadata
         {
             MarketId = input.MarketId,
-            ContentType = _contentType
+            ContentType = ContentType
         };
         var htmlStream = ShopifyHtmlConverter.ToHtml(entities, metadata);
         
@@ -81,7 +81,7 @@ public class MenuService(InvocationContext invocationContext, IFileManagementCli
             GraphQlQueries.Menus,
             QueryHelper.QueryToDictionary(query));
 
-        var contentItems = response.Select(x => new ContentItemEntity(x.Id, _contentType, x.Title)).ToList();
+        var contentItems = response.Select(x => new ContentItemEntity(x.Id, ContentType, x.Title)).ToList();
         return new(contentItems);
     }
 
@@ -102,7 +102,7 @@ public class MenuService(InvocationContext invocationContext, IFileManagementCli
         var current = menus.ToDictionary(m => m.Id, m => ComputeMenuHash(m, digests, linkDigests));
         var changed = menus
             .Where(m => !knownDigests.TryGetValue(m.Id, out var known) || known != current[m.Id])
-            .Select(m => new PollingContentItemEntity(m.Id, _contentType, m.Title))
+            .Select(m => new PollingContentItemEntity(m.Id, ContentType, m.Title))
             .ToList();
 
         return new(changed, current);
