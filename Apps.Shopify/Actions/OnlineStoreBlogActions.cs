@@ -1,5 +1,6 @@
 using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
+using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Blog;
@@ -10,6 +11,7 @@ using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.OnlineStoreBlog;
 using Apps.Shopify.Models.Response.Blog;
 using Apps.Shopify.Services;
+using Apps.Shopify.Services.Models;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Invocation;
@@ -21,7 +23,7 @@ namespace Apps.Shopify.Actions;
 public class OnlineStoreBlogActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
     : ShopifyInvocable(invocationContext)
 {
-    private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
+    private readonly ContentServiceFactory _factory = new(invocationContext);
     private readonly string ContentType = TranslatableResources.Blog;
 
     [Action("Search blogs", Description = "Search blogs with specific criteria")]
@@ -61,7 +63,8 @@ public class OnlineStoreBlogActions(InvocationContext invocationContext, IFileMa
             MarketId = marketIdentifier.MarketId
         };
 
-        var file = await service.Download(request);
+        var fileRecord = await service.Download(request);
+        var file = await fileManagementClient.UploadFileRecord(fileRecord);
         return new(file);
     }
 
@@ -72,14 +75,15 @@ public class OnlineStoreBlogActions(InvocationContext invocationContext, IFileMa
         [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
         var service = _factory.GetContentService(ContentType);
-        var request = new UploadContentRequest
+        string htmlContent = await fileManagementClient.DownloadHtml(input.File);
+        
+        var request = new UploadContentServiceRequest
         {
-            Content = input.File,
+            HtmlContent = htmlContent,
             ContentId = input.BlogId,
             Locale = locale.Locale,
             MarketId = marketIdentifier.MarketId
         };
-
         await service.Upload(request);
     }
 }

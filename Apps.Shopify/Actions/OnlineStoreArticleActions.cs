@@ -1,5 +1,6 @@
 using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
+using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Article;
@@ -10,6 +11,7 @@ using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.OnlineStoreArticle;
 using Apps.Shopify.Models.Response.Article;
 using Apps.Shopify.Services;
+using Apps.Shopify.Services.Models;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Invocation;
@@ -21,7 +23,7 @@ namespace Apps.Shopify.Actions;
 public class OnlineStoreArticleActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
     : ShopifyInvocable(invocationContext)
 {
-    private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
+    private readonly ContentServiceFactory _factory = new(invocationContext);
     private readonly string ContentType = TranslatableResources.Article;
 
     [Action("Search articles", Description = "Search articles with specific criteria")]
@@ -67,7 +69,8 @@ public class OnlineStoreArticleActions(InvocationContext invocationContext, IFil
             MarketId = marketIdentifier.MarketId
         };
 
-        var file = await service.Download(request);
+        var fileRecord = await service.Download(request);
+        var file = await fileManagementClient.UploadFileRecord(fileRecord);
         return new(file);
     }
 
@@ -78,14 +81,15 @@ public class OnlineStoreArticleActions(InvocationContext invocationContext, IFil
         [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
         var service = _factory.GetContentService(ContentType);
-        var request = new UploadContentRequest
+        string htmlContent = await fileManagementClient.DownloadHtml(input.File);
+        
+        var request = new UploadContentServiceRequest
         {
             ContentId = input.ArticleId,
-            Content = input.File,
+            HtmlContent = htmlContent,
             Locale = locale.Locale,
             MarketId = marketIdentifier.MarketId
         };
-
         await service.Upload(request);
     }
 }

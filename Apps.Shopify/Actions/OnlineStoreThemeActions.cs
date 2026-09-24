@@ -1,5 +1,6 @@
 using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
+using Apps.Shopify.Extensions;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Theme;
 using Apps.Shopify.Models.Identifiers;
@@ -9,6 +10,7 @@ using Apps.Shopify.Models.Request.OnlineStoreTheme;
 using Apps.Shopify.Models.Request.Theme;
 using Apps.Shopify.Models.Response.Theme;
 using Apps.Shopify.Services;
+using Apps.Shopify.Services.Models;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Invocation;
@@ -20,7 +22,7 @@ namespace Apps.Shopify.Actions;
 public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
     : ShopifyInvocable(invocationContext)
 {
-    private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
+    private readonly ContentServiceFactory _factory = new(invocationContext);
     private readonly string ContentType = TranslatableResources.Theme;
 
     [Action("Search themes", Description = "Search themes with specific criteria")]
@@ -59,7 +61,8 @@ public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileM
             MarketId = marketIdentifier.MarketId
         };
 
-        var file = await service.Download(request);
+        var fileRecord = await service.Download(request);
+        var file = await fileManagementClient.UploadFileRecord(fileRecord);
         return new(file);
     }
 
@@ -70,14 +73,15 @@ public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileM
         [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
         var service = _factory.GetContentService(ContentType);
-        var request = new UploadContentRequest
+        string htmlContent = await fileManagementClient.DownloadHtml(input.File);
+        
+        var request = new UploadContentServiceRequest
         {
-            Content = input.File,
+            HtmlContent = htmlContent,
             ContentId = input.ThemeId,
             Locale = locale.Locale,
             MarketId = marketIdentifier.MarketId
         };
-
         await service.Upload(request);
     }
 }

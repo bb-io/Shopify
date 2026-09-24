@@ -7,21 +7,19 @@ using Apps.Shopify.Models.Entities.Theme;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Response.Content;
 using Apps.Shopify.Models.Response.Theme;
-using Blackbird.Applications.Sdk.Common.Files;
 using Blackbird.Applications.Sdk.Common.Invocation;
-using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using System.Net.Mime;
 using Apps.Shopify.HtmlConversion.Models;
+using Apps.Shopify.Models.Dto;
 
 namespace Apps.Shopify.Services.Concrete;
 
-public class ThemeService(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : BaseContentService(invocationContext), IContentService
+public class ThemeService(InvocationContext invocationContext) : BaseContentService(invocationContext), IContentService
 {
-    private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
+    private readonly TranslatableResourceService _resourceService = new(invocationContext);
     public override string ContentType => TranslatableResources.Theme;
 
-    public async Task<FileReference> Download(DownloadContentRequest input)
+    public async Task<FileRecord> Download(DownloadContentRequest input)
     {
         var translatableContent = await _resourceService.GetTranslatableContent(
             input.ContentId, 
@@ -43,7 +41,7 @@ public class ThemeService(InvocationContext invocationContext, IFileManagementCl
         };
         
         var html = ShopifyHtmlConverter.ToHtml(translatableContent, metadata);
-        return await fileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html, input.ContentId.GetFileName(metadata.MarketId));
+        return new FileRecord(html, MediaTypeNames.Text.Html, input.ContentId.GetFileName(metadata.MarketId));
     }
 
     public async Task<SearchContentResponse> Search(SearchContentRequest input)
@@ -55,10 +53,5 @@ public class ThemeService(InvocationContext invocationContext, IFileManagementCl
 
         var items = response.Select(x => new ContentItemEntity(x.Id, ContentType, x.Name)).ToList();
         return new(items);
-    }
-
-    public async Task Upload(UploadContentRequest input)
-    {
-        await _resourceService.UpdateResourceContent(input.ContentId, input.Locale, input.Content, input.MarketId);
     }
 }

@@ -1,24 +1,23 @@
 ﻿using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.HtmlConversion.Models;
+using Apps.Shopify.Models.Dto;
 using Apps.Shopify.Models.Entities.Content;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Response.Content;
-using Blackbird.Applications.Sdk.Common.Files;
 using Blackbird.Applications.Sdk.Common.Invocation;
-using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using Apps.Shopify.Models.Entities.Resource;
 using Apps.Shopify.Models.Response.TranslatableResource;
 
 namespace Apps.Shopify.Services.Concrete;
 
-public class MetafieldService(InvocationContext invocationContext, IFileManagementClient fileManagementClient) 
+public class MetafieldService(InvocationContext invocationContext) 
     : BaseContentService(invocationContext), IContentService
 {
-    private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
+    private readonly TranslatableResourceService _resourceService = new(invocationContext);
     public override string ContentType => TranslatableResources.Metafield;
 
-    public async Task<FileReference> Download(DownloadContentRequest input)
+    public async Task<FileRecord> Download(DownloadContentRequest input)
     {
         var metadata = new ShopifyMetadata
         {
@@ -49,10 +48,5 @@ public class MetafieldService(InvocationContext invocationContext, IFileManageme
             .ToList();
         
         return new(items);
-    }
-
-    public async Task Upload(UploadContentRequest input)
-    {
-        await _resourceService.UpdateResourceContent(input.ContentId, input.Locale, input.Content, input.MarketId);
     }
 }

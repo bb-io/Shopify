@@ -1,5 +1,6 @@
 using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
+using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Menu;
@@ -9,6 +10,7 @@ using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.Menu;
 using Apps.Shopify.Models.Response.Menu;
 using Apps.Shopify.Services;
+using Apps.Shopify.Services.Models;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Invocation;
@@ -19,7 +21,7 @@ namespace Apps.Shopify.Actions;
 [ActionList("Menus")]
 public class MenuActions(InvocationContext context, IFileManagementClient fileManagementClient) : ShopifyInvocable(context)
 {
-    private readonly ContentServiceFactory _factory = new(context, fileManagementClient);
+    private readonly ContentServiceFactory _factory = new(context);
     private readonly string _contentType = TranslatableResources.Menu;
     
     [Action("Search menus", Description = "Search menus with specific criteria")]
@@ -52,8 +54,9 @@ public class MenuActions(InvocationContext context, IFileManagementClient fileMa
             Outdated = getContentRequest.Outdated,
             MarketId = marketIdentifier.MarketId
         };
-
-        var file = await service.Download(request);
+        
+        var fileRecord = await service.Download(request);
+        var file = await fileManagementClient.UploadFileRecord(fileRecord);
         return new(file);
     }
     
@@ -64,9 +67,11 @@ public class MenuActions(InvocationContext context, IFileManagementClient fileMa
         [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
         var service = _factory.GetContentService(_contentType);
-        var request = new UploadContentRequest
+        string htmlContent = await fileManagementClient.DownloadHtml(input.File);
+        
+        var request = new UploadContentServiceRequest
         {
-            Content = input.File,
+            HtmlContent = htmlContent,
             ContentId = input.MenuId,
             Locale = locale.Locale,
             MarketId = marketIdentifier.MarketId

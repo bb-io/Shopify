@@ -2,24 +2,22 @@
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Helper;
 using Apps.Shopify.HtmlConversion.Models;
+using Apps.Shopify.Models.Dto;
 using Apps.Shopify.Models.Entities.Article;
 using Apps.Shopify.Models.Entities.Content;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Response.Article;
 using Apps.Shopify.Models.Response.Content;
-using Blackbird.Applications.Sdk.Common.Files;
 using Blackbird.Applications.Sdk.Common.Invocation;
-using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
 namespace Apps.Shopify.Services.Concrete;
 
-public class ArticleService(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
+public class ArticleService(InvocationContext invocationContext) 
     : BaseContentService(invocationContext), IContentService, IPollingContentService
 {
-    private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
     public override string ContentType => TranslatableResources.Article;
 
-    public Task<FileReference> Download(DownloadContentRequest input)
+    public Task<FileRecord> Download(DownloadContentRequest input)
     {
         var metadata = new ShopifyMetadata
         {
@@ -27,7 +25,7 @@ public class ArticleService(InvocationContext invocationContext, IFileManagement
             ContentType = ContentType.ToLower()
         };
         
-        return _resourceService.GetResourceContent(input.ContentId, input.Locale, input.Outdated ?? false, metadata);
+        return ResourceService.GetResourceContent(input.ContentId, input.Locale, input.Outdated ?? false, metadata);
     }
 
     public async Task<ContentUpdatedResponse> PollUpdated(DateTime after, DateTime before, PollUpdatedContentRequest input)
@@ -77,10 +75,5 @@ public class ArticleService(InvocationContext invocationContext, IFileManagement
 
         var items = response.Select(x => new ContentItemEntity(x.Id, ContentType, x.Title)).ToList();
         return new(items);
-    }
-
-    public async Task Upload(UploadContentRequest input)
-    {
-        await _resourceService.UpdateResourceContent(input.ContentId, input.Locale, input.Content, input.MarketId);
     }
 }

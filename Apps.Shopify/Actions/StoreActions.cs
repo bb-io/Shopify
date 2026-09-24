@@ -16,7 +16,9 @@ using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using GraphQL;
 using System.Net.Mime;
+using System.Text;
 using Apps.Shopify.HtmlConversion.Models;
+using Blackbird.Applications.Sdk.Utils.Extensions.Files;
 
 namespace Apps.Shopify.Actions;
 
@@ -24,7 +26,7 @@ namespace Apps.Shopify.Actions;
 public class StoreActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
     : ShopifyInvocable(invocationContext)
 {
-    private readonly TranslatableResourceService _translatableResourceService = new(invocationContext, fileManagementClient);
+    private readonly TranslatableResourceService _translatableResourceService = new(invocationContext);
 
     [Action("Get store locales information", Description = "Get primary and additional store locales")]
     public async Task<StoreLocalesResponse> GetStoreLanguages()
@@ -78,7 +80,10 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
         [ActionParameter] LocaleIdentifier locale,
         [ActionParameter] UploadStoreResourcesRequest input)
     {
-        var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, input.Content);
+        var file = await fileManagementClient.DownloadAsync(input.Content);
+        var fileContent = Encoding.UTF8.GetString(await file.GetByteData());
+        var html = HtmlFileHelper.GetHtml(fileContent, input.Content.Name);
+        
         var content = ShopifyHtmlConverter.ToJson(html, locale.Locale, new ShopifyMetadata()).ToList();
         await _translatableResourceService.UpdateIdentifiedContent(content);
     }
@@ -140,7 +145,10 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
         [ActionParameter] LocaleIdentifier locale, 
         [ActionParameter] UploadStoreContentRequest input)
     {
-        var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, input.Content);
+        var file = await fileManagementClient.DownloadAsync(input.Content);
+        var fileContent = Encoding.UTF8.GetString(await file.GetByteData());
+        var html = HtmlFileHelper.GetHtml(fileContent, input.Content.Name);
+        
         var content = ShopifyHtmlConverter.StoreToJson(html, locale.Locale);
 
         await _translatableResourceService.UpdateIdentifiedContent(content.ThemesContentEntities?.ToList());

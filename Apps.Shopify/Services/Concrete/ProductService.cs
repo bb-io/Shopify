@@ -14,21 +14,21 @@ using Apps.Shopify.Models.Response.Metafield;
 using Apps.Shopify.Models.Response.Product;
 using Apps.Shopify.Models.Response.TranslatableResource;
 using Blackbird.Applications.Sdk.Common.Exceptions;
-using Blackbird.Applications.Sdk.Common.Files;
 using Blackbird.Applications.Sdk.Common.Invocation;
-using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using GraphQL;
 using System.Net.Mime;
+using Apps.Shopify.Models.Dto;
+using Apps.Shopify.Services.Models;
 
 namespace Apps.Shopify.Services.Concrete;
 
-public class ProductService(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
+public class ProductService(InvocationContext invocationContext)
     : BaseContentService(invocationContext), IContentService, IPollingContentService
 {
-    private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
+    private readonly TranslatableResourceService _resourceService = new(invocationContext);
     public override string ContentType => TranslatableResources.Product;
 
-    public async Task<FileReference> Download(DownloadContentRequest input)
+    public async Task<FileRecord> Download(DownloadContentRequest input)
     {
         var request = new GraphQLRequest
         {
@@ -71,11 +71,7 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
             OptionValuesContentEntities = optionValuesContentEntities,
         });
 
-        return await fileManagementClient.UploadAsync(
-            html, 
-            MediaTypeNames.Text.Html,
-            input.ContentId.GetFileName(input.MarketId)
-        );
+        return new FileRecord(html, MediaTypeNames.Text.Html, input.ContentId.GetFileName(input.MarketId));
     }
 
     public async Task<ContentUpdatedResponse> PollUpdated(DateTime after, DateTime before, PollUpdatedContentRequest input)
@@ -112,10 +108,9 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
         return new(items);
     }
 
-    public async Task Upload(UploadContentRequest input)
+    public override async Task Upload(UploadContentServiceRequest input)
     {
-        var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, input.Content);
-        var dto = ShopifyHtmlConverter.ProductToJson(html, input.Locale, input.MarketId);
+        var dto = ShopifyHtmlConverter.ProductToJson(input.HtmlContent, input.Locale, input.MarketId);
 
         var allItems = new List<IdentifiedContentRequest>();
         var productItems = dto.ProductContentEntities.ToList();

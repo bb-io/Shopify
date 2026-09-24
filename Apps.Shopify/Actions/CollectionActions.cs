@@ -10,6 +10,7 @@ using Apps.Shopify.Models.Request.Collection;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Response.Collection;
 using Apps.Shopify.Services;
+using Apps.Shopify.Services.Models;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Invocation;
@@ -21,7 +22,7 @@ namespace Apps.Shopify.Actions;
 public class CollectionActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
     : ShopifyInvocable(invocationContext)
 {
-    private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
+    private readonly ContentServiceFactory _factory = new(invocationContext);
     private readonly string ContentType = TranslatableResources.Collection;
 
     [Action("Download collection", Description = "Download content of a specific collection")]
@@ -40,7 +41,9 @@ public class CollectionActions(InvocationContext invocationContext, IFileManagem
             MarketId = marketIdentifier.MarketId
         };
 
-        var file = await service.Download(request);
+        var fileRecord = await service.Download(request);
+        
+        var file = await fileManagementClient.UploadFileRecord(fileRecord);
         return new(file);
     }
         
@@ -51,9 +54,11 @@ public class CollectionActions(InvocationContext invocationContext, IFileManagem
         [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
         var service = _factory.GetContentService(ContentType);
-        var request = new UploadContentRequest
+        string htmlContent = await fileManagementClient.DownloadHtml(input.File);
+        
+        var request = new UploadContentServiceRequest
         {
-            Content = input.File,
+            HtmlContent = htmlContent,
             ContentId = input.CollectionId,
             Locale = locale.Locale,
             MarketId = marketIdentifier.MarketId

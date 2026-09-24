@@ -7,6 +7,7 @@ using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
 using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.HtmlConversion.Models;
+using Apps.Shopify.Models.Dto;
 using Apps.Shopify.Models.Entities.Content;
 using Apps.Shopify.Models.Entities.Menu;
 using Apps.Shopify.Models.Entities.Resource;
@@ -15,20 +16,18 @@ using Apps.Shopify.Models.Response.Content;
 using Apps.Shopify.Models.Response.Menu;
 using Apps.Shopify.Models.Response.TranslatableResource;
 using Apps.Shopify.Services.Models;
-using Blackbird.Applications.Sdk.Common.Files;
 using Blackbird.Applications.Sdk.Common.Invocation;
-using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using GraphQL;
 
 namespace Apps.Shopify.Services.Concrete;
 
-public class MenuService(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
+public class MenuService(InvocationContext invocationContext)
     : BaseContentService(invocationContext), IContentService, IDigestPollingContentService
 {
-    private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
+    private readonly TranslatableResourceService _resourceService = new(invocationContext);
     public override string ContentType => TranslatableResources.Menu;
 
-    public async Task<FileReference> Download(DownloadContentRequest input)
+    public async Task<FileRecord> Download(DownloadContentRequest input)
     {
         var resourceIdsRequest = new GraphQLRequest
         {
@@ -59,13 +58,13 @@ public class MenuService(InvocationContext invocationContext, IFileManagementCli
         };
         var htmlStream = ShopifyHtmlConverter.ToHtml(entities, metadata);
         
-        return await fileManagementClient.UploadAsync(htmlStream, MediaTypeNames.Text.Html, input.ContentId.GetFileName(input.MarketId));
+        return new FileRecord(htmlStream, MediaTypeNames.Text.Html, input.ContentId.GetFileName(input.MarketId));
     }
 
-    public async Task Upload(UploadContentRequest input)
+    public override async Task Upload(UploadContentServiceRequest input)
     {
-        string html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, input.Content);
-        var items = ShopifyHtmlConverter.ToJson(html, input.Locale, new ShopifyMetadata { MarketId = input.MarketId }).ToList();
+        var metadata = new ShopifyMetadata { MarketId = input.MarketId };
+        var items = ShopifyHtmlConverter.ToJson(input.HtmlContent, input.Locale, metadata).ToList();
 
         await _resourceService.UpdateIdentifiedContent(items, null, input.MarketId);
     }
