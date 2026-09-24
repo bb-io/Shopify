@@ -11,10 +11,8 @@ using Apps.Shopify.Models.Response.TranslatableResource;
 
 namespace Apps.Shopify.Services.Concrete;
 
-public class MetafieldService(InvocationContext invocationContext) 
-    : BaseContentService(invocationContext), IContentService
+public class MetafieldService(InvocationContext invocationContext) : BaseContentService(invocationContext), IContentService
 {
-    private readonly TranslatableResourceService _resourceService = new(invocationContext);
     public override string ContentType => TranslatableResources.Metafield;
 
     public async Task<FileRecord> Download(DownloadContentRequest input)
@@ -25,7 +23,7 @@ public class MetafieldService(InvocationContext invocationContext)
             ContentType = ContentType.ToLower()
         };
         
-        return await _resourceService.GetResourceContent(input.ContentId, input.Locale, input.Outdated ?? false, metadata);
+        return await ResourceService.GetResourceContent(input.ContentId, input.Locale, input.Outdated ?? false, metadata);
     }
 
     public async Task<SearchContentResponse> Search(SearchContentRequest input)

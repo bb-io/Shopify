@@ -15,7 +15,6 @@ namespace Apps.Shopify.Services.Concrete;
 public class PageService(InvocationContext invocationContext)
     : BaseContentService(invocationContext), IContentService, IPollingContentService
 {
-    private readonly TranslatableResourceService _resourceService = new(invocationContext);
     public override string ContentType => TranslatableResources.Page;
 
     public Task<FileRecord> Download(DownloadContentRequest input)
@@ -26,7 +25,7 @@ public class PageService(InvocationContext invocationContext)
             ContentType = ContentType.ToLower()
         };
         
-        return _resourceService.GetResourceContent(input.ContentId, input.Locale, input.Outdated ?? false, metadata);
+        return ResourceService.GetResourceContent(input.ContentId, input.Locale, input.Outdated ?? false, metadata);
     }
 
     public async Task<ContentUpdatedResponse> PollUpdated(DateTime after, DateTime before, PollUpdatedContentRequest input)

@@ -25,7 +25,6 @@ namespace Apps.Shopify.Services.Concrete;
 public class ProductService(InvocationContext invocationContext)
     : BaseContentService(invocationContext), IContentService, IPollingContentService
 {
-    private readonly TranslatableResourceService _resourceService = new(invocationContext);
     public override string ContentType => TranslatableResources.Product;
 
     public async Task<FileRecord> Download(DownloadContentRequest input)
@@ -126,7 +125,7 @@ public class ProductService(InvocationContext invocationContext)
         if (dto.OptionValuesContentEntities != null) 
             allItems.AddRange(dto.OptionValuesContentEntities);
 
-        await _resourceService.UpdateIdentifiedContent(allItems, null, input.MarketId);
+        await ResourceService.UpdateIdentifiedContent(allItems, null, input.MarketId);
     }
 
     private static IEnumerable<IdentifiedContentEntity> GetProductOptions(ProductEntity product)
@@ -195,7 +194,7 @@ public class ProductService(InvocationContext invocationContext)
             new Dictionary<string, object> { ["resourceId"] = productId }
         );
         
-        var metaFields = await _resourceService.ListTranslatableResources(
+        var metaFields = await ResourceService.ListTranslatableResources(
             TranslatableResource.METAFIELD, 
             locale, 
             outdated,

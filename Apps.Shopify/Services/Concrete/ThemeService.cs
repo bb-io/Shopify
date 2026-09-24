@@ -16,12 +16,11 @@ namespace Apps.Shopify.Services.Concrete;
 
 public class ThemeService(InvocationContext invocationContext) : BaseContentService(invocationContext), IContentService
 {
-    private readonly TranslatableResourceService _resourceService = new(invocationContext);
     public override string ContentType => TranslatableResources.Theme;
 
     public async Task<FileRecord> Download(DownloadContentRequest input)
     {
-        var translatableContent = await _resourceService.GetTranslatableContent(
+        var translatableContent = await ResourceService.GetTranslatableContent(
             input.ContentId, 
             input.Locale, 
             input.Outdated ?? false,

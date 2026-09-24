@@ -24,7 +24,6 @@ namespace Apps.Shopify.Services.Concrete;
 public class MenuService(InvocationContext invocationContext)
     : BaseContentService(invocationContext), IContentService, IDigestPollingContentService
 {
-    private readonly TranslatableResourceService _resourceService = new(invocationContext);
     public override string ContentType => TranslatableResources.Menu;
 
     public async Task<FileRecord> Download(DownloadContentRequest input)
@@ -66,7 +65,7 @@ public class MenuService(InvocationContext invocationContext)
         var metadata = new ShopifyMetadata { MarketId = input.MarketId };
         var items = ShopifyHtmlConverter.ToJson(input.HtmlContent, input.Locale, metadata).ToList();
 
-        await _resourceService.UpdateIdentifiedContent(items, null, input.MarketId);
+        await ResourceService.UpdateIdentifiedContent(items, null, input.MarketId);
     }
 
     public async Task<SearchContentResponse> Search(SearchContentRequest input)

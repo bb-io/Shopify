@@ -24,7 +24,6 @@ namespace Apps.Shopify.Services.Concrete;
 public class BlogService(InvocationContext invocationContext)
     : BaseContentService(invocationContext), IContentService, IPollingContentService
 {
-    private readonly TranslatableResourceService _resourceService = new(invocationContext);
     public override string ContentType => TranslatableResources.Blog;
 
     public async Task<FileRecord> Download(DownloadContentRequest input)
@@ -96,7 +95,7 @@ public class BlogService(InvocationContext invocationContext)
         return new(items);
     }
 
-    public async Task Upload(UploadContentServiceRequest input)
+    public override async Task Upload(UploadContentServiceRequest input)
     {
         var metadata = new ShopifyMetadata
         {
@@ -113,7 +112,7 @@ public class BlogService(InvocationContext invocationContext)
         }
 
         var allContent = blogItems.Concat(blogPostItems).ToList();
-        await _resourceService.UpdateIdentifiedContent(allContent, null, metadata.MarketId);
+        await ResourceService.UpdateIdentifiedContent(allContent, null, metadata.MarketId);
     }
 
     private async Task<ICollection<IdentifiedContentEntity>> GetBlogPostTranslations(
