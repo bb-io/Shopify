@@ -6,7 +6,6 @@ namespace Apps.Shopify.Services;
 
 public interface IContentService
 {
-    string ContentType { get; }
     Task<FileReference> Download(DownloadContentRequest input);
     Task Upload(UploadContentRequest input);
     Task<SearchContentResponse> Search(SearchContentRequest input);

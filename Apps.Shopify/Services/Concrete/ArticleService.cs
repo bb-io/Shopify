@@ -2,7 +2,6 @@
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Helper;
 using Apps.Shopify.HtmlConversion.Models;
-using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Article;
 using Apps.Shopify.Models.Entities.Content;
 using Apps.Shopify.Models.Request.Content;
@@ -15,10 +14,10 @@ using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 namespace Apps.Shopify.Services.Concrete;
 
 public class ArticleService(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : ShopifyInvocable(invocationContext), IContentService, IPollingContentService
+    : BaseContentService(invocationContext), IContentService, IPollingContentService
 {
     private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
-    public string ContentType => TranslatableResources.Article;
+    public override string ContentType => TranslatableResources.Article;
 
     public Task<FileReference> Download(DownloadContentRequest input)
     {

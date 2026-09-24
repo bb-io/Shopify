@@ -2,7 +2,6 @@
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.HtmlConversion;
-using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Content;
 using Apps.Shopify.Models.Entities.Theme;
 using Apps.Shopify.Models.Request.Content;
@@ -17,10 +16,10 @@ using Apps.Shopify.HtmlConversion.Models;
 namespace Apps.Shopify.Services.Concrete;
 
 public class ThemeService(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : ShopifyInvocable(invocationContext), IContentService
+    : BaseContentService(invocationContext), IContentService
 {
     private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
-    public string ContentType => TranslatableResources.Theme;
+    public override string ContentType => TranslatableResources.Theme;
 
     public async Task<FileReference> Download(DownloadContentRequest input)
     {

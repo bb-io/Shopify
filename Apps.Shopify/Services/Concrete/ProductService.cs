@@ -3,7 +3,6 @@ using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
 using Apps.Shopify.HtmlConversion;
-using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Content;
 using Apps.Shopify.Models.Entities.Metafield;
 using Apps.Shopify.Models.Entities.Product;
@@ -24,10 +23,10 @@ using System.Net.Mime;
 namespace Apps.Shopify.Services.Concrete;
 
 public class ProductService(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : ShopifyInvocable(invocationContext), IContentService, IPollingContentService
+    : BaseContentService(invocationContext), IContentService, IPollingContentService
 {
     private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
-    public string ContentType => TranslatableResources.Product;
+    public override string ContentType => TranslatableResources.Product;
 
     public async Task<FileReference> Download(DownloadContentRequest input)
     {

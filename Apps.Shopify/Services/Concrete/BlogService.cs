@@ -3,7 +3,6 @@ using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
 using Apps.Shopify.HtmlConversion;
-using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Article;
 using Apps.Shopify.Models.Entities.Blog;
 using Apps.Shopify.Models.Entities.Content;
@@ -23,10 +22,10 @@ using Apps.Shopify.HtmlConversion.Models;
 namespace Apps.Shopify.Services.Concrete;
 
 public class BlogService(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : ShopifyInvocable(invocationContext), IContentService, IPollingContentService
+    : BaseContentService(invocationContext), IContentService, IPollingContentService
 {
     private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
-    public string ContentType => TranslatableResources.Blog;
+    public override string ContentType => TranslatableResources.Blog;
 
     public async Task<FileReference> Download(DownloadContentRequest input)
     {

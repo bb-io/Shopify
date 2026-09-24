@@ -7,7 +7,6 @@ using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
 using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.HtmlConversion.Models;
-using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Content;
 using Apps.Shopify.Models.Entities.Menu;
 using Apps.Shopify.Models.Entities.Resource;
@@ -24,10 +23,10 @@ using GraphQL;
 namespace Apps.Shopify.Services.Concrete;
 
 public class MenuService(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : ShopifyInvocable(invocationContext), IContentService, IDigestPollingContentService
+    : BaseContentService(invocationContext), IContentService, IDigestPollingContentService
 {
     private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
-    public string ContentType => TranslatableResources.Menu;
+    public override string ContentType => TranslatableResources.Menu;
 
     public async Task<FileReference> Download(DownloadContentRequest input)
     {
