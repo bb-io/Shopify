@@ -43,4 +43,14 @@ public class TranslatableResourceEntity
 
         return singleLine.Length <= 50 ? singleLine : singleLine[..50] + "...";
     }
+
+    public string GetDisplayName()
+    {
+        string[] displayNameKeys = ["title", "name"];
+        
+        return displayNameKeys
+                   .Select(key => TranslatableContent.FirstOrDefault(t => t.Key == key)?.Value)
+                   .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value))
+               ?? ToString();
+    }
 }

@@ -13,8 +13,9 @@ public enum TranslatableResource
     SHOP,
     SHOP_POLICY,
     MENU,
+    LINK,
+    DELIVERY_METHOD_DEFINITION,
     
     // Do not delete - we TryParse some string inputs to these
     METAOBJECT,
-    LINK
 }
