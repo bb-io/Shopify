@@ -47,7 +47,8 @@ public static class TranslatableResources
         Blog,
         Page,
         Product,
-        Menu
+        Menu,
+        DeliveryMethodDefinition
     ];
 
     public static bool TryGetApiType(string? contentType, out TranslatableResource apiType)

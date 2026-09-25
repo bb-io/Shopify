@@ -8,7 +8,7 @@ using Blackbird.Applications.Sdk.Common.Invocation;
 namespace Apps.Shopify.Services.Concrete;
 
 public class DeliveryMethodDefinitionService(InvocationContext invocationContext)
-    : BaseContentService(invocationContext), IContentService
+    : BaseContentService(invocationContext), IContentService, IDigestPollingContentService
 {
     protected override string ContentType => TranslatableResources.DeliveryMethodDefinition;
     
@@ -25,5 +25,10 @@ public class DeliveryMethodDefinitionService(InvocationContext invocationContext
     public Task Upload(UploadContentServiceRequest input)
     {
         return UploadTranslatableResource(input);
+    }
+
+    public Task<DigestPollResult> PollUpdated(IReadOnlyDictionary<string, string> knownDigests, PollUpdatedContentRequest input)
+    {
+        return PollTranslatableResourceDigests(knownDigests, input);
     }
 }
