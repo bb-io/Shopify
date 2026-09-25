@@ -11,6 +11,7 @@ using Blackbird.Applications.Sdk.Common.Invocation;
 using System.Net.Mime;
 using Apps.Shopify.HtmlConversion.Models;
 using Apps.Shopify.Models.Dto;
+using Apps.Shopify.Services.Models;
 
 namespace Apps.Shopify.Services.Concrete;
 
@@ -52,5 +53,10 @@ public class ThemeService(InvocationContext invocationContext) : BaseContentServ
 
         var items = response.Select(x => new ContentItemEntity(x.Id, ContentType, x.Name)).ToList();
         return new(items);
+    }
+
+    public Task Upload(UploadContentServiceRequest input)
+    {
+        return UploadTranslatableResource(input);
     }
 }

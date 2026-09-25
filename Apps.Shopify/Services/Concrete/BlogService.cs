@@ -95,7 +95,7 @@ public class BlogService(InvocationContext invocationContext)
         return new(items);
     }
 
-    public override async Task Upload(UploadContentServiceRequest input)
+    public async Task Upload(UploadContentServiceRequest input)
     {
         var metadata = new ShopifyMetadata
         {

@@ -7,6 +7,7 @@ using Apps.Shopify.Models.Entities.Content;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Response.Article;
 using Apps.Shopify.Models.Response.Content;
+using Apps.Shopify.Services.Models;
 using Blackbird.Applications.Sdk.Common.Invocation;
 
 namespace Apps.Shopify.Services.Concrete;
@@ -68,5 +69,10 @@ public class ArticleService(InvocationContext invocationContext)
 
         var items = response.Select(x => new ContentItemEntity(x.Id, ContentType, x.Title)).ToList();
         return new(items);
+    }
+
+    public Task Upload(UploadContentServiceRequest input)
+    {
+        return UploadTranslatableResource(input);
     }
 }

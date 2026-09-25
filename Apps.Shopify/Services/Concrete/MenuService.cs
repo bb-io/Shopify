@@ -60,7 +60,7 @@ public class MenuService(InvocationContext invocationContext)
         return new FileRecord(htmlStream, MediaTypeNames.Text.Html, input.ContentId.GetFileName(input.MarketId));
     }
 
-    public override async Task Upload(UploadContentServiceRequest input)
+    public async Task Upload(UploadContentServiceRequest input)
     {
         var metadata = new ShopifyMetadata { MarketId = input.MarketId };
         var items = ShopifyHtmlConverter.ToJson(input.HtmlContent, input.Locale, metadata).ToList();

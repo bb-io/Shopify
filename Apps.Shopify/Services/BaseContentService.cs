@@ -19,9 +19,9 @@ public abstract class BaseContentService(InvocationContext invocationContext) : 
     
     protected readonly TranslatableResourceService ResourceService = new(invocationContext);
 
-    public virtual async Task Upload(UploadContentServiceRequest input)
+    protected Task UploadTranslatableResource(UploadContentServiceRequest input)
     {
-        await ResourceService.UpdateResourceContent(input.ContentId, input.Locale, input.HtmlContent, input.MarketId);
+        return ResourceService.UpdateResourceContent(input.ContentId, input.Locale, input.HtmlContent, input.MarketId);
     }
     
     protected async Task<SearchContentResponse> SearchTranslatableResources(SearchContentRequest input)

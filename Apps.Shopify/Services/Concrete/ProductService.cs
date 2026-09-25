@@ -107,7 +107,7 @@ public class ProductService(InvocationContext invocationContext)
         return new(items);
     }
 
-    public override async Task Upload(UploadContentServiceRequest input)
+    public async Task Upload(UploadContentServiceRequest input)
     {
         var dto = ShopifyHtmlConverter.ProductToJson(input.HtmlContent, input.Locale, input.MarketId);
 
