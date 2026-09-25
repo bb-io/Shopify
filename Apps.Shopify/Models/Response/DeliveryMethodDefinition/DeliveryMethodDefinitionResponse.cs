@@ -5,9 +5,9 @@ namespace Apps.Shopify.Models.Response.DeliveryMethodDefinition;
 
 public class DeliveryMethodDefinitionResponse(ContentItemEntity contentEntity)
 {
-    [Display("Delivery method definition ID")]
+    [Display("Definition ID")]
     public string Id { get; set; } = contentEntity.ContentId;
 
-    [Display("Delivery method definition name")]
+    [Display("Definition name")]
     public string Name { get; set; } = contentEntity.Name;
 }
