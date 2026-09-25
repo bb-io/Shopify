@@ -22,9 +22,8 @@ public abstract class TranslatableResourceDataHandler(InvocationContext invocati
             cancellationToken);
 
         return response
+            .Where(x => x.MatchesSearch(context.SearchString))
             .Select(x => new DataSourceItem(x.ResourceId, x.GetDisplayName()))
-            .Where(x => context.SearchString is null ||
-                        x.DisplayName.Contains(context.SearchString, StringComparison.OrdinalIgnoreCase))
             .ToList();
     }
 }
