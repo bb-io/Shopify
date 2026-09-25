@@ -10,6 +10,7 @@ using Apps.Shopify.HtmlConversion.Models;
 using Apps.Shopify.Models.Dto;
 using Apps.Shopify.Models.Entities.Content;
 using Apps.Shopify.Models.Entities.Menu;
+using Apps.Shopify.Models.Entities.Polling;
 using Apps.Shopify.Models.Entities.Resource;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Response.Content;
@@ -96,21 +97,13 @@ public class MenuService(InvocationContext invocationContext)
         var digests = await GetDigests(TranslatableResource.MENU);
         var linkDigests = await GetDigests(TranslatableResource.LINK);
 
-        var current = menus.ToDictionary(m => m.Id, m => ComputeMenuHash(m, digests, linkDigests));
-        var changed = menus
-            .Where(m => !knownDigests.TryGetValue(m.Id, out var known) || known != current[m.Id])
-            .Select(m => new PollingContentItemEntity(m.Id, ContentType, m.Title))
-            .ToList();
-
-        return new(changed, current);
+        var items = menus.Select(m => new DigestItemEntity(m.Id, m.Title, ComputeMenuHash(m, digests, linkDigests)));
+        return BuildDigestPollResult(knownDigests, items);
     }
 
     private async Task<Dictionary<string, string>> GetDigests(TranslatableResource resourceType)
     {
-        var resources = await Client.Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
-            GraphQlQueries.TranslatableResources,
-            new Dictionary<string, object> { ["resourceType"] = resourceType });
-
+        var resources = await ListTranslatableResources(resourceType);
         return resources.ToDictionary(x => x.ResourceId, x => x.TranslatableContent.FirstOrDefault()?.Digest ?? string.Empty);
     }
 

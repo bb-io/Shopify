@@ -6,6 +6,8 @@ namespace Apps.Shopify.Models.Entities.Resource;
 
 public class TranslatableResourceEntity
 {
+    private static readonly string[] DisplayNameKeys = ["title", "name"];
+    
     public string ResourceId { get; set; }
 
     public IEnumerable<ContentEntity> TranslatableContent { get; set; }
@@ -46,11 +48,21 @@ public class TranslatableResourceEntity
 
     public string GetDisplayName()
     {
-        string[] displayNameKeys = ["title", "name"];
-        
-        return displayNameKeys
+        return DisplayNameKeys
                    .Select(key => TranslatableContent.FirstOrDefault(t => t.Key == key)?.Value)
                    .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value))
                ?? ToString();
+    }
+
+    public bool MatchesSearch(string? searchString)
+    {
+        return string.IsNullOrEmpty(searchString) ||
+               GetDisplayName().Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+               ResourceId.Contains(searchString, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public string GetContentDigest()
+    {
+        return string.Join('|', TranslatableContent.OrderBy(x => x.Key).Select(x => $"{x.Key}:{x.Digest}"));
     }
 }

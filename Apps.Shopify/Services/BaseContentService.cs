@@ -4,6 +4,7 @@ using Apps.Shopify.HtmlConversion.Models;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Dto;
 using Apps.Shopify.Models.Entities.Content;
+using Apps.Shopify.Models.Entities.Polling;
 using Apps.Shopify.Models.Entities.Resource;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Response.Content;
@@ -26,20 +27,11 @@ public abstract class BaseContentService(InvocationContext invocationContext) : 
     
     protected async Task<SearchContentResponse> SearchTranslatableResources(SearchContentRequest input)
     {
-        var variables = new Dictionary<string, object>
-        {
-            ["resourceType"] = TranslatableResources.GetApiType(ContentType)
-        };
+        var translatableResources = await ListTranslatableResources();
 
-        var response = await Client.Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
-            GraphQlQueries.TranslatableResources,
-            variables);
-
-        var items = response
+        var items = translatableResources
+            .Where(x => x.MatchesSearch(input.NameContains))
             .Select(x => new ContentItemEntity(x.ResourceId, ContentType, x.GetDisplayName()))
-            .Where(x => string.IsNullOrEmpty(input.NameContains) ||
-                        x.Name.Contains(input.NameContains, StringComparison.OrdinalIgnoreCase) ||
-                        x.ContentId.Contains(input.NameContains, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
         return new(items);
@@ -54,5 +46,45 @@ public abstract class BaseContentService(InvocationContext invocationContext) : 
         };
 
         return ResourceService.GetResourceContent(input.ContentId, input.Locale, input.Outdated ?? false, metadata);
+    }
+    
+    protected async Task<DigestPollResult> PollTranslatableResourceDigests(
+        IReadOnlyDictionary<string, string> knownDigests,
+        PollUpdatedContentRequest input)
+    {
+        var translatableResources = await ListTranslatableResources();
+
+        var items = translatableResources
+            .Where(x => x.MatchesSearch(input.NameContains))
+            .Select(x => new DigestItemEntity(x.ResourceId, x.GetDisplayName(), x.GetContentDigest()));
+
+        return BuildDigestPollResult(knownDigests, items);
+    }
+
+    protected DigestPollResult BuildDigestPollResult(
+        IReadOnlyDictionary<string, string> knownDigests,
+        IEnumerable<DigestItemEntity> items)
+    {
+        var itemList = items.ToList();
+
+        var current = itemList.ToDictionary(x => x.Id, x => x.Digest);
+        var changed = itemList
+            .Where(x => !knownDigests.TryGetValue(x.Id, out var known) || known != x.Digest)
+            .Select(x => new PollingContentItemEntity(x.Id, ContentType, x.Name))
+            .ToList();
+
+        return new(changed, current);
+    }
+    
+    protected Task<List<TranslatableResourceEntity>> ListTranslatableResources(TranslatableResource? resourceType = null)
+    {
+        var variables = new Dictionary<string, object>
+        {
+            ["resourceType"] = resourceType ?? TranslatableResources.GetApiType(ContentType)
+        };
+
+        return Client.Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
+            GraphQlQueries.TranslatableResources,
+            variables);
     }
 }
