@@ -1,6 +1,5 @@
 ﻿using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
-using Apps.Shopify.Helper;
 using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Resource;
@@ -16,9 +15,8 @@ using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using GraphQL;
 using System.Net.Mime;
-using System.Text;
+using Apps.Shopify.Extensions;
 using Apps.Shopify.HtmlConversion.Models;
-using Blackbird.Applications.Sdk.Utils.Extensions.Files;
 
 namespace Apps.Shopify.Actions;
 
@@ -80,9 +78,7 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
         [ActionParameter] LocaleIdentifier locale,
         [ActionParameter] UploadStoreResourcesRequest input)
     {
-        var file = await fileManagementClient.DownloadAsync(input.Content);
-        var fileContent = Encoding.UTF8.GetString(await file.GetByteData());
-        var html = HtmlFileHelper.GetHtml(fileContent, input.Content.Name);
+        string html = await fileManagementClient.DownloadHtml(input.Content);
         
         var content = ShopifyHtmlConverter.ToJson(html, locale.Locale, new ShopifyMetadata()).ToList();
         await _translatableResourceService.UpdateIdentifiedContent(content);
@@ -145,9 +141,7 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
         [ActionParameter] LocaleIdentifier locale, 
         [ActionParameter] UploadStoreContentRequest input)
     {
-        var file = await fileManagementClient.DownloadAsync(input.Content);
-        var fileContent = Encoding.UTF8.GetString(await file.GetByteData());
-        var html = HtmlFileHelper.GetHtml(fileContent, input.Content.Name);
+        string html = await fileManagementClient.DownloadHtml(input.Content);
         
         var content = ShopifyHtmlConverter.StoreToJson(html, locale.Locale);
 
