@@ -1,8 +1,7 @@
+using Apps.Shopify.Actions.Base;
 using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
-using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
-using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Article;
 using Apps.Shopify.Models.Identifiers;
 using Apps.Shopify.Models.Identifiers.Optional;
@@ -10,8 +9,6 @@ using Apps.Shopify.Models.Request.Article;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.OnlineStoreArticle;
 using Apps.Shopify.Models.Response.Article;
-using Apps.Shopify.Services;
-using Apps.Shopify.Services.Models;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Invocation;
@@ -21,10 +18,9 @@ namespace Apps.Shopify.Actions;
 
 [ActionList("Articles")]
 public class OnlineStoreArticleActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : ShopifyInvocable(invocationContext)
+    : BaseContentActions(invocationContext, fileManagementClient)
 {
-    private readonly ContentServiceFactory _factory = new(invocationContext);
-    private readonly string ContentType = TranslatableResources.Article;
+    protected override string ContentType => TranslatableResources.Article;
 
     [Action("Search articles", Description = "Search articles with specific criteria")]
     public async Task<SearchArticlesResponse> SearchArticles([ActionParameter] SearchArticlesRequest input)
@@ -60,7 +56,6 @@ public class OnlineStoreArticleActions(InvocationContext invocationContext, IFil
         [ActionParameter] OutdatedOptionalIdentifier getContentRequest,
         [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
-        var service = _factory.GetContentService(ContentType);
         var request = new DownloadContentRequest
         {
             ContentId = input.ArticleId,
@@ -69,27 +64,16 @@ public class OnlineStoreArticleActions(InvocationContext invocationContext, IFil
             MarketId = marketIdentifier.MarketId
         };
 
-        var fileRecord = await service.Download(request);
-        var file = await fileManagementClient.UploadFileRecord(fileRecord);
+        var file = await DownloadContent(request);
         return new(file);
     }
 
     [Action("Upload article", Description = "Upload content of a specific article")]
-    public async Task UpdateOnlineStoreArticleContent(
+    public Task UpdateOnlineStoreArticleContent(
         [ActionParameter] UploadArticleRequest input,
         [ActionParameter] NonPrimaryLocaleIdentifier locale,
         [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
-        var service = _factory.GetContentService(ContentType);
-        string htmlContent = await fileManagementClient.DownloadHtml(input.File);
-        
-        var request = new UploadContentServiceRequest
-        {
-            ContentId = input.ArticleId,
-            HtmlContent = htmlContent,
-            Locale = locale.Locale,
-            MarketId = marketIdentifier.MarketId
-        };
-        await service.Upload(request);
+        return UploadContent(input.File, input.ArticleId, locale.Locale, marketIdentifier.MarketId);
     }
 }

@@ -1,8 +1,7 @@
+using Apps.Shopify.Actions.Base;
 using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
-using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
-using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Blog;
 using Apps.Shopify.Models.Identifiers;
 using Apps.Shopify.Models.Identifiers.Optional;
@@ -10,8 +9,6 @@ using Apps.Shopify.Models.Request.Blog;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.OnlineStoreBlog;
 using Apps.Shopify.Models.Response.Blog;
-using Apps.Shopify.Services;
-using Apps.Shopify.Services.Models;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Invocation;
@@ -21,10 +18,9 @@ namespace Apps.Shopify.Actions;
 
 [ActionList("Blogs")]
 public class OnlineStoreBlogActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : ShopifyInvocable(invocationContext)
+    : BaseContentActions(invocationContext, fileManagementClient)
 {
-    private readonly ContentServiceFactory _factory = new(invocationContext);
-    private readonly string ContentType = TranslatableResources.Blog;
+    protected override string ContentType => TranslatableResources.Blog;
 
     [Action("Search blogs", Description = "Search blogs with specific criteria")]
     public async Task<SearchBlogsResponse> SearchBlogs([ActionParameter] SearchBlogsRequest input)
@@ -53,7 +49,6 @@ public class OnlineStoreBlogActions(InvocationContext invocationContext, IFileMa
         [ActionParameter] OutdatedOptionalIdentifier getContentRequest,
         [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
-        var service = _factory.GetContentService(ContentType);
         var request = new DownloadContentRequest
         {
             ContentId = blogId.BlogId,
@@ -63,27 +58,16 @@ public class OnlineStoreBlogActions(InvocationContext invocationContext, IFileMa
             MarketId = marketIdentifier.MarketId
         };
 
-        var fileRecord = await service.Download(request);
-        var file = await fileManagementClient.UploadFileRecord(fileRecord);
+        var file = await DownloadContent(request);
         return new(file);
     }
 
     [Action("Upload blog", Description = "Upload content of a specific blog")]
-    public async Task UpdateOnlineStoreBlogContent(
+    public Task UpdateOnlineStoreBlogContent(
         [ActionParameter] UploadBlogRequest input,
         [ActionParameter] NonPrimaryLocaleIdentifier locale,
         [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
-        var service = _factory.GetContentService(ContentType);
-        string htmlContent = await fileManagementClient.DownloadHtml(input.File);
-        
-        var request = new UploadContentServiceRequest
-        {
-            HtmlContent = htmlContent,
-            ContentId = input.BlogId,
-            Locale = locale.Locale,
-            MarketId = marketIdentifier.MarketId
-        };
-        await service.Upload(request);
+        return UploadContent(input.File, input.BlogId, locale.Locale, marketIdentifier.MarketId);
     }
 }
