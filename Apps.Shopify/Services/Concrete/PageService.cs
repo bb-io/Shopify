@@ -1,34 +1,25 @@
 ﻿using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Helper;
-using Apps.Shopify.HtmlConversion.Models;
-using Apps.Shopify.Invocables;
+using Apps.Shopify.Models.Dto;
 using Apps.Shopify.Models.Entities.Content;
 using Apps.Shopify.Models.Entities.Page;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Response.Content;
 using Apps.Shopify.Models.Response.Page;
-using Blackbird.Applications.Sdk.Common.Files;
+using Apps.Shopify.Services.Models;
 using Blackbird.Applications.Sdk.Common.Invocation;
-using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
 namespace Apps.Shopify.Services.Concrete;
 
-public class PageService(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : ShopifyInvocable(invocationContext), IContentService, IPollingContentService
+public class PageService(InvocationContext invocationContext)
+    : BaseContentService(invocationContext), IContentService, IPollingContentService
 {
-    private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
-    private readonly string _contentType = TranslatableResources.Page;
+    protected override string ContentType => TranslatableResources.Page;
 
-    public Task<FileReference> Download(DownloadContentRequest input)
+    public Task<FileRecord> Download(DownloadContentRequest input)
     {
-        var metadata = new ShopifyMetadata
-        {
-            MarketId = input.MarketId,
-            ContentType = _contentType.ToLower()
-        };
-        
-        return _resourceService.GetResourceContent(input.ContentId, input.Locale, input.Outdated ?? false, metadata);
+        return DownloadTranslatableResource(input);
     }
 
     public async Task<ContentUpdatedResponse> PollUpdated(DateTime after, DateTime before, PollUpdatedContentRequest input)
@@ -43,7 +34,7 @@ public class PageService(InvocationContext invocationContext, IFileManagementCli
             QueryHelper.QueryToDictionary(query)
         );
 
-        var items = response.Select(x => new PollingContentItemEntity(x.Id, _contentType, x.Title, x.UpdatedAt)).ToList();
+        var items = response.Select(x => new PollingContentItemEntity(x.Id, ContentType, x.Title, x.UpdatedAt)).ToList();
         return new(items);
     }
 
@@ -61,12 +52,12 @@ public class PageService(InvocationContext invocationContext, IFileManagementCli
             QueryHelper.QueryToDictionary(query)
         );
 
-        var items = response.Select(x => new ContentItemEntity(x.Id, _contentType, x.Title)).ToList();
+        var items = response.Select(x => new ContentItemEntity(x.Id, ContentType, x.Title)).ToList();
         return new(items);
     }
 
-    public async Task Upload(UploadContentRequest input)
+    public Task Upload(UploadContentServiceRequest input)
     {
-        await _resourceService.UpdateResourceContent(input.ContentId, input.Locale, input.Content, input.MarketId);
+        return UploadTranslatableResource(input);
     }
 }

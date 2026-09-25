@@ -1,4 +1,4 @@
-﻿using Apps.Shopify.Constants;
+using Apps.Shopify.Constants;
 using Apps.Shopify.Models.Dto;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Response.Content;
@@ -7,10 +7,11 @@ using Blackbird.Applications.Sdk.Common.Invocation;
 
 namespace Apps.Shopify.Services.Concrete;
 
-public class MetafieldService(InvocationContext invocationContext) : BaseContentService(invocationContext), IContentService
+public class DeliveryMethodDefinitionService(InvocationContext invocationContext)
+    : BaseContentService(invocationContext), IContentService, IDigestPollingContentService
 {
-    protected override string ContentType => TranslatableResources.Metafield;
-
+    protected override string ContentType => TranslatableResources.DeliveryMethodDefinition;
+    
     public Task<FileRecord> Download(DownloadContentRequest input)
     {
         return DownloadTranslatableResource(input);
@@ -24,5 +25,10 @@ public class MetafieldService(InvocationContext invocationContext) : BaseContent
     public Task Upload(UploadContentServiceRequest input)
     {
         return UploadTranslatableResource(input);
+    }
+
+    public Task<DigestPollResult> PollUpdated(IReadOnlyDictionary<string, string> knownDigests, PollUpdatedContentRequest input)
+    {
+        return PollTranslatableResourceDigests(knownDigests, input);
     }
 }

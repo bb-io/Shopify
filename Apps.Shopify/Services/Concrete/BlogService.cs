@@ -3,7 +3,6 @@ using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
 using Apps.Shopify.HtmlConversion;
-using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Article;
 using Apps.Shopify.Models.Entities.Blog;
 using Apps.Shopify.Models.Entities.Content;
@@ -13,22 +12,21 @@ using Apps.Shopify.Models.Response.Article;
 using Apps.Shopify.Models.Response.Blog;
 using Apps.Shopify.Models.Response.Content;
 using Apps.Shopify.Models.Response.TranslatableResource;
-using Blackbird.Applications.Sdk.Common.Files;
 using Blackbird.Applications.Sdk.Common.Invocation;
-using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using GraphQL;
 using System.Net.Mime;
 using Apps.Shopify.HtmlConversion.Models;
+using Apps.Shopify.Models.Dto;
+using Apps.Shopify.Services.Models;
 
 namespace Apps.Shopify.Services.Concrete;
 
-public class BlogService(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : ShopifyInvocable(invocationContext), IContentService, IPollingContentService
+public class BlogService(InvocationContext invocationContext)
+    : BaseContentService(invocationContext), IContentService, IPollingContentService
 {
-    private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
-    private readonly string _contentType = TranslatableResources.Blog;
+    protected override string ContentType => TranslatableResources.Blog;
 
-    public async Task<FileReference> Download(DownloadContentRequest input)
+    public async Task<FileRecord> Download(DownloadContentRequest input)
     {
         var request = new GraphQLRequest
         {
@@ -46,7 +44,7 @@ public class BlogService(InvocationContext invocationContext, IFileManagementCli
         
         var metadata = new ShopifyMetadata
         {
-            ContentType = _contentType.ToLower(),
+            ContentType = ContentType.ToLower(),
             MarketId = input.MarketId
         };
         
@@ -59,7 +57,7 @@ public class BlogService(InvocationContext invocationContext, IFileManagementCli
             blogPostTranslations,
             metadata);
 
-        return await fileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html, input.ContentId.GetFileName(metadata.MarketId));
+        return new FileRecord(html, MediaTypeNames.Text.Html, input.ContentId.GetFileName(metadata.MarketId));
     }
 
     public async Task<ContentUpdatedResponse> PollUpdated(DateTime after, DateTime before, PollUpdatedContentRequest input)
@@ -75,7 +73,7 @@ public class BlogService(InvocationContext invocationContext, IFileManagementCli
         );
 
         var items = response.Select(x => 
-            new PollingContentItemEntity(x.Id, _contentType, x.Title, x.UpdatedAt ?? x.CreatedAt)
+            new PollingContentItemEntity(x.Id, ContentType, x.Title, x.UpdatedAt ?? x.CreatedAt)
         ).ToList();
         return new(items);
     }
@@ -93,20 +91,19 @@ public class BlogService(InvocationContext invocationContext, IFileManagementCli
             QueryHelper.QueryToDictionary(query)
         );
 
-        var items = response.Select(x => new ContentItemEntity(x.Id, _contentType, x.Title)).ToList();
+        var items = response.Select(x => new ContentItemEntity(x.Id, ContentType, x.Title)).ToList();
         return new(items);
     }
 
-    public async Task Upload(UploadContentRequest input)
+    public async Task Upload(UploadContentServiceRequest input)
     {
-        var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, input.Content);
         var metadata = new ShopifyMetadata
         {
-            ContentType = _contentType,
+            ContentType = ContentType,
             MarketId = input.MarketId
         };
         
-        var (blogItems, blogPostItems) = ShopifyHtmlConverter.BlogToJson(html, input.Locale, metadata);
+        var (blogItems, blogPostItems) = ShopifyHtmlConverter.BlogToJson(input.HtmlContent, input.Locale, metadata);
 
         if (!string.IsNullOrWhiteSpace(input.ContentId))
         {
@@ -115,7 +112,7 @@ public class BlogService(InvocationContext invocationContext, IFileManagementCli
         }
 
         var allContent = blogItems.Concat(blogPostItems).ToList();
-        await _resourceService.UpdateIdentifiedContent(allContent, null, metadata.MarketId);
+        await ResourceService.UpdateIdentifiedContent(allContent, null, metadata.MarketId);
     }
 
     private async Task<ICollection<IdentifiedContentEntity>> GetBlogPostTranslations(

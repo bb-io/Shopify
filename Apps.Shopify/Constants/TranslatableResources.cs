@@ -13,6 +13,7 @@ public static class TranslatableResources
     public const string Product = "Product";
     public const string Store = "Store";
     public const string Menu = "Menu";
+    public const string DeliveryMethodDefinition = "Delivery method definition";
 
     private static readonly Dictionary<string, TranslatableResource> ApiTypes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -24,7 +25,8 @@ public static class TranslatableResources
         [Theme] = TranslatableResource.ONLINE_STORE_THEME,
         [Product] = TranslatableResource.PRODUCT,
         [Store] = TranslatableResource.SHOP,
-        [Menu] = TranslatableResource.MENU
+        [Menu] = TranslatableResource.MENU,
+        [DeliveryMethodDefinition] = TranslatableResource.DELIVERY_METHOD_DEFINITION
     };
 
     public static readonly List<string> SupportedContentTypes = [
@@ -35,7 +37,8 @@ public static class TranslatableResources
         Page,
         Theme,
         Product,
-        Menu
+        Menu,
+        DeliveryMethodDefinition
     ];
 
     public static readonly List<string> SupportedPollingContentTypes = [
@@ -44,7 +47,8 @@ public static class TranslatableResources
         Blog,
         Page,
         Product,
-        Menu
+        Menu,
+        DeliveryMethodDefinition
     ];
 
     public static bool TryGetApiType(string? contentType, out TranslatableResource apiType)

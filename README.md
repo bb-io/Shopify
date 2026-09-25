@@ -57,7 +57,7 @@ Other scopes that may be needed depending on desired actions are:
 
 - **Search products** Search products with specific criteria
 - **Download product** Download content of a specific product
-- **Uploade product** Upload content of a specific product
+- **Upload product** Upload content of a specific product
 
 ### Metafields
 
@@ -78,6 +78,12 @@ Other scopes that may be needed depending on desired actions are:
 - **Download menu** Download content of a specific menu
 - **Upload menu** Upload content of a specific menu
 - **Search menus** Search menus with specific criteria
+
+### Delivery method definitions
+
+- **Search delivery method definitions** Search delivery method definitions with specific criteria
+- **Download delivery method definition** Download content of a specific delivery method definition
+- **Upload delivery method definition** Upload content of a specific delivery method definition
 
 ### Content
 
@@ -114,9 +120,10 @@ Other scopes that may be needed depending on desired actions are:
 
 ### Content
 
-> **Note**: These events support the following content types: collection, article, blog, page, product, menu.
+> **Note**: These events support the following content types: collection, article, blog, page, product, 
+menu, delivery method definition.
 >
-> Menu's 'Updated at' output will always be empty since Shopify does not expose this value.
+> The 'Updated at' output for menus and delivery methods will always be empty since Shopify does not expose this value.
 
 - **On content updated**
 

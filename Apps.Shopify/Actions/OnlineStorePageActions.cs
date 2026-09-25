@@ -1,7 +1,7 @@
+using Apps.Shopify.Actions.Base;
 using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Helper;
-using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Page;
 using Apps.Shopify.Models.Identifiers;
 using Apps.Shopify.Models.Identifiers.Optional;
@@ -9,7 +9,6 @@ using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.OnlineStorePage;
 using Apps.Shopify.Models.Request.Page;
 using Apps.Shopify.Models.Response.Page;
-using Apps.Shopify.Services;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Invocation;
@@ -19,10 +18,9 @@ namespace Apps.Shopify.Actions;
 
 [ActionList("Pages")]
 public class OnlineStorePageActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : ShopifyInvocable(invocationContext)
+    : BaseContentActions(invocationContext, fileManagementClient)
 {
-    private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
-    private readonly string ContentType = TranslatableResources.Page;
+    protected override string ContentType => TranslatableResources.Page;
 
     [Action("Search pages", Description = "Search pages with specific criteria")]
     public async Task<SearchPagesResponse> SearchPages([ActionParameter] SearchPagesRequest input)
@@ -51,7 +49,6 @@ public class OnlineStorePageActions(InvocationContext invocationContext, IFileMa
         [ActionParameter] OutdatedOptionalIdentifier getContentRequest,
         [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
-        var service = _factory.GetContentService(ContentType);
         var request = new DownloadContentRequest
         {
             ContentId = input.PageId,
@@ -60,25 +57,16 @@ public class OnlineStorePageActions(InvocationContext invocationContext, IFileMa
             MarketId = marketIdentifier.MarketId
         };
 
-        var file = await service.Download(request);
+        var file = await DownloadContent(request);
         return new(file);
     }
 
     [Action("Upload page", Description = "Upload content of a specific page")]
-    public async Task UpdateOnlineStorePageContent(
+    public Task UpdateOnlineStorePageContent(
         [ActionParameter] UploadPageRequest input,
         [ActionParameter] NonPrimaryLocaleIdentifier locale,
         [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
-        var service = _factory.GetContentService(ContentType);
-        var request = new UploadContentRequest
-        {
-            Content = input.File,
-            ContentId = input.PageId,
-            Locale = locale.Locale,
-            MarketId = marketIdentifier.MarketId
-        };
-
-        await service.Upload(request);
+        return UploadContent(input.File, input.PageId, locale.Locale, marketIdentifier.MarketId);
     }
 }

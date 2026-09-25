@@ -1,15 +1,14 @@
+using Apps.Shopify.Actions.Base;
 using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
-using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Collection;
 using Apps.Shopify.Models.Identifiers;
 using Apps.Shopify.Models.Identifiers.Optional;
 using Apps.Shopify.Models.Request.Collection;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Response.Collection;
-using Apps.Shopify.Services;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Invocation;
@@ -19,10 +18,9 @@ namespace Apps.Shopify.Actions;
 
 [ActionList("Collections")]
 public class CollectionActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : ShopifyInvocable(invocationContext)
+    : BaseContentActions(invocationContext, fileManagementClient)
 {
-    private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
-    private readonly string ContentType = TranslatableResources.Collection;
+    protected override string ContentType => TranslatableResources.Collection;
 
     [Action("Download collection", Description = "Download content of a specific collection")]
     public async Task<DownloadCollectionResponse> GetCollectionContent(
@@ -31,7 +29,6 @@ public class CollectionActions(InvocationContext invocationContext, IFileManagem
         [ActionParameter] OutdatedOptionalIdentifier getContentRequest,
         [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
-        var service = _factory.GetContentService(ContentType);
         var request = new DownloadContentRequest
         {
             ContentId = input.CollectionId,
@@ -39,27 +36,18 @@ public class CollectionActions(InvocationContext invocationContext, IFileManagem
             Outdated = getContentRequest.Outdated,
             MarketId = marketIdentifier.MarketId
         };
-
-        var file = await service.Download(request);
+        
+        var file = await DownloadContent(request);
         return new(file);
     }
         
     [Action("Upload collection", Description = "Upload content of a specific collection")]
-    public async Task UpdateCollectionContent(
+    public Task UpdateCollectionContent(
         [ActionParameter] UploadCollectionRequest input,
         [ActionParameter] NonPrimaryLocaleIdentifier locale,
         [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
-        var service = _factory.GetContentService(ContentType);
-        var request = new UploadContentRequest
-        {
-            Content = input.File,
-            ContentId = input.CollectionId,
-            Locale = locale.Locale,
-            MarketId = marketIdentifier.MarketId
-        };
-
-        await service.Upload(request);
+        return UploadContent(input.File, input.CollectionId, locale.Locale, marketIdentifier.MarketId);
     }
 
     [Action("Search collections", Description = "Search collections with specific criteria")]

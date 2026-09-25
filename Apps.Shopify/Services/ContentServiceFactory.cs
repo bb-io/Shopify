@@ -1,25 +1,25 @@
 ﻿using Apps.Shopify.Constants;
 using Apps.Shopify.Services.Concrete;
 using Blackbird.Applications.Sdk.Common.Invocation;
-using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
 namespace Apps.Shopify.Services;
 
-public class ContentServiceFactory(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
+public class ContentServiceFactory(InvocationContext invocationContext)
 {
     public IContentService GetContentService(string contentType)
     {
         string normalizedType = TranslatableResources.Normalize(contentType);
         return normalizedType switch
         {
-            TranslatableResources.Collection => new CollectionService(invocationContext, fileManagementClient),
-            TranslatableResources.Metafield => new MetafieldService(invocationContext, fileManagementClient),
-            TranslatableResources.Article => new ArticleService(invocationContext, fileManagementClient),
-            TranslatableResources.Blog => new BlogService(invocationContext, fileManagementClient),
-            TranslatableResources.Page => new PageService(invocationContext, fileManagementClient),
-            TranslatableResources.Theme => new ThemeService(invocationContext, fileManagementClient),
-            TranslatableResources.Product => new ProductService(invocationContext, fileManagementClient),
-            TranslatableResources.Menu => new MenuService(invocationContext, fileManagementClient),
+            TranslatableResources.Collection => new CollectionService(invocationContext),
+            TranslatableResources.Metafield => new MetafieldService(invocationContext),
+            TranslatableResources.Article => new ArticleService(invocationContext),
+            TranslatableResources.Blog => new BlogService(invocationContext),
+            TranslatableResources.Page => new PageService(invocationContext),
+            TranslatableResources.Theme => new ThemeService(invocationContext),
+            TranslatableResources.Product => new ProductService(invocationContext),
+            TranslatableResources.Menu => new MenuService(invocationContext),
+            TranslatableResources.DeliveryMethodDefinition => new DeliveryMethodDefinitionService(invocationContext),
             _ => throw new Exception($"Unsupported content type '{contentType}' was passed in ContentServiceFactory")
         };
     }
