@@ -24,7 +24,7 @@ namespace Apps.Shopify.Services.Concrete;
 public class MenuService(InvocationContext invocationContext)
     : BaseContentService(invocationContext), IContentService, IDigestPollingContentService
 {
-    public override string ContentType => TranslatableResources.Menu;
+    protected override string ContentType => TranslatableResources.Menu;
 
     public async Task<FileRecord> Download(DownloadContentRequest input)
     {

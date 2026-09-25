@@ -24,7 +24,7 @@ namespace Apps.Shopify.Services.Concrete;
 public class BlogService(InvocationContext invocationContext)
     : BaseContentService(invocationContext), IContentService, IPollingContentService
 {
-    public override string ContentType => TranslatableResources.Blog;
+    protected override string ContentType => TranslatableResources.Blog;
 
     public async Task<FileRecord> Download(DownloadContentRequest input)
     {

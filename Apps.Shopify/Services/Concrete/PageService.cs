@@ -1,7 +1,6 @@
 ﻿using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Helper;
-using Apps.Shopify.HtmlConversion.Models;
 using Apps.Shopify.Models.Dto;
 using Apps.Shopify.Models.Entities.Content;
 using Apps.Shopify.Models.Entities.Page;
@@ -15,17 +14,11 @@ namespace Apps.Shopify.Services.Concrete;
 public class PageService(InvocationContext invocationContext)
     : BaseContentService(invocationContext), IContentService, IPollingContentService
 {
-    public override string ContentType => TranslatableResources.Page;
+    protected override string ContentType => TranslatableResources.Page;
 
     public Task<FileRecord> Download(DownloadContentRequest input)
     {
-        var metadata = new ShopifyMetadata
-        {
-            MarketId = input.MarketId,
-            ContentType = ContentType.ToLower()
-        };
-        
-        return ResourceService.GetResourceContent(input.ContentId, input.Locale, input.Outdated ?? false, metadata);
+        return DownloadTranslatableResource(input);
     }
 
     public async Task<ContentUpdatedResponse> PollUpdated(DateTime after, DateTime before, PollUpdatedContentRequest input)

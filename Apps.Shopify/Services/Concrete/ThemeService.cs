@@ -16,7 +16,7 @@ namespace Apps.Shopify.Services.Concrete;
 
 public class ThemeService(InvocationContext invocationContext) : BaseContentService(invocationContext), IContentService
 {
-    public override string ContentType => TranslatableResources.Theme;
+    protected override string ContentType => TranslatableResources.Theme;
 
     public async Task<FileRecord> Download(DownloadContentRequest input)
     {
