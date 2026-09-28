@@ -10,6 +10,6 @@ public class UploadEmailTemplateRequest
     [Display("Content")]
     public FileReference File { get; set; } = null!;
 
-    [Display("Email template"), DataSource(typeof(EmailTemplateDataHandler))]
+    [Display("Email template ID"), DataSource(typeof(EmailTemplateDataHandler))]
     public string? EmailTemplateId { get; set; }
 }
