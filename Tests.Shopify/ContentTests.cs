@@ -15,7 +15,7 @@ public class ContentTests : TestBase
 		var action = new ContentActions(InvocationContext, FileManager);
 		var input = new SearchContentRequest
 		{
-			ContentTypes = [TranslatableResources.DeliveryMethodDefinition]
+			ContentTypes = [TranslatableResources.EmailTemplate]
         };
 
 		// Act
@@ -33,11 +33,11 @@ public class ContentTests : TestBase
         var action = new ContentActions(InvocationContext, FileManager);
 		var contentType = new ContentTypeIdentifier
 		{
-			ContentType = TranslatableResources.DeliveryMethodDefinition
+			ContentType = TranslatableResources.EmailTemplate
 		};
 		var input = new DownloadContentRequest
 		{
-			ContentId = "gid://shopify/DeliveryMethodDefinition/1080266260764",
+			ContentId = "gid://shopify/EmailTemplate/43687346460",
 			Locale = "en",
 			//MarketId = "gid://shopify/Market/94465523996"
         };
@@ -58,8 +58,8 @@ public class ContentTests : TestBase
 		var input = new UploadContentRequest
 		{
 			Content = new FileReference { Name = "test.html" },
-			Locale = "nl",
-			MarketId = "gid://shopify/Market/94465523996"
+			Locale = "fr",
+			//MarketId = "gid://shopify/Market/94465523996"
 		};
 
         // Act

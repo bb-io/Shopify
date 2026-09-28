@@ -31,7 +31,7 @@ public class DataHandlerTests : TestBase
     {
         var contentType = new ContentTypeIdentifier
         {
-            ContentType = TranslatableResources.DeliveryMethodDefinition
+            ContentType = TranslatableResources.EmailTemplate
         };
 
         await TestHandler<ContentDataHandler>(contentType);
@@ -93,4 +93,7 @@ public class DataHandlerTests : TestBase
     [TestMethod]
     public async Task DeliveryMethodDefinitionDataHandler_ReturnsDeliveryMethods() 
         => await TestHandler<DeliveryMethodDefinitionDataHandler>();
+    
+    [TestMethod]
+    public async Task EmailTemplateDataHandler_ReturnsEmailTemplates() => await TestHandler<EmailTemplateDataHandler>();
 }
