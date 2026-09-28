@@ -4,8 +4,8 @@ using Apps.Shopify.Models.Identifiers;
 using Apps.Shopify.Models.Identifiers.Optional;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.DeliveryMethodDefinition;
+using Apps.Shopify.Models.Response;
 using Apps.Shopify.Models.Response.DeliveryMethodDefinition;
-using Apps.Shopify.Models.Response.Menu;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Invocation;
@@ -29,7 +29,7 @@ public class DeliveryMethodDefinitionActions(InvocationContext invocationContext
     }
 
     [Action("Download delivery method definition", Description = "Download content of a specific delivery method definition")]
-    public async Task<DownloadMenuResponse> DownloadDeliveryMethodDefinition(
+    public async Task<FileResponse> DownloadDeliveryMethodDefinition(
         [ActionParameter] DeliveryMethodDefinitionIdentifier definitionIdentifier,
         [ActionParameter] LocaleIdentifier locale,
         [ActionParameter] OutdatedOptionalIdentifier getContentRequest,
