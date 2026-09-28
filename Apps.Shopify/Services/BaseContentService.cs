@@ -20,6 +20,15 @@ public abstract class BaseContentService(InvocationContext invocationContext) : 
     
     protected readonly TranslatableResourceService ResourceService = new(invocationContext);
 
+    protected ShopifyMetadata CreateMetadata(string? marketId)
+    {
+        return new()
+        {
+            ContentType = ContentType.ToLower(),
+            MarketId = marketId
+        };
+    }
+
     protected Task UploadTranslatableResource(UploadContentServiceRequest input)
     {
         return ResourceService.UpdateResourceContent(input.ContentId, input.Locale, input.HtmlContent, input.MarketId);
@@ -39,12 +48,7 @@ public abstract class BaseContentService(InvocationContext invocationContext) : 
     
     protected Task<FileRecord> DownloadTranslatableResource(DownloadContentRequest input)
     {
-        var metadata = new ShopifyMetadata
-        {
-            MarketId = input.MarketId,
-            ContentType = ContentType.ToLower()
-        };
-
+        var metadata = CreateMetadata(input.MarketId);
         return ResourceService.GetResourceContent(input.ContentId, input.Locale, input.Outdated ?? false, metadata);
     }
     
