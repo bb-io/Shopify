@@ -11,7 +11,7 @@ using Blackbird.Applications.Sdk.Common.Invocation;
 namespace Apps.Shopify.Services.Concrete;
 
 public class EmailTemplateService(InvocationContext invocationContext) 
-    : BaseContentService(invocationContext), IContentService
+    : BaseContentService(invocationContext), IContentService, IDigestPollingContentService
 {
     protected override string ContentType => TranslatableResources.EmailTemplate;
     
@@ -36,5 +36,10 @@ public class EmailTemplateService(InvocationContext invocationContext)
     public Task<SearchContentResponse> Search(SearchContentRequest input)
     {
         return SearchTranslatableResources(input);
+    }
+
+    public Task<DigestPollResult> PollUpdated(IReadOnlyDictionary<string, string> knownDigests, PollUpdatedContentRequest input)
+    {
+        return PollTranslatableResourceDigests(knownDigests, input);
     }
 }
