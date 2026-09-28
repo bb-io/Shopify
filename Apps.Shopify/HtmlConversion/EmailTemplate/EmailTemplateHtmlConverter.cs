@@ -35,8 +35,8 @@ public static class EmailTemplateHtmlConverter
         var contentEntitiesList = contentEntities.ToList();
         var body = contentEntitiesList.FirstOrDefault(x => x.Key == BodyHtmlKey) ?? 
                    throw new PluginMisconfigurationException($"Email template has no {BodyHtmlKey} content");
-
-        string html = LockLiquid(body.Value);
+        
+        string html = LockLiquid(LiquidPlaceholder.LockTags(body.Value));
         html = InsertAfter(html, BodyTagRegex, LockLiquid(BuildTitle(contentEntitiesList.Where(x => x.Key == TitleKey))));
         html = InsertAfter(html, HeadTagRegex, BuildMetas(metadata, body.Digest));
 
