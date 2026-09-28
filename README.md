@@ -91,6 +91,12 @@ Other scopes that may be needed depending on desired actions are:
 - **Download email template** Download content of a specific email template
 - **Upload email template** Upload content of a specific email template
 
+### Store theme JSON templates
+
+- **Search store theme JSON templates** Search store theme JSON templates with specific criteria
+- **Download store theme JSON template** Download content of a specific store theme JSON template
+- **Upload store theme JSON template** Upload content of a specific store theme JSON template
+
 ### Content
 
 > **Note**: These actions support the following content types: collection, metafield, article, blog, page, theme, product, menu.
@@ -126,10 +132,11 @@ Other scopes that may be needed depending on desired actions are:
 
 ### Content
 
-> **Note**: These events support the following content types: collection, article, blog, page, product, 
-menu, delivery method definition.
+> **Note**: These events support the following content types: collection, article, blog, page, product, menu, 
+> delivery method definition, email template, store theme JSON template.
 >
-> The 'Updated at' output for menus and delivery methods will always be empty since Shopify does not expose this value.
+> Since Shopify does not expose the 'Updated at' value for some resources, this output for will always be empty 
+> for these content types: menu, delivery method, email template, store theme JSON template.
 
 - **On content updated**
 
