@@ -11,7 +11,9 @@ public static class LiquidPlaceholder
     private const string LiquidTag = @"(?:\{%.*?%\}|\{\{.*?\}\})";
     private const string TagAttrPrefix = "data-liquid-";
 
-    private static readonly Regex TagPlaceholderRegex = new($@"{TagAttrPrefix}\d+=""([^""]*)""", RegexOptions.Compiled);
+    private static readonly Regex TagPlaceholderRegex = new(
+        $@"(?<before>\s?){TagAttrPrefix}\d+(?:-(?<flags>[ba]+))?=""(?<code>[^""]*)""(?<after>\s?)",
+        RegexOptions.Compiled);
     private static readonly Regex PlaceholderRegex = new($@"<span {CodeAttr}=""([^""]*)""></span>", RegexOptions.Compiled);
     private static readonly Regex LiquidRegex = new($@"(?:^\s*)?{LiquidTag}(?:\s*{LiquidTag})*(?:\s*$)?", RegexOptions.Compiled | RegexOptions.Singleline);
 
@@ -36,7 +38,7 @@ public static class LiquidPlaceholder
                 int endIndex = html.IndexOf(html[i + 1] == '%' ? "%}" : "}}", i + 2, StringComparison.Ordinal);
                 if (endIndex >= 0)
                 {
-                    result.Append($"{TagAttrPrefix}{++counter}=\"{HttpUtility.HtmlEncode(html[i..(endIndex + 2)])}\"");
+                    result.Append(ToTagPlaceholder(html, i, endIndex + 2, ++counter));
                     i = endIndex + 1;
                     continue;
                 }
@@ -60,6 +62,24 @@ public static class LiquidPlaceholder
     public static string Unlock(string html)
     {
         html = PlaceholderRegex.Replace(html, m => HttpUtility.HtmlDecode(m.Groups[1].Value));
-        return TagPlaceholderRegex.Replace(html, m => HttpUtility.HtmlDecode(m.Groups[1].Value));
+
+        return TagPlaceholderRegex.Replace(html, m =>
+        {
+            string flags = m.Groups["flags"].Value;
+            string before = flags.Contains('b') ? string.Empty : m.Groups["before"].Value;
+            string after = flags.Contains('a') ? string.Empty : m.Groups["after"].Value;
+
+            return before + HttpUtility.HtmlDecode(m.Groups["code"].Value) + after;
+        });
+    }
+    
+    private static string ToTagPlaceholder(string html, int start, int end, int number)
+    {
+        bool addBefore = !char.IsWhiteSpace(html[start - 1]);
+        bool addAfter = end < html.Length && !char.IsWhiteSpace(html[end]) && html[end] is not ('>' or '/');
+        string flags = (addBefore ? "b" : "") + (addAfter ? "a" : "");
+        string name = $"{TagAttrPrefix}{number}{(flags.Length > 0 ? "-" + flags : "")}";
+
+        return (addBefore ? " " : "") + $"{name}=\"{HttpUtility.HtmlEncode(html[start..end])}\"" + (addAfter ? " " : "");
     }
 }
