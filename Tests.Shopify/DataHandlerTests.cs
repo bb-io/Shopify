@@ -31,7 +31,7 @@ public class DataHandlerTests : TestBase
     {
         var contentType = new ContentTypeIdentifier
         {
-            ContentType = TranslatableResources.EmailTemplate
+            ContentType = TranslatableResources.ThemeJsonTemplate
         };
 
         await TestHandler<ContentDataHandler>(contentType);
@@ -96,4 +96,8 @@ public class DataHandlerTests : TestBase
     
     [TestMethod]
     public async Task EmailTemplateDataHandler_ReturnsEmailTemplates() => await TestHandler<EmailTemplateDataHandler>();
+    
+    [TestMethod]
+    public async Task ThemeJsonTemplateDataHandler_ReturnsJsonTemplates() 
+        => await TestHandler<ThemeJsonTemplateDataHandler>();
 }

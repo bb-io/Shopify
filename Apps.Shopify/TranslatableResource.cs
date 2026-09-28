@@ -16,6 +16,7 @@ public enum TranslatableResource
     LINK,
     DELIVERY_METHOD_DEFINITION,
     EMAIL_TEMPLATE,
+    ONLINE_STORE_THEME_JSON_TEMPLATE,
     
     // Do not delete - we TryParse some string inputs to these
     METAOBJECT,
