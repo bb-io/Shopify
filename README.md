@@ -85,6 +85,12 @@ Other scopes that may be needed depending on desired actions are:
 - **Download delivery method definition** Download content of a specific delivery method definition
 - **Upload delivery method definition** Upload content of a specific delivery method definition
 
+### Email templates
+
+- **Search email templates** Search email templates with specific criteria
+- **Download email template** Download content of a specific email template
+- **Upload email template** Upload content of a specific email template
+
 ### Content
 
 > **Note**: These actions support the following content types: collection, metafield, article, blog, page, theme, product, menu.
