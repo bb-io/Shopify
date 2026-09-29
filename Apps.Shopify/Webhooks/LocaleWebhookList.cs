@@ -5,7 +5,7 @@ using Blackbird.Applications.Sdk.Common.Webhooks;
 namespace Apps.Shopify.Webhooks;
 
 [WebhookList("Locales")]
-public class LocaleWebhookList : BaseWebhookList
+public class LocaleWebhookList : BaseWebhookList, IAsyncWebhookHandler
 {
     [Webhook("On locale created", typeof(LocaleCreatedHandler), Description = "On a new locale added to the store")]
     public Task<WebhookResponse<LocalePayload>> OnLocaleCreated(WebhookRequest request)

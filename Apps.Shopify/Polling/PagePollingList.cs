@@ -4,6 +4,7 @@ using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Page;
 using Apps.Shopify.Models.Response.Page;
 using Apps.Shopify.Polling.Models.Memory;
+using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.Sdk.Common.Polling;
 
@@ -12,15 +13,15 @@ namespace Apps.Shopify.Polling;
 [PollingEventList("Pages")]
 public class PagePollingList(InvocationContext invocationContext) : ShopifyInvocable(invocationContext)
 {
-    [PollingEvent("On pages created", "On new pages are created")]
-    public Task<PollingEventResponse<DateMemory, SearchPagesResponse>> OnPagesCreated(
+    [MultipleEvents, PollingEvent("On page created", "Triggered when a new page is created")]
+    public Task<PollingEventResponse<DateMemory, List<PageEntity>>> OnPagesCreated(
         PollingEventRequest<DateMemory> request) => HandlePolling(request, isCreatedMode: true);
 
-    [PollingEvent("On pages updated", "On any pages are updated")]
-    public Task<PollingEventResponse<DateMemory, SearchPagesResponse>> OnPagesUpdated(
+    [MultipleEvents, PollingEvent("On page updated", "Triggered when a new page is updated")]
+    public Task<PollingEventResponse<DateMemory, List<PageEntity>>> OnPagesUpdated(
         PollingEventRequest<DateMemory> request) => HandlePolling(request, isCreatedMode: false);
 
-    private async Task<PollingEventResponse<DateMemory, SearchPagesResponse>> HandlePolling(
+    private async Task<PollingEventResponse<DateMemory, List<PageEntity>>> HandlePolling(
         PollingEventRequest<DateMemory> request, 
         bool isCreatedMode)
     {
@@ -49,7 +50,7 @@ public class PagePollingList(InvocationContext invocationContext) : ShopifyInvoc
         return new()
         {
             FlyBird = response.Count > 0,
-            Result = new(response),
+            Result = response,
             Memory = new() { LastInteractionDate = now }
         };
     }
