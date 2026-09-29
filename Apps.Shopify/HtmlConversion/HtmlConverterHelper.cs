@@ -24,7 +24,7 @@ public static class HtmlConverterHelper
         }) ?? [];
     }
     
-    internal static void FillInIdentifiedContentEntities(
+    public static void FillInIdentifiedContentEntities(
         HtmlDocument doc,
         HtmlNode body,
         IEnumerable<IdentifiedContentEntity> contentEntities)
@@ -33,7 +33,7 @@ public static class HtmlConverterHelper
         {
             var node = doc.CreateElement(HtmlConstants.Div);
 
-            node.InnerHtml = x.Value;
+            node.InnerHtml = x.Value ?? string.Empty;
             node.SetAttributeValue(HtmlAttributeConstants.KeyAttr, x.Key);
             node.SetAttributeValue(HtmlAttributeConstants.DigestAttr, x.Digest);
             node.SetAttributeValue(HtmlAttributeConstants.ResourceAttr, x.Id);
