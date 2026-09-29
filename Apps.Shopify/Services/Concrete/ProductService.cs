@@ -3,7 +3,6 @@ using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
 using Apps.Shopify.HtmlConversion;
-using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Content;
 using Apps.Shopify.Models.Entities.Metafield;
 using Apps.Shopify.Models.Entities.Product;
@@ -15,21 +14,20 @@ using Apps.Shopify.Models.Response.Metafield;
 using Apps.Shopify.Models.Response.Product;
 using Apps.Shopify.Models.Response.TranslatableResource;
 using Blackbird.Applications.Sdk.Common.Exceptions;
-using Blackbird.Applications.Sdk.Common.Files;
 using Blackbird.Applications.Sdk.Common.Invocation;
-using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using GraphQL;
 using System.Net.Mime;
+using Apps.Shopify.Models.Dto;
+using Apps.Shopify.Services.Models;
 
 namespace Apps.Shopify.Services.Concrete;
 
-public class ProductService(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : ShopifyInvocable(invocationContext), IContentService, IPollingContentService
+public class ProductService(InvocationContext invocationContext)
+    : BaseContentService(invocationContext), IContentService, IPollingContentService
 {
-    private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
-    private readonly string _contentType = TranslatableResources.Product;
+    protected override string ContentType => TranslatableResources.Product;
 
-    public async Task<FileReference> Download(DownloadContentRequest input)
+    public async Task<FileRecord> Download(DownloadContentRequest input)
     {
         var request = new GraphQLRequest
         {
@@ -72,11 +70,7 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
             OptionValuesContentEntities = optionValuesContentEntities,
         });
 
-        return await fileManagementClient.UploadAsync(
-            html, 
-            MediaTypeNames.Text.Html,
-            input.ContentId.GetFileName(input.MarketId)
-        );
+        return new FileRecord(html, MediaTypeNames.Text.Html, input.ContentId.GetFileName(input.MarketId));
     }
 
     public async Task<ContentUpdatedResponse> PollUpdated(DateTime after, DateTime before, PollUpdatedContentRequest input)
@@ -91,7 +85,7 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
             QueryHelper.QueryToDictionary(query)
         );
 
-        var items = response.Select(x => new PollingContentItemEntity(x.Id, _contentType, x.Title, x.UpdatedAt)).ToList();
+        var items = response.Select(x => new PollingContentItemEntity(x.Id, ContentType, x.Title, x.UpdatedAt)).ToList();
         return new(items);
     }
 
@@ -109,14 +103,13 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
             QueryHelper.QueryToDictionary(query)
         );
 
-        var items = response.Select(x => new ContentItemEntity(x.Id, _contentType, x.Title)).ToList();
+        var items = response.Select(x => new ContentItemEntity(x.Id, ContentType, x.Title)).ToList();
         return new(items);
     }
 
-    public async Task Upload(UploadContentRequest input)
+    public async Task Upload(UploadContentServiceRequest input)
     {
-        var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, input.Content);
-        var dto = ShopifyHtmlConverter.ProductToJson(html, input.Locale, input.MarketId);
+        var dto = ShopifyHtmlConverter.ProductToJson(input.HtmlContent, input.Locale, input.MarketId);
 
         var allItems = new List<IdentifiedContentRequest>();
         var productItems = dto.ProductContentEntities.ToList();
@@ -132,7 +125,7 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
         if (dto.OptionValuesContentEntities != null) 
             allItems.AddRange(dto.OptionValuesContentEntities);
 
-        await _resourceService.UpdateIdentifiedContent(allItems, null, input.MarketId);
+        await ResourceService.UpdateIdentifiedContent(allItems, null, input.MarketId);
     }
 
     private static IEnumerable<IdentifiedContentEntity> GetProductOptions(ProductEntity product)
@@ -201,7 +194,7 @@ public class ProductService(InvocationContext invocationContext, IFileManagement
             new Dictionary<string, object> { ["resourceId"] = productId }
         );
         
-        var metaFields = await _resourceService.ListTranslatableResources(
+        var metaFields = await ResourceService.ListTranslatableResources(
             TranslatableResource.METAFIELD, 
             locale, 
             outdated,

@@ -1,59 +1,28 @@
 ﻿using Apps.Shopify.Constants;
-using Apps.Shopify.Constants.GraphQL;
-using Apps.Shopify.HtmlConversion.Models;
-using Apps.Shopify.Invocables;
-using Apps.Shopify.Models.Entities.Content;
+using Apps.Shopify.Models.Dto;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Response.Content;
-using Blackbird.Applications.Sdk.Common.Files;
+using Apps.Shopify.Services.Models;
 using Blackbird.Applications.Sdk.Common.Invocation;
-using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
-using Apps.Shopify.Models.Entities.Resource;
-using Apps.Shopify.Models.Response.TranslatableResource;
 
 namespace Apps.Shopify.Services.Concrete;
 
-public class MetafieldService(InvocationContext invocationContext, IFileManagementClient fileManagementClient) 
-    : ShopifyInvocable(invocationContext), IContentService
+public class MetafieldService(InvocationContext invocationContext) : BaseContentService(invocationContext), IContentService
 {
-    private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
-    private readonly string _contentType = TranslatableResources.Metafield;
+    protected override string ContentType => TranslatableResources.Metafield;
 
-    public async Task<FileReference> Download(DownloadContentRequest input)
+    public Task<FileRecord> Download(DownloadContentRequest input)
     {
-        var metadata = new ShopifyMetadata
-        {
-            MarketId = input.MarketId,
-            ContentType = _contentType.ToLower()
-        };
-        
-        return await _resourceService.GetResourceContent(input.ContentId, input.Locale, input.Outdated ?? false, metadata);
+        return DownloadTranslatableResource(input);
     }
 
-    public async Task<SearchContentResponse> Search(SearchContentRequest input)
+    public Task<SearchContentResponse> Search(SearchContentRequest input)
     {
-        var variables = new Dictionary<string, object>
-        {
-            ["resourceType"] = TranslatableResources.GetApiType(_contentType)
-        };
-
-        var response = await Client.Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
-            GraphQlQueries.TranslatableResources,
-            variables
-        );
-
-        var items = response
-            .Select(x => new ContentItemEntity(x.ResourceId, _contentType, x.ToString()))
-            .Where(x => string.IsNullOrEmpty(input.NameContains) ||
-                        x.Name.Contains(input.NameContains, StringComparison.OrdinalIgnoreCase) ||
-                        x.ContentId.Contains(input.NameContains, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-        
-        return new(items);
+        return SearchTranslatableResources(input);
     }
 
-    public async Task Upload(UploadContentRequest input)
+    public Task Upload(UploadContentServiceRequest input)
     {
-        await _resourceService.UpdateResourceContent(input.ContentId, input.Locale, input.Content, input.MarketId);
+        return UploadTranslatableResource(input);
     }
 }

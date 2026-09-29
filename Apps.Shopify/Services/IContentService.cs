@@ -1,12 +1,13 @@
-﻿using Apps.Shopify.Models.Request.Content;
+﻿using Apps.Shopify.Models.Dto;
+using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Response.Content;
-using Blackbird.Applications.Sdk.Common.Files;
+using Apps.Shopify.Services.Models;
 
 namespace Apps.Shopify.Services;
 
 public interface IContentService
 {
-    Task<FileReference> Download(DownloadContentRequest input);
-    Task Upload(UploadContentRequest input);
+    Task<FileRecord> Download(DownloadContentRequest input);
+    Task Upload(UploadContentServiceRequest input);
     Task<SearchContentResponse> Search(SearchContentRequest input);
 }

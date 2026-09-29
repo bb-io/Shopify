@@ -1,14 +1,13 @@
+using Apps.Shopify.Actions.Base;
 using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Helper;
-using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Metafield;
 using Apps.Shopify.Models.Identifiers;
 using Apps.Shopify.Models.Identifiers.Optional;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.Metafield;
 using Apps.Shopify.Models.Response.Metafield;
-using Apps.Shopify.Services;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Exceptions;
@@ -20,10 +19,9 @@ namespace Apps.Shopify.Actions;
 
 [ActionList("Metafields")]
 public class MetafieldActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : ShopifyInvocable(invocationContext)
+    : BaseContentActions(invocationContext, fileManagementClient)
 {
-    private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
-    private readonly string ContentType = TranslatableResources.Metafield;
+    protected override string ContentType => TranslatableResources.Metafield;
 
     [Action("Download metafields", Description = "Download metafield content of a specific product")]
     public async Task<DownloadMetafieldResponse> GetMetafieldContent(
@@ -32,7 +30,6 @@ public class MetafieldActions(InvocationContext invocationContext, IFileManageme
         [ActionParameter] OutdatedOptionalIdentifier getContentRequest,
         [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
-        var service = _factory.GetContentService(ContentType);
         var request = new DownloadContentRequest
         {
             ContentId = resourceRequest.ProductId,
@@ -40,27 +37,18 @@ public class MetafieldActions(InvocationContext invocationContext, IFileManageme
             Outdated = getContentRequest.Outdated,
             MarketId = marketIdentifier.MarketId
         };
-
-        var file = await service.Download(request);
+        
+        var file = await DownloadContent(request);
         return new(file);
     }
 
     [Action("Upload metafields", Description = "Upload metafield content of a specific product")]
-    public async Task UpdateMetaFieldContent(
+    public Task UpdateMetaFieldContent(
         [ActionParameter] UploadMetafieldRequest input,
         [ActionParameter] NonPrimaryLocaleIdentifier locale,
         [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
-        var service = _factory.GetContentService(ContentType);
-        var request = new UploadContentRequest
-        {
-            ContentId = input.MetafieldId,
-            Content = input.File,
-            Locale = locale.Locale,
-            MarketId = marketIdentifier.MarketId
-        };
-
-        await service.Upload(request);
+        return UploadContent(input.File, input.MetafieldId, locale.Locale, marketIdentifier.MarketId);
     }
 
     [Action("Search metafield definitions", Description = "Search metafield definitions with specific criteria")]

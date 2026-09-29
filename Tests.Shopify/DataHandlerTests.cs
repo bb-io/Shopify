@@ -31,7 +31,7 @@ public class DataHandlerTests : TestBase
     {
         var contentType = new ContentTypeIdentifier
         {
-            ContentType = TranslatableResources.Menu
+            ContentType = TranslatableResources.ThemeJsonTemplate
         };
 
         await TestHandler<ContentDataHandler>(contentType);
@@ -89,4 +89,15 @@ public class DataHandlerTests : TestBase
     
     [TestMethod]
     public async Task MenuDataHandler_ReturnsMenus() => await TestHandler<MenuDataHandler>();
+    
+    [TestMethod]
+    public async Task DeliveryMethodDefinitionDataHandler_ReturnsDeliveryMethods() 
+        => await TestHandler<DeliveryMethodDefinitionDataHandler>();
+    
+    [TestMethod]
+    public async Task EmailTemplateDataHandler_ReturnsEmailTemplates() => await TestHandler<EmailTemplateDataHandler>();
+    
+    [TestMethod]
+    public async Task ThemeJsonTemplateDataHandler_ReturnsJsonTemplates() 
+        => await TestHandler<ThemeJsonTemplateDataHandler>();
 }

@@ -1,3 +1,4 @@
+using System.Web;
 using Apps.Shopify.Extensions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -42,5 +43,40 @@ public class TranslatableResourceEntity
             value.Split(['\n', '\r', '\t'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
 
         return singleLine.Length <= 50 ? singleLine : singleLine[..50] + "...";
+    }
+
+    public string GetDisplayName()
+    {
+        string[] displayNameKeys = ["title", "name"];
+        
+        return displayNameKeys
+                   .Select(key => TranslatableContent.FirstOrDefault(t => t.Key == key)?.Value)
+                   .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value))
+               ?? GetThemeFileName()
+               ?? ToString();
+    }
+
+    public bool MatchesSearch(string? searchString)
+    {
+        return string.IsNullOrEmpty(searchString) ||
+               GetDisplayName().Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+               ResourceId.Contains(searchString, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public string GetContentDigest()
+    {
+        return string.Join('|', TranslatableContent.OrderBy(x => x.Key).Select(x => $"{x.Key}:{x.Digest}"));
+    }
+    
+    // Example:
+    // Resource ID: gid://shopify/OnlineStoreThemeJsonTemplate/index?theme_id=162863874332
+    // Output: "index (theme 162863874332)"
+    private string? GetThemeFileName()
+    {
+        if (!Uri.TryCreate(ResourceId, UriKind.Absolute, out var uri))
+            return null;
+
+        string? themeId = HttpUtility.ParseQueryString(uri.Query)["theme_id"];
+        return themeId is null ? null : $"{uri.Segments[^1]} (theme {themeId})";
     }
 }

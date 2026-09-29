@@ -1,32 +1,29 @@
 ﻿using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.Extensions;
-using Apps.Shopify.Helper;
 using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Resource;
 using Apps.Shopify.Models.Request.TranslatableResource;
 using Apps.Shopify.Models.Response.TranslatableResource;
 using Blackbird.Applications.Sdk.Common.Exceptions;
-using Blackbird.Applications.Sdk.Common.Files;
 using Blackbird.Applications.Sdk.Common.Invocation;
-using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using GraphQL;
 using System.Net.Mime;
 using Apps.Shopify.HtmlConversion.Models;
+using Apps.Shopify.Models.Dto;
 
 namespace Apps.Shopify.Services;
 
-public class TranslatableResourceService(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : ShopifyInvocable(invocationContext)
+public class TranslatableResourceService(InvocationContext invocationContext) : ShopifyInvocable(invocationContext)
 {
     private const int MaxUpdateChunkSize = 250;
     
-    public async Task<FileReference> GetResourceContent(string resourceId, string locale, bool outdated, ShopifyMetadata metadata)
+    public async Task<FileRecord> GetResourceContent(string resourceId, string locale, bool outdated, ShopifyMetadata metadata)
     {
         var translatableContent = await GetTranslatableContent(resourceId, locale, outdated, metadata.MarketId);
         var html = ShopifyHtmlConverter.ToHtml(translatableContent, metadata);
 
-        return await fileManagementClient.UploadAsync(html, MediaTypeNames.Text.Html, resourceId.GetFileName(metadata.MarketId));
+        return new FileRecord(html, MediaTypeNames.Text.Html, resourceId.GetFileName(metadata.MarketId));
     }
 
     public async Task<List<IdentifiedContentEntity>> GetTranslatableContent(
@@ -54,11 +51,10 @@ public class TranslatableResourceService(InvocationContext invocationContext, IF
             }).ToList();
     }
 
-    public async Task UpdateResourceContent(string? resourceId, string locale, FileReference file, string? marketId = null)
+    public async Task UpdateResourceContent(string? resourceId, string locale, string htmlContent, string? marketId = null)
     {
-        var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, file);
         var items = ShopifyHtmlConverter
-            .ToJson(html, locale, new ShopifyMetadata { MarketId = marketId })
+            .ToJson(htmlContent, locale, new ShopifyMetadata { MarketId = marketId })
             .ToList();
 
         await UpdateIdentifiedContent(items, resourceId, marketId);

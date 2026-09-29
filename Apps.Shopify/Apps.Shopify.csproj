@@ -6,14 +6,14 @@
         <Nullable>enable</Nullable>
         <Product>Shopify</Product>
         <Description>E-commerce platform that enables individuals and businesses to create and manage online stores.</Description>
-        <Version>1.6.9</Version>
+        <Version>1.6.10</Version>
         <AssemblyName>Apps.Shopify</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Blackbird.Applications.SDK.Blueprints" Version="1.0.2" />
         <PackageReference Include="Blackbird.Applications.Sdk.Utils" Version="1.0.26" />
-        <PackageReference Include="Blackbird.Filters" Version="1.1.50" />
+        <PackageReference Include="Blackbird.Filters" Version="1.2.19" />
         <PackageReference Include="GraphQL.Client" Version="6.1.0" />
         <PackageReference Include="GraphQL.Client.Serializer.Newtonsoft" Version="6.1.0" />
         <PackageReference Include="Polly" Version="8.2.0" />
@@ -21,12 +21,7 @@
 
     <ItemGroup>
         <EmbeddedResource CopyToOutputDirectory="Always" Include="image\icon.png" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Content Include="..\README.md">
-        <Link>README.md</Link>
-      </Content>
+        <EmbeddedResource CopyToOutputDirectory="Always" Include="..\README.md"/>
     </ItemGroup>
 
 </Project>

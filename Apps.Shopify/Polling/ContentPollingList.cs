@@ -14,7 +14,7 @@ namespace Apps.Shopify.Polling;
 [PollingEventList("Content")]
 public class ContentPollingList(InvocationContext invocationContext) : ShopifyInvocable(invocationContext)
 {
-    private readonly ContentServiceFactory _factory = new(invocationContext, null!);
+    private readonly ContentServiceFactory _factory = new(invocationContext);
 
     [BlueprintEventDefinition(BlueprintEvent.ContentCreatedOrUpdatedMultiple)]
     [PollingEvent("On content updated", "On existing content is updated")]

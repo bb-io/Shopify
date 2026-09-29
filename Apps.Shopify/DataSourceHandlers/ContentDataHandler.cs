@@ -1,17 +1,13 @@
 ﻿using Apps.Shopify.Constants;
-using Apps.Shopify.Constants.GraphQL;
-using Apps.Shopify.Invocables;
-using Apps.Shopify.Models.Entities.Resource;
+using Apps.Shopify.DataSourceHandlers.TranslatableResourceBase;
 using Apps.Shopify.Models.Request.Content;
-using Apps.Shopify.Models.Response.TranslatableResource;
 using Blackbird.Applications.Sdk.Common;
-using Blackbird.Applications.Sdk.Common.Dynamic;
 using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Common.Invocation;
 
 namespace Apps.Shopify.DataSourceHandlers;
 
-public class ContentDataHandler : ShopifyInvocable, IAsyncDataSourceItemHandler
+public class ContentDataHandler : TranslatableResourceDataHandler
 {
     private readonly ContentTypeIdentifier _contentType;
 
@@ -23,28 +19,5 @@ public class ContentDataHandler : ShopifyInvocable, IAsyncDataSourceItemHandler
         _contentType = contentType;
     }
 
-    public async Task<IEnumerable<DataSourceItem>> GetDataAsync(DataSourceContext context, CancellationToken ct)
-    {
-        var variables = new Dictionary<string, object>
-        {
-            ["resourceType"] = TranslatableResources.GetApiType(_contentType.ContentType),
-        };
-
-        var response = await Client.PaginateOnce<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
-            GraphQlQueries.TranslatableResources,
-            variables, 
-            ct
-        );
-
-        return response
-            .Select(x => new DataSourceItem(
-                x.ResourceId,
-                x.TranslatableContent.FirstOrDefault(t => t.Key == "title")?.Value ?? x.ToString())
-            )
-            .Where(x =>
-                context.SearchString is null ||
-                x.DisplayName.Contains(context.SearchString, StringComparison.OrdinalIgnoreCase)
-            )
-            .ToList();
-    }
+    protected override TranslatableResource ResourceType => TranslatableResources.GetApiType(_contentType.ContentType);
 }

@@ -7,29 +7,27 @@ using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
 using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.HtmlConversion.Models;
-using Apps.Shopify.Invocables;
+using Apps.Shopify.Models.Dto;
 using Apps.Shopify.Models.Entities.Content;
 using Apps.Shopify.Models.Entities.Menu;
+using Apps.Shopify.Models.Entities.Polling;
 using Apps.Shopify.Models.Entities.Resource;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Response.Content;
 using Apps.Shopify.Models.Response.Menu;
 using Apps.Shopify.Models.Response.TranslatableResource;
 using Apps.Shopify.Services.Models;
-using Blackbird.Applications.Sdk.Common.Files;
 using Blackbird.Applications.Sdk.Common.Invocation;
-using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using GraphQL;
 
 namespace Apps.Shopify.Services.Concrete;
 
-public class MenuService(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : ShopifyInvocable(invocationContext), IContentService, IDigestPollingContentService
+public class MenuService(InvocationContext invocationContext)
+    : BaseContentService(invocationContext), IContentService, IDigestPollingContentService
 {
-    private readonly TranslatableResourceService _resourceService = new(invocationContext, fileManagementClient);
-    private readonly string _contentType = TranslatableResources.Menu;
-    
-    public async Task<FileReference> Download(DownloadContentRequest input)
+    protected override string ContentType => TranslatableResources.Menu;
+
+    public async Task<FileRecord> Download(DownloadContentRequest input)
     {
         var resourceIdsRequest = new GraphQLRequest
         {
@@ -56,19 +54,19 @@ public class MenuService(InvocationContext invocationContext, IFileManagementCli
         var metadata = new ShopifyMetadata
         {
             MarketId = input.MarketId,
-            ContentType = _contentType
+            ContentType = ContentType
         };
         var htmlStream = ShopifyHtmlConverter.ToHtml(entities, metadata);
         
-        return await fileManagementClient.UploadAsync(htmlStream, MediaTypeNames.Text.Html, input.ContentId.GetFileName(input.MarketId));
+        return new FileRecord(htmlStream, MediaTypeNames.Text.Html, input.ContentId.GetFileName(input.MarketId));
     }
 
-    public async Task Upload(UploadContentRequest input)
+    public async Task Upload(UploadContentServiceRequest input)
     {
-        string html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, input.Content);
-        var items = ShopifyHtmlConverter.ToJson(html, input.Locale, new ShopifyMetadata { MarketId = input.MarketId }).ToList();
+        var metadata = new ShopifyMetadata { MarketId = input.MarketId };
+        var items = ShopifyHtmlConverter.ToJson(input.HtmlContent, input.Locale, metadata).ToList();
 
-        await _resourceService.UpdateIdentifiedContent(items, null, input.MarketId);
+        await ResourceService.UpdateIdentifiedContent(items, null, input.MarketId);
     }
 
     public async Task<SearchContentResponse> Search(SearchContentRequest input)
@@ -81,7 +79,7 @@ public class MenuService(InvocationContext invocationContext, IFileManagementCli
             GraphQlQueries.Menus,
             QueryHelper.QueryToDictionary(query));
 
-        var contentItems = response.Select(x => new ContentItemEntity(x.Id, _contentType, x.Title)).ToList();
+        var contentItems = response.Select(x => new ContentItemEntity(x.Id, ContentType, x.Title)).ToList();
         return new(contentItems);
     }
 
@@ -99,21 +97,13 @@ public class MenuService(InvocationContext invocationContext, IFileManagementCli
         var digests = await GetDigests(TranslatableResource.MENU);
         var linkDigests = await GetDigests(TranslatableResource.LINK);
 
-        var current = menus.ToDictionary(m => m.Id, m => ComputeMenuHash(m, digests, linkDigests));
-        var changed = menus
-            .Where(m => !knownDigests.TryGetValue(m.Id, out var known) || known != current[m.Id])
-            .Select(m => new PollingContentItemEntity(m.Id, _contentType, m.Title))
-            .ToList();
-
-        return new(changed, current);
+        var items = menus.Select(m => new DigestItemEntity(m.Id, m.Title, ComputeMenuHash(m, digests, linkDigests)));
+        return BuildDigestPollResult(knownDigests, items);
     }
 
     private async Task<Dictionary<string, string>> GetDigests(TranslatableResource resourceType)
     {
-        var resources = await Client.Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
-            GraphQlQueries.TranslatableResources,
-            new Dictionary<string, object> { ["resourceType"] = resourceType });
-
+        var resources = await ListTranslatableResources(resourceType);
         return resources.ToDictionary(x => x.ResourceId, x => x.TranslatableContent.FirstOrDefault()?.Digest ?? string.Empty);
     }
 

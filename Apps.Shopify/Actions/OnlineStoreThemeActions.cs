@@ -1,6 +1,6 @@
+using Apps.Shopify.Actions.Base;
 using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
-using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Theme;
 using Apps.Shopify.Models.Identifiers;
 using Apps.Shopify.Models.Identifiers.Optional;
@@ -8,7 +8,6 @@ using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.OnlineStoreTheme;
 using Apps.Shopify.Models.Request.Theme;
 using Apps.Shopify.Models.Response.Theme;
-using Apps.Shopify.Services;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Invocation;
@@ -18,10 +17,9 @@ namespace Apps.Shopify.Actions;
 
 [ActionList("Themes")]
 public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : ShopifyInvocable(invocationContext)
+    : BaseContentActions(invocationContext, fileManagementClient)
 {
-    private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
-    private readonly string ContentType = TranslatableResources.Theme;
+    protected override string ContentType => TranslatableResources.Theme;
 
     [Action("Search themes", Description = "Search themes with specific criteria")]
     public async Task<SearchThemesResponse> SearchThemes([ActionParameter] SearchThemesRequest input)
@@ -49,7 +47,6 @@ public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileM
         [ActionParameter] OutdatedOptionalIdentifier getContentRequest,
         [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
-        var service = _factory.GetContentService(ContentType);
         var request = new DownloadContentRequest
         {
             ContentId = theme.ThemeId,
@@ -59,25 +56,16 @@ public class OnlineStoreThemeActions(InvocationContext invocationContext, IFileM
             MarketId = marketIdentifier.MarketId
         };
 
-        var file = await service.Download(request);
+        var file = await DownloadContent(request);
         return new(file);
     }
 
     [Action("Upload theme", Description = "Upload content of a specific theme")]
-    public async Task UpdateOnlineStoreThemeContent(
+    public Task UpdateOnlineStoreThemeContent(
         [ActionParameter] UploadThemeRequest input,
         [ActionParameter] NonPrimaryLocaleIdentifier locale,
         [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
-        var service = _factory.GetContentService(ContentType);
-        var request = new UploadContentRequest
-        {
-            Content = input.File,
-            ContentId = input.ThemeId,
-            Locale = locale.Locale,
-            MarketId = marketIdentifier.MarketId
-        };
-
-        await service.Upload(request);
+        return UploadContent(input.File, input.ThemeId, locale.Locale, marketIdentifier.MarketId);
     }
 }

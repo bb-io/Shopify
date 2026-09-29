@@ -57,7 +57,7 @@ Other scopes that may be needed depending on desired actions are:
 
 - **Search products** Search products with specific criteria
 - **Download product** Download content of a specific product
-- **Uploade product** Upload content of a specific product
+- **Upload product** Upload content of a specific product
 
 ### Metafields
 
@@ -78,6 +78,24 @@ Other scopes that may be needed depending on desired actions are:
 - **Download menu** Download content of a specific menu
 - **Upload menu** Upload content of a specific menu
 - **Search menus** Search menus with specific criteria
+
+### Delivery method definitions
+
+- **Search delivery method definitions** Search delivery method definitions with specific criteria
+- **Download delivery method definition** Download content of a specific delivery method definition
+- **Upload delivery method definition** Upload content of a specific delivery method definition
+
+### Email templates
+
+- **Search email templates** Search email templates with specific criteria
+- **Download email template** Download content of a specific email template
+- **Upload email template** Upload content of a specific email template
+
+### Store theme JSON templates
+
+- **Search store theme JSON templates** Search store theme JSON templates with specific criteria
+- **Download store theme JSON template** Download content of a specific store theme JSON template
+- **Upload store theme JSON template** Upload content of a specific store theme JSON template
 
 ### Content
 
@@ -114,9 +132,11 @@ Other scopes that may be needed depending on desired actions are:
 
 ### Content
 
-> **Note**: These events support the following content types: collection, article, blog, page, product, menu.
+> **Note**: These events support the following content types: collection, article, blog, page, product, menu, 
+> delivery method definition, email template, store theme JSON template.
 >
-> Menu's 'Updated at' output will always be empty since Shopify does not expose this value.
+> Since Shopify does not expose the 'Updated at' value for some resources, this output for will always be empty 
+> for these content types: menu, delivery method, email template, store theme JSON template.
 
 - **On content updated**
 

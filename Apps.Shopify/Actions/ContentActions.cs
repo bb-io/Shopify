@@ -1,5 +1,4 @@
-﻿using Apps.Shopify.Helper;
-using Apps.Shopify.Services;
+﻿using Apps.Shopify.Services;
 using Apps.Shopify.Invocables;
 using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.Models.Request.Content;
@@ -12,6 +11,7 @@ using Blackbird.Applications.SDK.Blueprints;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using Apps.Shopify.Constants;
 using Apps.Shopify.Extensions;
+using Apps.Shopify.Services.Models;
 
 namespace Apps.Shopify.Actions;
 
@@ -19,24 +19,28 @@ namespace Apps.Shopify.Actions;
 public class ContentActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient) 
     : ShopifyInvocable(invocationContext)
 {
-    private readonly ContentServiceFactory _factory = new(invocationContext, fileManagementClient);
+    private readonly ContentServiceFactory _factory = new(invocationContext);
 
     [BlueprintActionDefinition(BlueprintAction.UploadContent)]
     [Action("Upload content", Description = "Upload content of a specific content type from a file")]
     public async Task UploadContent([ActionParameter] UploadContentRequest input)
     {
-        var html = await HtmlFileHelper.GetHtmlFromFile(fileManagementClient, input.Content);
-
-        var contentType = input.ContentType ?? ShopifyHtmlConverter.ExtractContentTypeFromHtml(html);
-        if (string.IsNullOrEmpty(contentType))
-        {
-            throw new PluginMisconfigurationException(
-                "Content type is missing. Provide it in the input or include it in the file"
-            );
-        }
+        string htmlContent = await fileManagementClient.DownloadHtml(input.Content);
+        string contentType = 
+            input.ContentType ?? 
+            ShopifyHtmlConverter.ExtractContentTypeFromHtml(htmlContent) ??
+            throw new PluginMisconfigurationException("Content type is missing. Provide it in the input or include it in the file");
 
         var service = _factory.GetContentService(contentType);
-        await service.Upload(input);
+        var request = new UploadContentServiceRequest
+        {
+            HtmlContent = htmlContent,
+            ContentId = input.ContentId,
+            Locale = input.Locale,
+            MarketId = input.MarketId
+        };
+        
+        await service.Upload(request);
     }
 
     [BlueprintActionDefinition(BlueprintAction.DownloadContent)]
@@ -46,7 +50,9 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
         [ActionParameter] DownloadContentRequest input)
     {
         var service = _factory.GetContentService(contentType.ContentType);
-        var file = await service.Download(input);
+        var fileRecord = await service.Download(input);
+        
+        var file = await fileManagementClient.UploadFileRecord(fileRecord);
         return new(file);
     }
 

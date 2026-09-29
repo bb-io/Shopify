@@ -15,7 +15,7 @@ public class ContentTests : TestBase
 		var action = new ContentActions(InvocationContext, FileManager);
 		var input = new SearchContentRequest
 		{
-			ContentTypes = [TranslatableResources.Menu]
+			ContentTypes = [TranslatableResources.ThemeJsonTemplate]
         };
 
 		// Act
@@ -31,12 +31,15 @@ public class ContentTests : TestBase
 	{
         // Arrange
         var action = new ContentActions(InvocationContext, FileManager);
-		var contentType = new ContentTypeIdentifier { ContentType = "Menu" };
+		var contentType = new ContentTypeIdentifier
+		{
+			ContentType = TranslatableResources.ThemeJsonTemplate
+		};
 		var input = new DownloadContentRequest
 		{
-			ContentId = "gid://shopify/Menu/247055548700",
-			Locale = "fr",
-			MarketId = "gid://shopify/Market/94465523996"
+			ContentId = "gid://shopify/OnlineStoreThemeJsonTemplate/index?theme_id=162863874332",
+			Locale = "en",
+			//MarketId = "gid://shopify/Market/94465523996"
         };
 
 		// Act
@@ -56,7 +59,7 @@ public class ContentTests : TestBase
 		{
 			Content = new FileReference { Name = "test.html" },
 			Locale = "fr",
-			MarketId = "gid://shopify/Market/94465523996"
+			//MarketId = "gid://shopify/Market/94465523996"
 		};
 
         // Act
