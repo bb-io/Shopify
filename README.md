@@ -109,13 +109,13 @@ Other scopes that may be needed depending on desired actions are:
 
 ### Articles
 
-- **On articles created**
-- **On articles updated**
+- **On article created**
+- **On article updated**
 
 ### Pages
 
-- **On pages created**
-- **On pages updated**
+- **On page created**
+- **On page updated**
 
 ### Products
 
