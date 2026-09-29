@@ -5,7 +5,7 @@ using Blackbird.Applications.Sdk.Common.Webhooks;
 namespace Apps.Shopify.Webhooks;
 
 [WebhookList("Product")]
-public class ProductWebhookList : BaseWebhookList
+public class ProductWebhookList : BaseWebhookList, IAsyncWebhookHandler
 {
     [Webhook("On product created", typeof(ProductCreatedHandler), Description = "On certain product created")]
     public Task<WebhookResponse<ProductPayload>> OnProductCreated(WebhookRequest request)
