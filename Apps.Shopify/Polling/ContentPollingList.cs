@@ -2,12 +2,12 @@
 using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Content;
 using Apps.Shopify.Models.Request.Content;
-using Apps.Shopify.Models.Response.Content;
 using Apps.Shopify.Polling.Models.Memory;
 using Apps.Shopify.Services;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.Sdk.Common.Polling;
 using Blackbird.Applications.SDK.Blueprints;
+using Blackbird.Applications.Sdk.Common;
 
 namespace Apps.Shopify.Polling;
 
@@ -16,9 +16,9 @@ public class ContentPollingList(InvocationContext invocationContext) : ShopifyIn
 {
     private readonly ContentServiceFactory _factory = new(invocationContext);
 
-    [BlueprintEventDefinition(BlueprintEvent.ContentCreatedOrUpdatedMultiple)]
-    [PollingEvent("On content updated", "On existing content is updated")]
-    public async Task<PollingEventResponse<DigestDateMemory, ContentUpdatedResponse>> OnContentUpdated(
+    [BlueprintEventDefinition(BlueprintEvent.ContentCreatedOrUpdated)]
+    [MultipleEvents, PollingEvent("On content updated", "Triggered when a content item is created or updated")]
+    public async Task<PollingEventResponse<DigestDateMemory, List<PollingContentItemEntity>>> OnContentUpdated(
         PollingEventRequest<DigestDateMemory> request,
         [PollingEventParameter] PollUpdatedContentRequest input)
     {
@@ -72,7 +72,7 @@ public class ContentPollingList(InvocationContext invocationContext) : ShopifyIn
         return new()
         {
             FlyBird = allItems.Count != 0,
-            Result = new(allItems),
+            Result = allItems,
             Memory = new() { LastInteractionDate = now, Digests = digests }
         };
     }

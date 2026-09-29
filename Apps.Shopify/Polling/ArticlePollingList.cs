@@ -6,6 +6,7 @@ using Apps.Shopify.Models.Entities.Article;
 using Apps.Shopify.Models.Identifiers;
 using Apps.Shopify.Models.Response.Article;
 using Apps.Shopify.Polling.Models.Memory;
+using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.Sdk.Common.Polling;
 
@@ -14,19 +15,19 @@ namespace Apps.Shopify.Polling;
 [PollingEventList("Articles")]
 public class ArticlePollingList(InvocationContext invocationContext) : ShopifyInvocable(invocationContext)
 {
-    [PollingEvent("On articles created", "On new articles are created")]
-    public Task<PollingEventResponse<DateMemory, SearchArticlesResponse>> OnArticlesCreated(
+    [MultipleEvents, PollingEvent("On article created", "Triggered when an article is created")]
+    public Task<PollingEventResponse<DateMemory, List<GetArticleResponse>>> OnArticlesCreated(
         PollingEventRequest<DateMemory> request, 
         [PollingEventParameter] BlogIdentifier blog) =>
         HandlePolling(request, blog, isCreatedMode: true);
 
-    [PollingEvent("On articles updated", "On any articles are updated")]
-    public Task<PollingEventResponse<DateMemory, SearchArticlesResponse>> OnArticlesUpdated(
+    [MultipleEvents, PollingEvent("On article updated", "Triggered when an article is updated")]
+    public Task<PollingEventResponse<DateMemory, List<GetArticleResponse>>> OnArticlesUpdated(
         PollingEventRequest<DateMemory> request, 
         [PollingEventParameter] BlogIdentifier blog) =>
         HandlePolling(request, blog, isCreatedMode: false);
 
-    private async Task<PollingEventResponse<DateMemory, SearchArticlesResponse>> HandlePolling(
+    private async Task<PollingEventResponse<DateMemory, List<GetArticleResponse>>> HandlePolling(
         PollingEventRequest<DateMemory> request,
         BlogIdentifier blog,
         bool isCreatedMode)
@@ -58,7 +59,7 @@ public class ArticlePollingList(InvocationContext invocationContext) : ShopifyIn
         return new()
         {
             FlyBird = result.Count > 0,
-            Result = new(result),
+            Result = result,
             Memory = new() { LastInteractionDate = now }
         };
     }
