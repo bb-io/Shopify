@@ -72,7 +72,7 @@ public class ContentPollingList(InvocationContext invocationContext) : ShopifyIn
         return new()
         {
             FlyBird = allItems.Count != 0,
-            Result = allItems,
+            Result = allItems.Count != 0 ? allItems : null,
             Memory = new() { LastInteractionDate = now, Digests = digests }
         };
     }
