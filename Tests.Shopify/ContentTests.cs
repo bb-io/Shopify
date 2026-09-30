@@ -15,7 +15,7 @@ public class ContentTests : TestBase
 		var action = new ContentActions(InvocationContext, FileManager);
 		var input = new SearchContentRequest
 		{
-			ContentTypes = [TranslatableResources.ThemeJsonTemplate]
+			ContentTypes = [TranslatableResources.Filter]
         };
 
 		// Act
@@ -33,11 +33,11 @@ public class ContentTests : TestBase
         var action = new ContentActions(InvocationContext, FileManager);
 		var contentType = new ContentTypeIdentifier
 		{
-			ContentType = TranslatableResources.ThemeJsonTemplate
+			ContentType = TranslatableResources.Filter
 		};
 		var input = new DownloadContentRequest
 		{
-			ContentId = "gid://shopify/OnlineStoreThemeJsonTemplate/index?theme_id=162863874332",
+			ContentId = "gid://shopify/OnlineStoreFilterSetting/88700911900",
 			Locale = "en",
 			//MarketId = "gid://shopify/Market/94465523996"
         };

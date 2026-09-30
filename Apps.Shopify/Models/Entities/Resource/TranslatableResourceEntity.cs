@@ -47,7 +47,7 @@ public class TranslatableResourceEntity
 
     public string GetDisplayName()
     {
-        string[] displayNameKeys = ["title", "name"];
+        string[] displayNameKeys = ["title", "name", "label"];
         
         return displayNameKeys
                    .Select(key => TranslatableContent.FirstOrDefault(t => t.Key == key)?.Value)

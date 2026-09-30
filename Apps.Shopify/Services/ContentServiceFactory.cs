@@ -22,6 +22,7 @@ public class ContentServiceFactory(InvocationContext invocationContext)
             TranslatableResources.DeliveryMethodDefinition => new DeliveryMethodDefinitionService(invocationContext),
             TranslatableResources.EmailTemplate => new EmailTemplateService(invocationContext),
             TranslatableResources.ThemeJsonTemplate => new StoreJsonTemplateService(invocationContext),
+            TranslatableResources.Filter => new FilterService(invocationContext),
             _ => throw new Exception($"Unsupported content type '{contentType}' was passed in ContentServiceFactory")
         };
     }
