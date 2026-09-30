@@ -4,6 +4,6 @@ namespace Apps.Shopify.Models.Request.Filter;
 
 public class SearchFiltersRequest
 {
-    [Display("Delivery method definition name contains")]
+    [Display("Filter name contains")]
     public string? NameContains { get; set; }
 }
