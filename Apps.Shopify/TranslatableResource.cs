@@ -19,6 +19,7 @@ public enum TranslatableResource
     ONLINE_STORE_THEME_JSON_TEMPLATE,
     FILTER,
     MEDIA_IMAGE,
+    ONLINE_STORE_THEME_APP_EMBED,
     
     // Do not delete - we TryParse some string inputs to these
     METAOBJECT,

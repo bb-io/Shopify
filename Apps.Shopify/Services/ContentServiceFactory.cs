@@ -24,6 +24,7 @@ public class ContentServiceFactory(InvocationContext invocationContext)
             TranslatableResources.ThemeJsonTemplate => new StoreJsonTemplateService(invocationContext),
             TranslatableResources.Filter => new FilterService(invocationContext),
             TranslatableResources.MediaImage => new MediaImageService(invocationContext),
+            TranslatableResources.ThemeAppEmbed => new StoreThemeAppEmbedService(invocationContext),
             _ => throw new Exception($"Unsupported content type '{contentType}' was passed in ContentServiceFactory")
         };
     }

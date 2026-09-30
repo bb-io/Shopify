@@ -18,6 +18,7 @@ public static class TranslatableResources
     public const string ThemeJsonTemplate = "Store theme JSON template";
     public const string Filter = "Filter";
     public const string MediaImage = "Media image";
+    public const string ThemeAppEmbed = "Store theme app embed";
 
     private static readonly Dictionary<string, TranslatableResource> ApiTypes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -35,6 +36,7 @@ public static class TranslatableResources
         [ThemeJsonTemplate] = TranslatableResource.ONLINE_STORE_THEME_JSON_TEMPLATE,
         [Filter] = TranslatableResource.FILTER,
         [MediaImage] = TranslatableResource.MEDIA_IMAGE,
+        [ThemeAppEmbed] = TranslatableResource.ONLINE_STORE_THEME_APP_EMBED,
     };
     
     private static readonly Dictionary<TranslatableResource, string> FriendlyNames = ApiTypes.ToDictionary(x => x.Value, x => x.Key);
@@ -53,6 +55,7 @@ public static class TranslatableResources
         ThemeJsonTemplate,
         Filter,
         MediaImage,
+        ThemeAppEmbed,
     ];
 
     public static readonly List<string> SupportedPollingContentTypes = [
@@ -67,6 +70,7 @@ public static class TranslatableResources
         ThemeJsonTemplate,
         Filter,
         MediaImage,
+        ThemeAppEmbed,
     ];
 
     public static bool TryGetApiType(string? contentType, out TranslatableResource apiType)
