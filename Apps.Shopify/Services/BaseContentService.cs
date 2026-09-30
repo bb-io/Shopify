@@ -39,7 +39,7 @@ public abstract class BaseContentService(InvocationContext invocationContext) : 
         var translatableResources = await ListTranslatableResources();
 
         var items = translatableResources
-            .Where(x => x.MatchesSearch(input.NameContains))
+            .Where(x => x.HasContent() && x.MatchesSearch(input.NameContains))
             .Select(x => new ContentItemEntity(x.ResourceId, ContentType, x.GetDisplayName()))
             .ToList();
 

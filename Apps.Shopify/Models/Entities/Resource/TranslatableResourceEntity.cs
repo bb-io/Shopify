@@ -67,7 +67,12 @@ public class TranslatableResourceEntity
     {
         return string.Join('|', TranslatableContent.OrderBy(x => x.Key).Select(x => $"{x.Key}:{x.Digest}"));
     }
-    
+
+    public bool HasContent()
+    {
+        return TranslatableContent.Any(x => !string.IsNullOrWhiteSpace(x.Value));
+    }
+
     // Example:
     // Resource ID: gid://shopify/OnlineStoreThemeJsonTemplate/index?theme_id=162863874332
     // Output: "index (theme 162863874332)"
