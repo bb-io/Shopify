@@ -17,6 +17,7 @@ public static class TranslatableResources
     public const string EmailTemplate = "Email template";
     public const string ThemeJsonTemplate = "Store theme JSON template";
     public const string Filter = "Filter";
+    public const string MediaImage = "Media image";
 
     private static readonly Dictionary<string, TranslatableResource> ApiTypes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -33,7 +34,10 @@ public static class TranslatableResources
         [EmailTemplate] = TranslatableResource.EMAIL_TEMPLATE,
         [ThemeJsonTemplate] = TranslatableResource.ONLINE_STORE_THEME_JSON_TEMPLATE,
         [Filter] = TranslatableResource.FILTER,
+        [MediaImage] = TranslatableResource.MEDIA_IMAGE,
     };
+    
+    private static readonly Dictionary<TranslatableResource, string> FriendlyNames = ApiTypes.ToDictionary(x => x.Value, x => x.Key);
 
     public static readonly List<string> SupportedContentTypes = [
         Collection,
@@ -48,6 +52,7 @@ public static class TranslatableResources
         EmailTemplate,
         ThemeJsonTemplate,
         Filter,
+        MediaImage,
     ];
 
     public static readonly List<string> SupportedPollingContentTypes = [
@@ -61,6 +66,7 @@ public static class TranslatableResources
         EmailTemplate,
         ThemeJsonTemplate,
         Filter,
+        MediaImage,
     ];
 
     public static bool TryGetApiType(string? contentType, out TranslatableResource apiType)
@@ -76,9 +82,9 @@ public static class TranslatableResources
                 $"Unsupported content type '{contentType}'. Supported values: {string.Join(", ", SupportedContentTypes)}.");
     }
     
-    public static string GetFriendlyName(TranslatableResource apiType) => FriendlyNames.TryGetValue(apiType, out var name) ? name : apiType.ToString();
-
-    public static string Normalize(string? contentType) => GetFriendlyName(GetApiType(contentType));
-    
-    private static readonly Dictionary<TranslatableResource, string> FriendlyNames = ApiTypes.ToDictionary(x => x.Value, x => x.Key);
+    public static string Normalize(string? contentType)
+    {
+        TranslatableResource apiType = GetApiType(contentType);
+        return FriendlyNames.TryGetValue(apiType, out var name) ? name : apiType.ToString();
+    }
 }

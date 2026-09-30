@@ -31,7 +31,7 @@ public class DataHandlerTests : TestBase
     {
         var contentType = new ContentTypeIdentifier
         {
-            ContentType = TranslatableResources.ThemeJsonTemplate
+            ContentType = TranslatableResources.MediaImage
         };
 
         await TestHandler<ContentDataHandler>(contentType);
@@ -103,4 +103,7 @@ public class DataHandlerTests : TestBase
     
     [TestMethod]
     public async Task FilterDataHandler_ReturnsFilters() => await TestHandler<FilterDataHandler>();
+    
+    [TestMethod]
+    public async Task MediaImageDataHandler_ReturnsMediaImage() => await TestHandler<MediaImageDataHandler>();
 }

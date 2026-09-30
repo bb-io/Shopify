@@ -18,6 +18,7 @@ public enum TranslatableResource
     EMAIL_TEMPLATE,
     ONLINE_STORE_THEME_JSON_TEMPLATE,
     FILTER,
+    MEDIA_IMAGE,
     
     // Do not delete - we TryParse some string inputs to these
     METAOBJECT,
