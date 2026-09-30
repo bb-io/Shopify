@@ -15,7 +15,7 @@ public class ContentTests : TestBase
 		var action = new ContentActions(InvocationContext, FileManager);
 		var input = new SearchContentRequest
 		{
-			ContentTypes = [TranslatableResources.Filter]
+			ContentTypes = [TranslatableResources.Metaobject]
         };
 
 		// Act
@@ -37,7 +37,7 @@ public class ContentTests : TestBase
 		};
 		var input = new DownloadContentRequest
 		{
-			ContentId = "gid://shopify/OnlineStoreThemeAppEmbed/chat?theme_id=208521298258&app_embed_uuid=841fc607-4181-4ad1-842d-e24d7f8bad6b",
+			ContentId = "gid://shopify/Metaobject/545664827730",
 			Locale = "en",
 			//MarketId = "gid://shopify/Market/94465523996"
         };
