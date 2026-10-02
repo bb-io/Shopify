@@ -100,11 +100,8 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
                 .GroupBy(x => x.Key)
                 .ToDictionary(g => g.Key, g => g.First());
 
-            foreach (var item in groupItems)
-            {
-                if (string.IsNullOrWhiteSpace(item.TranslatableContentDigest))
-                    item.TranslatableContentDigest = sourceByKey.GetValueOrDefault(item.Key)?.Digest ?? string.Empty;
-            }
+            foreach (var item in groupItems.Where(item => string.IsNullOrWhiteSpace(item.TranslatableContentDigest)))
+                item.TranslatableContentDigest = sourceByKey.GetValueOrDefault(item.Key)?.Digest ?? string.Empty;
 
             var withDigest = groupItems
                 .Where(x => !string.IsNullOrWhiteSpace(x.TranslatableContentDigest))
@@ -135,10 +132,8 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
                 var response = await Client.ExecuteWithErrorHandling<TranslationsRegisterResponse>(request);
                 
                 var errors = response.TranslationsRegister.UserErrors;
-                if (errors.Count == 0)
-                    return;
-
-                throw new PluginApplicationException($"Shopify rejected translations for {resourceId}: {string.Join("; ", errors)}");
+                if (errors.Count > 0)
+                    throw new PluginApplicationException($"Shopify rejected translations for {id}: {string.Join("; ", errors)}");
             }
         }
     }
