@@ -35,7 +35,6 @@
 	  <None Update="TestFiles\**\*">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
-	  <None Remove="TestFiles\Input\test.html" />
   </ItemGroup>
 
   <ItemGroup>

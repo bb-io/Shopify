@@ -1,0 +1,3 @@
+namespace Apps.Shopify.Models.Response.StoreThemeLocaleContent;
+
+public record SearchStoreThemeLocaleContentResponse(List<StoreThemeLocaleContentResponse> Content);

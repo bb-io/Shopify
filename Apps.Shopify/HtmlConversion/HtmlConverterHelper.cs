@@ -1,5 +1,6 @@
 using System.Web;
 using Apps.Shopify.HtmlConversion.Constants;
+using Apps.Shopify.HtmlConversion.Models;
 using Apps.Shopify.Models.Entities.Resource;
 using Apps.Shopify.Models.Request.TranslatableResource;
 using HtmlAgilityPack;
@@ -18,7 +19,7 @@ public static class HtmlConverterHelper
             ResourceId = x.Attributes[HtmlAttributeConstants.ResourceAttr].Value,
             Key = x.Attributes[HtmlAttributeConstants.KeyAttr].Value,
             TranslatableContentDigest = x.Attributes[HtmlAttributeConstants.DigestAttr].Value,
-            Value = HttpUtility.HtmlDecode(x.InnerHtml),
+            Value = HttpUtility.HtmlDecode(LiquidPlaceholder.Unlock(x.InnerHtml)),
             Locale = locale,
             MarketId = marketId
         }) ?? [];
@@ -33,7 +34,7 @@ public static class HtmlConverterHelper
         {
             var node = doc.CreateElement(HtmlConstants.Div);
 
-            node.InnerHtml = x.Value ?? string.Empty;
+            node.InnerHtml = LiquidPlaceholder.Lock(x.Value ?? string.Empty);
             node.SetAttributeValue(HtmlAttributeConstants.KeyAttr, x.Key);
             node.SetAttributeValue(HtmlAttributeConstants.DigestAttr, x.Digest);
             node.SetAttributeValue(HtmlAttributeConstants.ResourceAttr, x.Id);

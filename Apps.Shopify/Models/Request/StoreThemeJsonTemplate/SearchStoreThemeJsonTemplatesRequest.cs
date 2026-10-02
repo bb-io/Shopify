@@ -4,6 +4,6 @@ namespace Apps.Shopify.Models.Request.StoreThemeJsonTemplate;
 
 public class SearchStoreThemeJsonTemplatesRequest
 {
-    [Display("Email template name contains")]
+    [Display("Store theme JSON template name contains")]
     public string? NameContains { get; set; }
 }

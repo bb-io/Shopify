@@ -15,7 +15,13 @@ public static class TranslatableResources
     public const string Menu = "Menu";
     public const string DeliveryMethodDefinition = "Delivery method definition";
     public const string EmailTemplate = "Email template";
-    public const string ThemeJsonTemplate = "Store theme JSON template";
+    public const string StoreThemeJsonTemplate = "Store theme JSON template";
+    public const string Filter = "Filter";
+    public const string MediaImage = "Media image";
+    public const string StoreThemeAppEmbed = "Store theme app embed";
+    public const string Metaobject = "Metaobject";
+    public const string StoreThemeLocaleContent = "Store theme locale content";
+    public const string StoreThemeSectionGroup = "Store theme section group";
 
     private static readonly Dictionary<string, TranslatableResource> ApiTypes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -30,8 +36,16 @@ public static class TranslatableResources
         [Menu] = TranslatableResource.MENU,
         [DeliveryMethodDefinition] = TranslatableResource.DELIVERY_METHOD_DEFINITION,
         [EmailTemplate] = TranslatableResource.EMAIL_TEMPLATE,
-        [ThemeJsonTemplate] = TranslatableResource.ONLINE_STORE_THEME_JSON_TEMPLATE
+        [StoreThemeJsonTemplate] = TranslatableResource.ONLINE_STORE_THEME_JSON_TEMPLATE,
+        [Filter] = TranslatableResource.FILTER,
+        [MediaImage] = TranslatableResource.MEDIA_IMAGE,
+        [StoreThemeAppEmbed] = TranslatableResource.ONLINE_STORE_THEME_APP_EMBED,
+        [Metaobject] = TranslatableResource.METAOBJECT,
+        [StoreThemeLocaleContent] = TranslatableResource.ONLINE_STORE_THEME_LOCALE_CONTENT,
+        [StoreThemeSectionGroup] = TranslatableResource.ONLINE_STORE_THEME_SECTION_GROUP,
     };
+    
+    private static readonly Dictionary<TranslatableResource, string> FriendlyNames = ApiTypes.ToDictionary(x => x.Value, x => x.Key);
 
     public static readonly List<string> SupportedContentTypes = [
         Collection,
@@ -44,7 +58,13 @@ public static class TranslatableResources
         Menu,
         DeliveryMethodDefinition,
         EmailTemplate,
-        ThemeJsonTemplate
+        StoreThemeJsonTemplate,
+        Filter,
+        MediaImage,
+        StoreThemeAppEmbed,
+        Metaobject,
+        StoreThemeLocaleContent,
+        StoreThemeSectionGroup,
     ];
 
     public static readonly List<string> SupportedPollingContentTypes = [
@@ -56,7 +76,13 @@ public static class TranslatableResources
         Menu,
         DeliveryMethodDefinition,
         EmailTemplate,
-        ThemeJsonTemplate
+        StoreThemeJsonTemplate,
+        Filter,
+        MediaImage,
+        StoreThemeAppEmbed,
+        Metaobject,
+        StoreThemeLocaleContent,
+        StoreThemeSectionGroup,
     ];
 
     public static bool TryGetApiType(string? contentType, out TranslatableResource apiType)
@@ -72,9 +98,9 @@ public static class TranslatableResources
                 $"Unsupported content type '{contentType}'. Supported values: {string.Join(", ", SupportedContentTypes)}.");
     }
     
-    public static string GetFriendlyName(TranslatableResource apiType) => FriendlyNames.TryGetValue(apiType, out var name) ? name : apiType.ToString();
-
-    public static string Normalize(string? contentType) => GetFriendlyName(GetApiType(contentType));
-    
-    private static readonly Dictionary<TranslatableResource, string> FriendlyNames = ApiTypes.ToDictionary(x => x.Value, x => x.Key);
+    public static string Normalize(string? contentType)
+    {
+        TranslatableResource apiType = GetApiType(contentType);
+        return FriendlyNames.TryGetValue(apiType, out var name) ? name : apiType.ToString();
+    }
 }

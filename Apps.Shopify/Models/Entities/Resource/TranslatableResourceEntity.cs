@@ -47,7 +47,7 @@ public class TranslatableResourceEntity
 
     public string GetDisplayName()
     {
-        string[] displayNameKeys = ["title", "name"];
+        string[] displayNameKeys = ["title", "name", "label"];
         
         return displayNameKeys
                    .Select(key => TranslatableContent.FirstOrDefault(t => t.Key == key)?.Value)
@@ -67,16 +67,29 @@ public class TranslatableResourceEntity
     {
         return string.Join('|', TranslatableContent.OrderBy(x => x.Key).Select(x => $"{x.Key}:{x.Digest}"));
     }
-    
-    // Example:
-    // Resource ID: gid://shopify/OnlineStoreThemeJsonTemplate/index?theme_id=162863874332
-    // Output: "index (theme 162863874332)"
+
+    public bool HasContent()
+    {
+        return TranslatableContent.Any(x => !string.IsNullOrWhiteSpace(x.Value));
+    }
+
+    // Examples:
+    // gid://shopify/OnlineStoreThemeJsonTemplate/index?theme_id=162863874332   -> "index (theme 162863874332)"
+    // gid://shopify/OnlineStoreThemeLocaleContent/208521298258                 -> "Default theme content (theme 208521298258)"
     private string? GetThemeFileName()
     {
-        if (!Uri.TryCreate(ResourceId, UriKind.Absolute, out var uri))
+        const string themeLocaleContentType = "OnlineStoreThemeLocaleContent";
+        
+        if (!Uri.TryCreate(ResourceId, UriKind.Absolute, out var uri) || uri.Segments.Length < 3)
             return null;
 
+        string id = uri.Segments[^1];
+        string type = uri.Segments[^2].TrimEnd('/');
+
         string? themeId = HttpUtility.ParseQueryString(uri.Query)["theme_id"];
-        return themeId is null ? null : $"{uri.Segments[^1]} (theme {themeId})";
+        if (themeId is not null)
+            return $"{id} (theme {themeId})";
+
+        return type == themeLocaleContentType ? $"Default theme content (theme {id})" : null;
     }
 }

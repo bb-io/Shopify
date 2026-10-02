@@ -18,7 +18,7 @@ namespace Apps.Shopify.Actions;
 public class StoreThemeJsonTemplateActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
     : BaseContentActions(invocationContext, fileManagementClient)
 {
-    protected override string ContentType => TranslatableResources.ThemeJsonTemplate;
+    protected override string ContentType => TranslatableResources.StoreThemeJsonTemplate;
     
     [Action("Search store theme JSON templates", Description = "Search store theme JSON templates with specific criteria")]
     public async Task<SearchStoreThemeJsonTemplatesResponse> SearchStoreThemeJsonTemplate(
