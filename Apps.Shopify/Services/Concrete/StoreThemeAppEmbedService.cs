@@ -10,7 +10,7 @@ namespace Apps.Shopify.Services.Concrete;
 public class StoreThemeAppEmbedService(InvocationContext invocationContext)
     : BaseContentService(invocationContext), IContentService, IDigestPollingContentService
 {
-    protected override string ContentType => TranslatableResources.ThemeAppEmbed;
+    protected override string ContentType => TranslatableResources.StoreThemeAppEmbed;
     
     public Task<FileRecord> Download(DownloadContentRequest input)
     {

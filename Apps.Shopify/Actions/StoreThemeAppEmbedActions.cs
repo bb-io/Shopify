@@ -17,7 +17,7 @@ namespace Apps.Shopify.Actions;
 public class StoreThemeAppEmbedActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
     : BaseContentActions(invocationContext, fileManagementClient)
 {
-    protected override string ContentType => TranslatableResources.ThemeAppEmbed;
+    protected override string ContentType => TranslatableResources.StoreThemeAppEmbed;
     
     [Action("Search store theme app embeds", Description = "Search store theme app embeds with specific criteria")]
     public async Task<SearchStoreThemeAppEmbedsResponse> SearchStoreThemeAppEmbeds(

@@ -31,7 +31,7 @@ public class DataHandlerTests : TestBase
     {
         var contentType = new ContentTypeIdentifier
         {
-            ContentType = TranslatableResources.ThemeLocaleContent
+            ContentType = TranslatableResources.StoreThemeLocaleContent
         };
 
         await TestHandler<ContentDataHandler>(contentType);

@@ -21,12 +21,12 @@ public class ContentServiceFactory(InvocationContext invocationContext)
             TranslatableResources.Menu => new MenuService(invocationContext),
             TranslatableResources.DeliveryMethodDefinition => new DeliveryMethodDefinitionService(invocationContext),
             TranslatableResources.EmailTemplate => new EmailTemplateService(invocationContext),
-            TranslatableResources.ThemeJsonTemplate => new StoreJsonTemplateService(invocationContext),
+            TranslatableResources.StoreThemeJsonTemplate => new StoreJsonTemplateService(invocationContext),
             TranslatableResources.Filter => new FilterService(invocationContext),
             TranslatableResources.MediaImage => new MediaImageService(invocationContext),
-            TranslatableResources.ThemeAppEmbed => new StoreThemeAppEmbedService(invocationContext),
+            TranslatableResources.StoreThemeAppEmbed => new StoreThemeAppEmbedService(invocationContext),
             TranslatableResources.Metaobject => new MetaobjectService(invocationContext),
-            TranslatableResources.ThemeLocaleContent => new StoreThemeLocaleContentService(invocationContext),
+            TranslatableResources.StoreThemeLocaleContent => new StoreThemeLocaleContentService(invocationContext),
             _ => throw new Exception($"Unsupported content type '{contentType}' was passed in ContentServiceFactory")
         };
     }

@@ -10,7 +10,7 @@ namespace Apps.Shopify.Services.Concrete;
 public class StoreJsonTemplateService(InvocationContext invocationContext) 
     : BaseContentService(invocationContext), IContentService, IDigestPollingContentService
 {
-    protected override string ContentType => TranslatableResources.ThemeJsonTemplate;
+    protected override string ContentType => TranslatableResources.StoreThemeJsonTemplate;
     
     public Task<FileRecord> Download(DownloadContentRequest input)
     {

@@ -15,12 +15,12 @@ public static class TranslatableResources
     public const string Menu = "Menu";
     public const string DeliveryMethodDefinition = "Delivery method definition";
     public const string EmailTemplate = "Email template";
-    public const string ThemeJsonTemplate = "Store theme JSON template";
+    public const string StoreThemeJsonTemplate = "Store theme JSON template";
     public const string Filter = "Filter";
     public const string MediaImage = "Media image";
-    public const string ThemeAppEmbed = "Store theme app embed";
+    public const string StoreThemeAppEmbed = "Store theme app embed";
     public const string Metaobject = "Metaobject";
-    public const string ThemeLocaleContent = "Store theme locale content";
+    public const string StoreThemeLocaleContent = "Store theme locale content";
 
     private static readonly Dictionary<string, TranslatableResource> ApiTypes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -35,12 +35,12 @@ public static class TranslatableResources
         [Menu] = TranslatableResource.MENU,
         [DeliveryMethodDefinition] = TranslatableResource.DELIVERY_METHOD_DEFINITION,
         [EmailTemplate] = TranslatableResource.EMAIL_TEMPLATE,
-        [ThemeJsonTemplate] = TranslatableResource.ONLINE_STORE_THEME_JSON_TEMPLATE,
+        [StoreThemeJsonTemplate] = TranslatableResource.ONLINE_STORE_THEME_JSON_TEMPLATE,
         [Filter] = TranslatableResource.FILTER,
         [MediaImage] = TranslatableResource.MEDIA_IMAGE,
-        [ThemeAppEmbed] = TranslatableResource.ONLINE_STORE_THEME_APP_EMBED,
+        [StoreThemeAppEmbed] = TranslatableResource.ONLINE_STORE_THEME_APP_EMBED,
         [Metaobject] = TranslatableResource.METAOBJECT,
-        [ThemeLocaleContent] = TranslatableResource.ONLINE_STORE_THEME_LOCALE_CONTENT,
+        [StoreThemeLocaleContent] = TranslatableResource.ONLINE_STORE_THEME_LOCALE_CONTENT,
     };
     
     private static readonly Dictionary<TranslatableResource, string> FriendlyNames = ApiTypes.ToDictionary(x => x.Value, x => x.Key);
@@ -56,12 +56,12 @@ public static class TranslatableResources
         Menu,
         DeliveryMethodDefinition,
         EmailTemplate,
-        ThemeJsonTemplate,
+        StoreThemeJsonTemplate,
         Filter,
         MediaImage,
-        ThemeAppEmbed,
+        StoreThemeAppEmbed,
         Metaobject,
-        ThemeLocaleContent,
+        StoreThemeLocaleContent,
     ];
 
     public static readonly List<string> SupportedPollingContentTypes = [
@@ -73,12 +73,12 @@ public static class TranslatableResources
         Menu,
         DeliveryMethodDefinition,
         EmailTemplate,
-        ThemeJsonTemplate,
+        StoreThemeJsonTemplate,
         Filter,
         MediaImage,
-        ThemeAppEmbed,
+        StoreThemeAppEmbed,
         Metaobject,
-        ThemeLocaleContent,
+        StoreThemeLocaleContent,
     ];
 
     public static bool TryGetApiType(string? contentType, out TranslatableResource apiType)

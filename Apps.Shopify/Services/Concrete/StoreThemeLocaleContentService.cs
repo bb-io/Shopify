@@ -10,7 +10,7 @@ namespace Apps.Shopify.Services.Concrete;
 public class StoreThemeLocaleContentService(InvocationContext invocationContext) 
     : BaseContentService(invocationContext), IContentService, IDigestPollingContentService
 {
-    protected override string ContentType => TranslatableResources.ThemeLocaleContent;
+    protected override string ContentType => TranslatableResources.StoreThemeLocaleContent;
     
     public Task<FileRecord> Download(DownloadContentRequest input)
     {
