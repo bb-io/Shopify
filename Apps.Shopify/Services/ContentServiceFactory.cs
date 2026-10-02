@@ -27,7 +27,8 @@ public class ContentServiceFactory(InvocationContext invocationContext)
             TranslatableResources.StoreThemeAppEmbed => new StoreThemeAppEmbedService(invocationContext),
             TranslatableResources.Metaobject => new MetaobjectService(invocationContext),
             TranslatableResources.StoreThemeLocaleContent => new StoreThemeLocaleContentService(invocationContext),
-            _ => throw new Exception($"Unsupported content type '{contentType}' was passed in ContentServiceFactory")
+            TranslatableResources.StoreThemeSectionGroup => new StoreThemeSectionGroupService(invocationContext),
+            _ => throw new ArgumentException($"Unsupported content type '{contentType}' was passed in ContentServiceFactory")
         };
     }
 

@@ -15,7 +15,7 @@ public class ContentTests : TestBase
 		var action = new ContentActions(InvocationContext, FileManager);
 		var input = new SearchContentRequest
 		{
-			ContentTypes = [TranslatableResources.StoreThemeLocaleContent]
+			ContentTypes = [TranslatableResources.StoreThemeSectionGroup]
         };
 
 		// Act
@@ -37,7 +37,7 @@ public class ContentTests : TestBase
 		};
 		var input = new DownloadContentRequest
 		{
-			ContentId = "gid://shopify/OnlineStoreThemeLocaleContent/208521298258",
+			ContentId = "gid://shopify/OnlineStoreThemeSectionGroup/footer-group?theme_id=208521298258",
 			Locale = "en",
 			//MarketId = "gid://shopify/Market/94465523996"
         };
