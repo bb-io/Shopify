@@ -15,7 +15,7 @@ public class ContentTests : TestBase
 		var action = new ContentActions(InvocationContext, FileManager);
 		var input = new SearchContentRequest
 		{
-			ContentTypes = [TranslatableResources.Metaobject]
+			ContentTypes = [TranslatableResources.ThemeLocaleContent]
         };
 
 		// Act
@@ -37,7 +37,7 @@ public class ContentTests : TestBase
 		};
 		var input = new DownloadContentRequest
 		{
-			ContentId = "gid://shopify/Metaobject/545664827730",
+			ContentId = "gid://shopify/OnlineStoreThemeLocaleContent/208521298258",
 			Locale = "en",
 			//MarketId = "gid://shopify/Market/94465523996"
         };

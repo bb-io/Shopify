@@ -20,6 +20,7 @@ public static class TranslatableResources
     public const string MediaImage = "Media image";
     public const string ThemeAppEmbed = "Store theme app embed";
     public const string Metaobject = "Metaobject";
+    public const string ThemeLocaleContent = "Store theme locale content";
 
     private static readonly Dictionary<string, TranslatableResource> ApiTypes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -39,6 +40,7 @@ public static class TranslatableResources
         [MediaImage] = TranslatableResource.MEDIA_IMAGE,
         [ThemeAppEmbed] = TranslatableResource.ONLINE_STORE_THEME_APP_EMBED,
         [Metaobject] = TranslatableResource.METAOBJECT,
+        [ThemeLocaleContent] = TranslatableResource.ONLINE_STORE_THEME_LOCALE_CONTENT,
     };
     
     private static readonly Dictionary<TranslatableResource, string> FriendlyNames = ApiTypes.ToDictionary(x => x.Value, x => x.Key);
@@ -59,6 +61,7 @@ public static class TranslatableResources
         MediaImage,
         ThemeAppEmbed,
         Metaobject,
+        ThemeLocaleContent,
     ];
 
     public static readonly List<string> SupportedPollingContentTypes = [
@@ -75,6 +78,7 @@ public static class TranslatableResources
         MediaImage,
         ThemeAppEmbed,
         Metaobject,
+        ThemeLocaleContent,
     ];
 
     public static bool TryGetApiType(string? contentType, out TranslatableResource apiType)

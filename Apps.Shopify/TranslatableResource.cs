@@ -21,4 +21,5 @@ public enum TranslatableResource
     MEDIA_IMAGE,
     ONLINE_STORE_THEME_APP_EMBED,
     METAOBJECT,
+    ONLINE_STORE_THEME_LOCALE_CONTENT,
 }

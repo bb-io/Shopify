@@ -31,7 +31,7 @@ public class DataHandlerTests : TestBase
     {
         var contentType = new ContentTypeIdentifier
         {
-            ContentType = TranslatableResources.Metaobject
+            ContentType = TranslatableResources.ThemeLocaleContent
         };
 
         await TestHandler<ContentDataHandler>(contentType);
@@ -112,4 +112,8 @@ public class DataHandlerTests : TestBase
     
     [TestMethod]
     public async Task MetaobjectDataHandler_ReturnsMetaobjects() => await TestHandler<MetaobjectDataHandler>();
+    
+    [TestMethod]
+    public async Task ThemeLocaleContentDataHandler_ReturnsThemeLocaleContent() 
+        => await TestHandler<ThemeLocaleContentDataHandler>();
 }
