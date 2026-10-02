@@ -12,7 +12,7 @@ using Apps.Shopify.Models.Response.TranslatableResource;
 using Apps.Shopify.Services.Models;
 using Blackbird.Applications.Sdk.Common.Invocation;
 
-namespace Apps.Shopify.Services;
+namespace Apps.Shopify.Services.Base;
 
 public abstract class BaseContentService(InvocationContext invocationContext) : ShopifyInvocable(invocationContext)
 {
