@@ -119,5 +119,5 @@ public class DataHandlerTests : TestBase
     
     [TestMethod]
     public async Task StoreThemeSectionGroupDataHandler_ReturnsThemeSectionGroups() 
-        => await TestHandler<StoreThemeSectionGroupDataHandler>();
+        => await TestHandler<ThemeSectionGroupDataHandler>();
 }
