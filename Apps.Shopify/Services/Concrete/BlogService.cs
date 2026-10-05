@@ -17,6 +17,7 @@ using GraphQL;
 using System.Net.Mime;
 using Apps.Shopify.HtmlConversion.Models;
 using Apps.Shopify.Models.Dto;
+using Apps.Shopify.Services.Base;
 using Apps.Shopify.Services.Models;
 
 namespace Apps.Shopify.Services.Concrete;

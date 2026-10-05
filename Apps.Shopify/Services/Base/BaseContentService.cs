@@ -12,7 +12,7 @@ using Apps.Shopify.Models.Response.TranslatableResource;
 using Apps.Shopify.Services.Models;
 using Blackbird.Applications.Sdk.Common.Invocation;
 
-namespace Apps.Shopify.Services;
+namespace Apps.Shopify.Services.Base;
 
 public abstract class BaseContentService(InvocationContext invocationContext) : ShopifyInvocable(invocationContext)
 {
@@ -39,7 +39,7 @@ public abstract class BaseContentService(InvocationContext invocationContext) : 
         var translatableResources = await ListTranslatableResources();
 
         var items = translatableResources
-            .Where(x => x.MatchesSearch(input.NameContains))
+            .Where(x => x.HasContent() && x.MatchesSearch(input.NameContains))
             .Select(x => new ContentItemEntity(x.ResourceId, ContentType, x.GetDisplayName()))
             .ToList();
 

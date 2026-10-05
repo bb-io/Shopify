@@ -11,12 +11,14 @@ using GraphQL;
 using System.Net.Mime;
 using Apps.Shopify.HtmlConversion.Models;
 using Apps.Shopify.Models.Dto;
+using Apps.Shopify.Models.Response.Utility.TranslationError;
 
 namespace Apps.Shopify.Services;
 
 public class TranslatableResourceService(InvocationContext invocationContext) : ShopifyInvocable(invocationContext)
 {
-    private const int MaxUpdateChunkSize = 250;
+    // Max 100 translation keys per mutation - do not change
+    private const int MaxUpdateChunkSize = 100;
     
     public async Task<FileRecord> GetResourceContent(string resourceId, string locale, bool outdated, ShopifyMetadata metadata)
     {
@@ -98,11 +100,8 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
                 .GroupBy(x => x.Key)
                 .ToDictionary(g => g.Key, g => g.First());
 
-            foreach (var item in groupItems)
-            {
-                if (string.IsNullOrWhiteSpace(item.TranslatableContentDigest))
-                    item.TranslatableContentDigest = sourceByKey.GetValueOrDefault(item.Key)?.Digest ?? string.Empty;
-            }
+            foreach (var item in groupItems.Where(item => string.IsNullOrWhiteSpace(item.TranslatableContentDigest)))
+                item.TranslatableContentDigest = sourceByKey.GetValueOrDefault(item.Key)?.Digest ?? string.Empty;
 
             var withDigest = groupItems
                 .Where(x => !string.IsNullOrWhiteSpace(x.TranslatableContentDigest))
@@ -130,7 +129,11 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
                         translations = chunk
                     }
                 };
-                await Client.ExecuteWithErrorHandling(request);
+                var response = await Client.ExecuteWithErrorHandling<TranslationsRegisterResponse>(request);
+                
+                var errors = response.TranslationsRegister.UserErrors;
+                if (errors.Count > 0)
+                    throw new PluginApplicationException($"Shopify rejected translations for {id}: {string.Join("; ", errors)}");
             }
         }
     }

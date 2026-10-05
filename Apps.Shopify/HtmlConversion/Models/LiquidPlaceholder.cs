@@ -1,16 +1,18 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
+using HtmlAgilityPack;
 
 namespace Apps.Shopify.HtmlConversion.Models;
 
-// Liquid = a custom template language created by Shopify. Used in email templates in our case
+// Liquid = a custom template language created by Shopify
 public static class LiquidPlaceholder
 {
     private const string CodeAttr = "data-code";
     private const string LiquidTag = @"(?:\{%.*?%\}|\{\{.*?\}\})";
     private const string TagAttrPrefix = "data-liquid-";
-
+    
+    private static readonly HashSet<string> RawTextParents = ["style", "script", "title"];
     private static readonly Regex TagPlaceholderRegex = new(
         $@"(?<before>\s?){TagAttrPrefix}\d+(?:-(?<flags>[ba]+))?=""(?<code>[^""]*)""(?<after>\s?)",
         RegexOptions.Compiled);
@@ -22,7 +24,38 @@ public static class LiquidPlaceholder
         return LiquidRegex.Replace(text, m => $"<span {CodeAttr}=\"{HttpUtility.HtmlEncode(m.Value)}\"></span>");
     }
     
-    public static string LockTags(string html)
+    public static string LockHtml(string html)
+    {
+        html = LockTags(html);
+
+        var result = new StringBuilder(html.Length);
+        int position = 0;
+
+        foreach (var range in FindTextRanges(html))
+        {
+            result.Append(html, position, range.Start - position);
+            result.Append(Lock(html.Substring(range.Start, range.Length)));
+            position = range.End;
+        }
+
+        return result.Append(html, position, html.Length - position).ToString();
+    }
+    
+    public static string Unlock(string html)
+    {
+        html = PlaceholderRegex.Replace(html, m => HttpUtility.HtmlDecode(m.Groups[1].Value));
+
+        return TagPlaceholderRegex.Replace(html, m =>
+        {
+            string flags = m.Groups["flags"].Value;
+            string before = flags.Contains('b') ? string.Empty : m.Groups["before"].Value;
+            string after = flags.Contains('a') ? string.Empty : m.Groups["after"].Value;
+
+            return before + HttpUtility.HtmlDecode(m.Groups["code"].Value) + after;
+        });
+    }
+    
+    private static string LockTags(string html)
     {
         var result = new StringBuilder(html.Length);
         bool inTag = false;
@@ -59,20 +92,6 @@ public static class LiquidPlaceholder
         return result.ToString();
     }
     
-    public static string Unlock(string html)
-    {
-        html = PlaceholderRegex.Replace(html, m => HttpUtility.HtmlDecode(m.Groups[1].Value));
-
-        return TagPlaceholderRegex.Replace(html, m =>
-        {
-            string flags = m.Groups["flags"].Value;
-            string before = flags.Contains('b') ? string.Empty : m.Groups["before"].Value;
-            string after = flags.Contains('a') ? string.Empty : m.Groups["after"].Value;
-
-            return before + HttpUtility.HtmlDecode(m.Groups["code"].Value) + after;
-        });
-    }
-    
     private static string ToTagPlaceholder(string html, int start, int end, int number)
     {
         bool addBefore = !char.IsWhiteSpace(html[start - 1]);
@@ -81,5 +100,17 @@ public static class LiquidPlaceholder
         string name = $"{TagAttrPrefix}{number}{(flags.Length > 0 ? "-" + flags : "")}";
 
         return (addBefore ? " " : "") + $"{name}=\"{HttpUtility.HtmlEncode(html[start..end])}\"" + (addAfter ? " " : "");
+    }
+
+    private static IEnumerable<TextRange> FindTextRanges(string html)
+    {
+        var doc = new HtmlDocument();
+        doc.LoadHtml(html);
+
+        return doc.DocumentNode.Descendants()
+            .OfType<HtmlTextNode>()
+            .Where(x => !RawTextParents.Contains(x.ParentNode.Name))
+            .Select(x => new TextRange(x.StreamPosition, x.Text.Length))
+            .OrderBy(x => x.Start);
     }
 }

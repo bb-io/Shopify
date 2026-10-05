@@ -16,7 +16,7 @@ public class DataHandlerTests : TestBase
     {
         // Arrange
         var constructorArgs = new object[] { InvocationContext }.Concat(additionalArgs).ToArray();
-        var handler = (dynamic)Activator.CreateInstance(typeof(T), constructorArgs)!;
+        dynamic handler = Activator.CreateInstance(typeof(T), constructorArgs)!;
 
         // Act
         var result = await handler.GetDataAsync(_emptyDataSourceContext, CancellationToken.None);
@@ -31,7 +31,7 @@ public class DataHandlerTests : TestBase
     {
         var contentType = new ContentTypeIdentifier
         {
-            ContentType = TranslatableResources.ThemeJsonTemplate
+            ContentType = TranslatableResources.StoreThemeSectionGroup
         };
 
         await TestHandler<ContentDataHandler>(contentType);
@@ -100,4 +100,24 @@ public class DataHandlerTests : TestBase
     [TestMethod]
     public async Task ThemeJsonTemplateDataHandler_ReturnsJsonTemplates() 
         => await TestHandler<ThemeJsonTemplateDataHandler>();
+    
+    [TestMethod]
+    public async Task FilterDataHandler_ReturnsFilters() => await TestHandler<FilterDataHandler>();
+    
+    [TestMethod]
+    public async Task MediaImageDataHandler_ReturnsMediaImage() => await TestHandler<MediaImageDataHandler>();
+    
+    [TestMethod]
+    public async Task ThemeAppEmbedDataHandler_ReturnsAppEmbeds() => await TestHandler<ThemeAppEmbedDataHandler>();
+    
+    [TestMethod]
+    public async Task MetaobjectDataHandler_ReturnsMetaobjects() => await TestHandler<MetaobjectDataHandler>();
+    
+    [TestMethod]
+    public async Task ThemeLocaleContentDataHandler_ReturnsThemeLocaleContent() 
+        => await TestHandler<ThemeLocaleContentDataHandler>();
+    
+    [TestMethod]
+    public async Task StoreThemeSectionGroupDataHandler_ReturnsThemeSectionGroups() 
+        => await TestHandler<ThemeSectionGroupDataHandler>();
 }

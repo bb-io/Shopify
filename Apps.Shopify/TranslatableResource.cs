@@ -17,7 +17,10 @@ public enum TranslatableResource
     DELIVERY_METHOD_DEFINITION,
     EMAIL_TEMPLATE,
     ONLINE_STORE_THEME_JSON_TEMPLATE,
-    
-    // Do not delete - we TryParse some string inputs to these
+    FILTER,
+    MEDIA_IMAGE,
+    ONLINE_STORE_THEME_APP_EMBED,
     METAOBJECT,
+    ONLINE_STORE_THEME_LOCALE_CONTENT,
+    ONLINE_STORE_THEME_SECTION_GROUP,
 }

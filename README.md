@@ -97,9 +97,50 @@ Other scopes that may be needed depending on desired actions are:
 - **Download store theme JSON template** Download content of a specific store theme JSON template
 - **Upload store theme JSON template** Upload content of a specific store theme JSON template
 
+### Filters
+
+> **Note**: Filters are managed in Shopify's [Search & Discovery](https://apps.shopify.com/search-and-discovery) app. 
+> Set them up there before using the filter actions.
+
+- **Search filters** Search filters with specific criteria
+- **Download filter** Download content of a specific filter
+- **Upload filter** Upload content of a specific filter
+
+### Media images
+
+- **Search media images** Search media images with specific criteria
+- **Download media image** Download content of a specific media image
+- **Upload media image** Upload content of a specific media image
+
+### Store theme app embeds
+
+- **Search store theme app embeds** Search store theme app embeds with specific criteria
+- **Download store theme app embed** Download content of a specific store theme app embed
+- **Upload store theme app embed** Upload content of a specific store theme app embed
+
+### Metaobjects
+
+- **Search metaobjects** Search metaobjects with specific criteria
+- **Download metaobject** Download content of a specific metaobject
+- **Upload metaobject** Upload content of a specific metaobject
+
+### Store theme locale content
+
+- **Search store theme locale content** Search store theme locale content with specific criteria
+- **Download store theme locale content** Download content of a specific store theme locale content
+- **Upload store theme locale content** Upload content of a specific store theme locale content
+
+### Store theme section groups
+
+- **Search store theme section groups** Search store theme section groups with specific criteria
+- **Download store theme section group** Download content of a specific store theme section group
+- **Upload store theme section group** Upload content of a specific store theme section group
+
 ### Content
 
-> **Note**: These actions support the following content types: collection, metafield, article, blog, page, theme, product, menu.
+> **Note**: These actions support the following content types: collection, metafield, article, blog, page, 
+> theme, product, menu, delivery method definition, email template, store theme JSON template, filter, 
+> media image, store theme app embed, metaobject, store theme locale content, store theme section group.
 
 - **Upload content** Upload content of a specific content type from a file
 - **Download content** Download content of a specific content type
@@ -132,11 +173,11 @@ Other scopes that may be needed depending on desired actions are:
 
 ### Content
 
-> **Note**: These events support the following content types: collection, article, blog, page, product, menu, 
-> delivery method definition, email template, store theme JSON template.
+> **Note**: These events support the following content types: collection, article, blog, page, product, *menu, 
+> delivery method definition, email template, store theme JSON template, filter, media image, 
+> store theme app embed, metaobject, store theme locale content, store theme section group*.
 >
-> Since Shopify does not expose the 'Updated at' value for some resources, this output for will always be empty 
-> for these content types: menu, delivery method, email template, store theme JSON template.
+> Shopify doesn't expose an update date for the content types in italic. The 'Updated at' output will always be empty for them.
 
 - **On content updated**
 

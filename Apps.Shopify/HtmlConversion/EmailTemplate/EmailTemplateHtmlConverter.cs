@@ -16,8 +16,6 @@ public static class EmailTemplateHtmlConverter
     private const string TitleKey = "title";
     private const string BodyHtmlKey = "body_html";
     
-    private static readonly HashSet<string> RawTextParents = ["style", "script", "title"];
-    
     private static readonly Regex BlackbirdMetaRegex = new(
         @"<meta\s+name=""blackbird-[^""]*""[^>]*>", 
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -35,9 +33,12 @@ public static class EmailTemplateHtmlConverter
         var contentEntitiesList = contentEntities.ToList();
         var body = contentEntitiesList.FirstOrDefault(x => x.Key == BodyHtmlKey) ?? 
                    throw new PluginMisconfigurationException($"Email template has no {BodyHtmlKey} content");
+
+        if (string.IsNullOrWhiteSpace(body.Value))
+            throw new PluginMisconfigurationException($"Email template {BodyHtmlKey} content is empty");
         
-        string html = LockLiquid(LiquidPlaceholder.LockTags(body.Value));
-        html = InsertAfter(html, BodyTagRegex, LockLiquid(BuildTitle(contentEntitiesList.Where(x => x.Key == TitleKey))));
+        string html = LiquidPlaceholder.LockHtml(body.Value);
+        html = InsertAfter(html, BodyTagRegex, BuildTitle(contentEntitiesList.Where(x => x.Key == TitleKey)));
         html = InsertAfter(html, HeadTagRegex, BuildMetas(metadata, body.Digest));
 
         return new MemoryStream(Encoding.UTF8.GetBytes(html));
@@ -106,32 +107,5 @@ public static class EmailTemplateHtmlConverter
 
         HtmlConverterHelper.FillInIdentifiedContentEntities(doc, body, title);
         return body.InnerHtml;
-    }
-    
-    private static string LockLiquid(string html)
-    {
-        var result = new StringBuilder(html.Length);
-        int position = 0;
-        
-        foreach (var range in FindTextRanges(html))
-        {
-            result.Append(html, position, range.Start - position);
-            result.Append(LiquidPlaceholder.Lock(html.Substring(range.Start, range.Length)));
-            position = range.End;
-        }
-
-        return result.Append(html, position, html.Length - position).ToString();
-    }
-    
-    private static IEnumerable<TextRange> FindTextRanges(string html)
-    {
-        var doc = new HtmlDocument();
-        doc.LoadHtml(html);
-
-        return doc.DocumentNode.Descendants()
-            .OfType<HtmlTextNode>()
-            .Where(x => !RawTextParents.Contains(x.ParentNode.Name))
-            .Select(x => new TextRange(x.StreamPosition, x.Text.Length))
-            .OrderBy(x => x.Start);
     }
 }
