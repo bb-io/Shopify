@@ -21,7 +21,7 @@ public class StoreThemeLocaleContentActions(InvocationContext invocationContext,
     
     [Action("Search store theme locale content", Description = "Search store theme locale content with specific criteria")]
     public async Task<SearchStoreThemeLocaleContentResponse> SearchStoreThemeLocaleContent(
-        [ActionParameter] StoreThemeLocaleContentRequest input)
+        [ActionParameter] SearchStoreThemeLocaleContentRequest input)
     {
         var searchInput = new SearchContentRequest { NameContains = input.NameContains };
         var items = await ContentService.Search(searchInput);
