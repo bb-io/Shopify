@@ -5,9 +5,9 @@ namespace Apps.Shopify.Models.Response.StoreThemeLocaleContent;
 
 public class StoreThemeLocaleContentResponse(ContentItemEntity contentEntity)
 {
-    [Display("Theme locale content ID")]
+    [Display("Content ID")]
     public string Id { get; set; } = contentEntity.ContentId;
 
-    [Display("Theme locale content name")]
+    [Display("Content name")]
     public string Name { get; set; } = contentEntity.Name;
 }

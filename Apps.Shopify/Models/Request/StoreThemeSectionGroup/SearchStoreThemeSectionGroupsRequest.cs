@@ -4,6 +4,6 @@ namespace Apps.Shopify.Models.Request.StoreThemeSectionGroup;
 
 public class SearchStoreThemeSectionGroupsRequest
 {
-    [Display("Store theme locale content name contains")]
+    [Display("Store theme section group name contains")]
     public string? NameContains { get; set; }
 }

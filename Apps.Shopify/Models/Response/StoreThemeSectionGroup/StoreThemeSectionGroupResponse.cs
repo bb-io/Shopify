@@ -5,9 +5,9 @@ namespace Apps.Shopify.Models.Response.StoreThemeSectionGroup;
 
 public class StoreThemeSectionGroupResponse(ContentItemEntity contentEntity)
 {
-    [Display("Theme section group ID")]
+    [Display("Section group ID")]
     public string Id { get; set; } = contentEntity.ContentId;
 
-    [Display("Theme section group name")]
+    [Display("Section group name")]
     public string Name { get; set; } = contentEntity.Name;
 }
