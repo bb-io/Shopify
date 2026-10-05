@@ -10,6 +10,6 @@ public class UploadStoreThemeAppEmbedRequest
     [Display("Content")]
     public FileReference File { get; set; } = null!;
 
-    [Display("Store theme JSON template ID"), DataSource(typeof(ThemeAppEmbedDataHandler))]
+    [Display("Store theme app embed ID"), DataSource(typeof(ThemeAppEmbedDataHandler))]
     public string? ThemeAppEmbedIdId { get; set; }
 }

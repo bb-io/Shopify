@@ -6,6 +6,6 @@ namespace Apps.Shopify.Models.Identifiers;
 
 public class StoreThemeAppEmbedIdentifier
 {
-    [Display("Store theme JSON template ID"), DataSource(typeof(ThemeAppEmbedDataHandler))]
+    [Display("Store theme app embed ID"), DataSource(typeof(ThemeAppEmbedDataHandler))]
     public string StoreThemeAppEmbedId { get; set; } = string.Empty;
 }
