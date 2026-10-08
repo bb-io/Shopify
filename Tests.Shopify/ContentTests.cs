@@ -33,11 +33,11 @@ public class ContentTests : TestBase
         var action = new ContentActions(InvocationContext, FileManager);
 		var contentType = new ContentTypeIdentifier
 		{
-			ContentType = TranslatableResources.StoreThemeAppEmbed
+			ContentType = TranslatableResources.StoreThemeSettingsCategory
 		};
 		var input = new DownloadContentRequest
 		{
-			ContentId = "gid://shopify/OnlineStoreThemeSectionGroup/footer-group?theme_id=208521298258",
+			ContentId = "gid://shopify/OnlineStoreThemeSettingsCategory/Brand+information?theme_id=162863874332&first_setting_id=brand_headline",
 			Locale = "en",
 			//MarketId = "gid://shopify/Market/94465523996"
         };
@@ -58,7 +58,7 @@ public class ContentTests : TestBase
 		var input = new UploadContentRequest
 		{
 			Content = new FileReference { Name = "test.html" },
-			Locale = "uk",
+			Locale = "fr",
 			//MarketId = "gid://shopify/Market/94465523996"
 		};
 
