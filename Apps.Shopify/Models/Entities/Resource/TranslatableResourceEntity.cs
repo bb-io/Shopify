@@ -83,7 +83,7 @@ public class TranslatableResourceEntity
         if (!Uri.TryCreate(ResourceId, UriKind.Absolute, out var uri) || uri.Segments.Length < 3)
             return null;
 
-        string id = uri.Segments[^1];
+        string id = HttpUtility.UrlDecode(uri.Segments[^1]);
         string type = uri.Segments[^2].TrimEnd('/');
 
         string? themeId = HttpUtility.ParseQueryString(uri.Query)["theme_id"];
