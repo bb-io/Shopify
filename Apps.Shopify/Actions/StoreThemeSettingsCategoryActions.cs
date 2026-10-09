@@ -19,7 +19,7 @@ public class StoreThemeSettingsCategoryActions(InvocationContext invocationConte
 {
     protected override string ContentType => TranslatableResources.StoreThemeSettingsCategory;
     
-    [Action("Search theme settings categories", Description = "Search store theme settings categories with specific criteria")]
+    [Action("Search store theme settings categories", Description = "Search store theme settings categories with specific criteria")]
     public async Task<SearchStoreThemeSettingsCategoriesResponse> SearchStoreThemeSettingsCategories(
         [ActionParameter] SearchStoreThemeSettingsCategoriesRequest input)
     {
