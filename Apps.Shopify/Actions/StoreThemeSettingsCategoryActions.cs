@@ -13,7 +13,7 @@ using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
 namespace Apps.Shopify.Actions;
 
-[ActionList("Store theme settings category")]
+[ActionList("Store theme settings categories")]
 public class StoreThemeSettingsCategoryActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
     : BaseContentActions(invocationContext, fileManagementClient)
 {
