@@ -22,6 +22,9 @@ public static class TranslatableResources
     public const string Metaobject = "Metaobject";
     public const string StoreThemeLocaleContent = "Store theme locale content";
     public const string StoreThemeSectionGroup = "Store theme section group";
+    public const string StoreThemeSettingsCategory = "Store theme settings category";
+    public const string StoreThemeSettingsDataSection = "Store theme settings data section";
+    public const string PackingSlipTemplate = "Packing slip template";
 
     private static readonly Dictionary<string, TranslatableResource> ApiTypes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -43,6 +46,9 @@ public static class TranslatableResources
         [Metaobject] = TranslatableResource.METAOBJECT,
         [StoreThemeLocaleContent] = TranslatableResource.ONLINE_STORE_THEME_LOCALE_CONTENT,
         [StoreThemeSectionGroup] = TranslatableResource.ONLINE_STORE_THEME_SECTION_GROUP,
+        [StoreThemeSettingsCategory] = TranslatableResource.ONLINE_STORE_THEME_SETTINGS_CATEGORY,
+        [StoreThemeSettingsDataSection] = TranslatableResource.ONLINE_STORE_THEME_SETTINGS_DATA_SECTIONS,
+        [PackingSlipTemplate] = TranslatableResource.PACKING_SLIP_TEMPLATE,
     };
     
     private static readonly Dictionary<TranslatableResource, string> FriendlyNames = ApiTypes.ToDictionary(x => x.Value, x => x.Key);
@@ -65,6 +71,9 @@ public static class TranslatableResources
         Metaobject,
         StoreThemeLocaleContent,
         StoreThemeSectionGroup,
+        StoreThemeSettingsCategory,
+        StoreThemeSettingsDataSection,
+        PackingSlipTemplate,
     ];
 
     public static readonly List<string> SupportedPollingContentTypes = [
@@ -83,6 +92,9 @@ public static class TranslatableResources
         Metaobject,
         StoreThemeLocaleContent,
         StoreThemeSectionGroup,
+        StoreThemeSettingsCategory,
+        StoreThemeSettingsDataSection,
+        PackingSlipTemplate,
     ];
 
     public static bool TryGetApiType(string? contentType, out TranslatableResource apiType)

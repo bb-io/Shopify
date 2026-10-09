@@ -1,0 +1,3 @@
+namespace Apps.Shopify.Models.Response.StoreThemeSettingsCategory;
+
+public record SearchStoreThemeSettingsCategoriesResponse(List<StoreThemeSettingsCategoryResponse> Categories);
