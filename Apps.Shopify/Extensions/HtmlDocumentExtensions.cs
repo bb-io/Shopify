@@ -1,5 +1,6 @@
 using Apps.Shopify.Constants;
 using Apps.Shopify.HtmlConversion.Models;
+using Blackbird.Applications.Sdk.Common.Exceptions;
 using HtmlAgilityPack;
 
 namespace Apps.Shopify.Extensions;
@@ -24,6 +25,14 @@ public static class HtmlDocumentExtensions
         return htmlDoc.DocumentNode
             .SelectSingleNode($"//meta[@name='{metaName}']")?
             .GetAttributeValue("content", string.Empty);
+    }
+
+    public static string GetRequiredMeta(this HtmlDocument doc, string metaName)
+    {
+        string? value = doc.GetMeta(metaName);
+        return !string.IsNullOrWhiteSpace(value)
+            ? value
+            : throw new PluginMisconfigurationException($"The file has no {metaName} metadata. Please include it in the file");
     }
 
     public static ShopifyMetadata GetAllMeta(this HtmlDocument htmlDoc)

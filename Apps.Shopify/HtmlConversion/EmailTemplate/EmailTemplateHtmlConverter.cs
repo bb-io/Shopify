@@ -56,10 +56,7 @@ public static class EmailTemplateHtmlConverter
         var titleNodes = doc.DocumentNode.SelectNodes($"//div[@{HtmlAttributeConstants.KeyAttr}='{TitleKey}']");
         var titleResources = HtmlConverterHelper.GetIdentifiedResourceContent(titleNodes, locale, metadata.MarketId).ToList();
 
-        string? bodyDigest = doc.GetMeta(HtmlMetadataConstants.BlackbirdBodyDigest);
-        if (string.IsNullOrWhiteSpace(bodyDigest))
-            throw new PluginMisconfigurationException("The file has no email body digest. Download the email template again");
-
+        string bodyDigest = doc.GetRequiredMeta(HtmlMetadataConstants.BlackbirdBodyDigest);
         string? resourceId = titleResources.FirstOrDefault()?.ResourceId;
         if (string.IsNullOrWhiteSpace(resourceId))
             throw new PluginMisconfigurationException("The file has no title resource ID. Download the email template again");
