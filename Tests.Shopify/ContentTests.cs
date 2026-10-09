@@ -15,7 +15,7 @@ public class ContentTests : TestBase
 		var action = new ContentActions(InvocationContext, FileManager);
 		var input = new SearchContentRequest
 		{
-			ContentTypes = [TranslatableResources.StoreThemeSettingsDataSection]
+			ContentTypes = [TranslatableResources.PackingSlipTemplate]
         };
 
 		// Act
@@ -33,11 +33,11 @@ public class ContentTests : TestBase
         var action = new ContentActions(InvocationContext, FileManager);
 		var contentType = new ContentTypeIdentifier
 		{
-			ContentType = TranslatableResources.StoreThemeSettingsCategory
+			ContentType = TranslatableResources.PackingSlipTemplate
 		};
 		var input = new DownloadContentRequest
 		{
-			ContentId = "gid://shopify/OnlineStoreThemeSettingsDataSections/162863907100",
+			ContentId = "gid://shopify/PackingSlipTemplate/4399956252",
 			Locale = "en",
 			//MarketId = "gid://shopify/Market/94465523996"
         };

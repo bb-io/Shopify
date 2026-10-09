@@ -128,4 +128,8 @@ public class DataHandlerTests : TestBase
     [TestMethod]
     public async Task ThemeSettingsDataSectionsDataHandler_ReturnsThemeSettingsDataSections() 
         => await TestHandler<ThemeSettingsDataSectionDataHandler>();
+    
+    [TestMethod]
+    public async Task PackingSlipTemplateDataHandler_ReturnsPackingSlipTemplates() 
+        => await TestHandler<PackingSlipTemplateDataHandler>();
 }

@@ -30,6 +30,7 @@ public class ContentServiceFactory(InvocationContext invocationContext)
             TranslatableResources.StoreThemeSectionGroup => new StoreThemeSectionGroupService(invocationContext),
             TranslatableResources.StoreThemeSettingsCategory => new StoreThemeSettingsCategoryService(invocationContext),
             TranslatableResources.StoreThemeSettingsDataSection => new StoreThemeSettingsDataSectionService(invocationContext),
+            TranslatableResources.PackingSlipTemplate => new PackingSlipTemplateService(invocationContext),
             _ => throw new ArgumentException($"Unsupported content type '{contentType}' was passed in ContentServiceFactory")
         };
     }
