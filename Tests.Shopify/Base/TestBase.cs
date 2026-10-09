@@ -20,11 +20,6 @@ public class TestBase
         Creds = config.GetSection("ConnectionDefinition").GetChildren()
             .Select(x => new AuthenticationCredentialsProvider(AuthenticationCredentialsRequestLocation.None,x.Key, x.Value)).ToList();
 
-
-        var relativePath = config.GetSection("TestFolder").Value;
-        var projectDirectory = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.FullName;
-        var folderLocation = Path.Combine(projectDirectory, relativePath);
-
         InvocationContext = new InvocationContext
         {
             AuthenticationCredentialsProviders = Creds,
@@ -33,13 +28,14 @@ public class TestBase
         FileManager = new FileManager();
     }
 
-    public static void PrintJsonResult(object result)
+    protected static void PrintJsonResult(object result)
     {
         Console.WriteLine(JsonConvert.SerializeObject(result, Formatting.Indented));
     }
 
-    public static void PrintDataHandlerResult(IEnumerable<DataSourceItem> items)
+    protected static void PrintDataHandlerResult(IEnumerable<DataSourceItem> items)
     {
+        Console.WriteLine($"Count: {items.Count()}");
         foreach (var item in items)
             Console.WriteLine($"{item.Value} - {item.DisplayName}");
     }
