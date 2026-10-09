@@ -4,8 +4,8 @@ using Blackbird.Applications.Sdk.Common.Invocation;
 
 namespace Apps.Shopify.Services.Concrete;
 
-public class StoreThemeSettingsDataSectionsService(InvocationContext invocationContext) 
+public class StoreThemeSettingsDataSectionService(InvocationContext invocationContext) 
     : BaseTranslatableResourceContentService(invocationContext)
 {
-    protected override string ContentType => TranslatableResources.StoreThemeSettingsDataSections;
+    protected override string ContentType => TranslatableResources.StoreThemeSettingsDataSection;
 }

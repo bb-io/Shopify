@@ -31,7 +31,7 @@ public class DataHandlerTests : TestBase
     {
         var contentType = new ContentTypeIdentifier
         {
-            ContentType = TranslatableResources.StoreThemeSettingsDataSections
+            ContentType = TranslatableResources.StoreThemeSettingsDataSection
         };
 
         await TestHandler<ContentDataHandler>(contentType);
@@ -127,5 +127,5 @@ public class DataHandlerTests : TestBase
     
     [TestMethod]
     public async Task ThemeSettingsDataSectionsDataHandler_ReturnsThemeSettingsDataSections() 
-        => await TestHandler<ThemeSettingsDataSectionsDataHandler>();
+        => await TestHandler<ThemeSettingsDataSectionDataHandler>();
 }

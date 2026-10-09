@@ -29,7 +29,7 @@ public class ContentServiceFactory(InvocationContext invocationContext)
             TranslatableResources.StoreThemeLocaleContent => new StoreThemeLocaleContentService(invocationContext),
             TranslatableResources.StoreThemeSectionGroup => new StoreThemeSectionGroupService(invocationContext),
             TranslatableResources.StoreThemeSettingsCategory => new StoreThemeSettingsCategoryService(invocationContext),
-            TranslatableResources.StoreThemeSettingsDataSections => new StoreThemeSettingsDataSectionsService(invocationContext),
+            TranslatableResources.StoreThemeSettingsDataSection => new StoreThemeSettingsDataSectionService(invocationContext),
             _ => throw new ArgumentException($"Unsupported content type '{contentType}' was passed in ContentServiceFactory")
         };
     }
