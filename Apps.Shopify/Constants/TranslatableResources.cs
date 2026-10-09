@@ -23,6 +23,7 @@ public static class TranslatableResources
     public const string StoreThemeLocaleContent = "Store theme locale content";
     public const string StoreThemeSectionGroup = "Store theme section group";
     public const string StoreThemeSettingsCategory = "Store theme settings category";
+    public const string StoreThemeSettingsDataSections = "Store theme settings data sections";
 
     private static readonly Dictionary<string, TranslatableResource> ApiTypes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -45,6 +46,7 @@ public static class TranslatableResources
         [StoreThemeLocaleContent] = TranslatableResource.ONLINE_STORE_THEME_LOCALE_CONTENT,
         [StoreThemeSectionGroup] = TranslatableResource.ONLINE_STORE_THEME_SECTION_GROUP,
         [StoreThemeSettingsCategory] = TranslatableResource.ONLINE_STORE_THEME_SETTINGS_CATEGORY,
+        [StoreThemeSettingsDataSections] = TranslatableResource.ONLINE_STORE_THEME_SETTINGS_DATA_SECTIONS,
     };
     
     private static readonly Dictionary<TranslatableResource, string> FriendlyNames = ApiTypes.ToDictionary(x => x.Value, x => x.Key);
@@ -68,6 +70,7 @@ public static class TranslatableResources
         StoreThemeLocaleContent,
         StoreThemeSectionGroup,
         StoreThemeSettingsCategory,
+        StoreThemeSettingsDataSections,
     ];
 
     public static readonly List<string> SupportedPollingContentTypes = [
@@ -87,6 +90,7 @@ public static class TranslatableResources
         StoreThemeLocaleContent,
         StoreThemeSectionGroup,
         StoreThemeSettingsCategory,
+        StoreThemeSettingsDataSections,
     ];
 
     public static bool TryGetApiType(string? contentType, out TranslatableResource apiType)

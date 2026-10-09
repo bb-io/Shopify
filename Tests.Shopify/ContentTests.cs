@@ -15,7 +15,7 @@ public class ContentTests : TestBase
 		var action = new ContentActions(InvocationContext, FileManager);
 		var input = new SearchContentRequest
 		{
-			ContentTypes = [TranslatableResources.StoreThemeSectionGroup]
+			ContentTypes = [TranslatableResources.StoreThemeSettingsDataSections]
         };
 
 		// Act
@@ -37,7 +37,7 @@ public class ContentTests : TestBase
 		};
 		var input = new DownloadContentRequest
 		{
-			ContentId = "gid://shopify/OnlineStoreThemeSettingsCategory/Brand+information?theme_id=162863874332&first_setting_id=brand_headline",
+			ContentId = "gid://shopify/OnlineStoreThemeSettingsDataSections/162863907100",
 			Locale = "en",
 			//MarketId = "gid://shopify/Market/94465523996"
         };
