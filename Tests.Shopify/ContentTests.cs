@@ -15,7 +15,7 @@ public class ContentTests : TestBase
 		var action = new ContentActions(InvocationContext, FileManager);
 		var input = new SearchContentRequest
 		{
-			ContentTypes = [TranslatableResources.StoreThemeSectionGroup]
+			ContentTypes = [TranslatableResources.SellingPlanGroup]
         };
 
 		// Act
@@ -33,11 +33,11 @@ public class ContentTests : TestBase
         var action = new ContentActions(InvocationContext, FileManager);
 		var contentType = new ContentTypeIdentifier
 		{
-			ContentType = TranslatableResources.StoreThemeAppEmbed
+			ContentType = TranslatableResources.SellingPlanGroup
 		};
 		var input = new DownloadContentRequest
 		{
-			ContentId = "gid://shopify/OnlineStoreThemeSectionGroup/footer-group?theme_id=208521298258",
+			ContentId = "gid://shopify/SellingPlanGroup/78841119047",
 			Locale = "en",
 			//MarketId = "gid://shopify/Market/94465523996"
         };

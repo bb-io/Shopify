@@ -1,0 +1,3 @@
+namespace Apps.Shopify.Models.Response.StoreThemeSettingsDataSection;
+
+public record SearchStoreThemeSettingsDataSectionsResponse(List<StoreThemeSettingsDataSectionResponse> Sections);

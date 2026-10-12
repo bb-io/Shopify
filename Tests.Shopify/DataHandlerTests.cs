@@ -31,7 +31,7 @@ public class DataHandlerTests : TestBase
     {
         var contentType = new ContentTypeIdentifier
         {
-            ContentType = TranslatableResources.StoreThemeSectionGroup
+            ContentType = TranslatableResources.SellingPlan
         };
 
         await TestHandler<ContentDataHandler>(contentType);
@@ -118,6 +118,28 @@ public class DataHandlerTests : TestBase
         => await TestHandler<ThemeLocaleContentDataHandler>();
     
     [TestMethod]
-    public async Task StoreThemeSectionGroupDataHandler_ReturnsThemeSectionGroups() 
+    public async Task ThemeSectionGroupDataHandler_ReturnsThemeSectionGroups() 
         => await TestHandler<ThemeSectionGroupDataHandler>();
+    
+    [TestMethod]
+    public async Task ThemeSettingsCategoryDataHandler_ReturnsThemeSettingsCategories() 
+        => await TestHandler<ThemeSettingsCategoryDataHandler>();
+    
+    [TestMethod]
+    public async Task ThemeSettingsDataSectionsDataHandler_ReturnsThemeSettingsDataSections() 
+        => await TestHandler<ThemeSettingsDataSectionDataHandler>();
+    
+    [TestMethod]
+    public async Task PackingSlipTemplateDataHandler_ReturnsPackingSlipTemplates() 
+        => await TestHandler<PackingSlipTemplateDataHandler>();
+    
+    [TestMethod]
+    public async Task PaymentGatewayDataHandler_ReturnsPaymentGateways() => await TestHandler<PaymentGatewayDataHandler>();
+    
+    [TestMethod]
+    public async Task SellingPlanDataHandler_ReturnsSellingPlans() => await TestHandler<SellingPlanDataHandler>();
+    
+    [TestMethod]
+    public async Task SellingPlanGroupDataHandler_ReturnsSellingPlanGroups() 
+        => await TestHandler<SellingPlanGroupDataHandler>();
 }
