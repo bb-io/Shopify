@@ -34,6 +34,7 @@ public class ContentServiceFactory(InvocationContext invocationContext)
             TranslatableResources.PaymentGateway => new PaymentGatewayService(invocationContext),
             TranslatableResources.SellingPlan => new SellingPlanService(invocationContext),
             TranslatableResources.SellingPlanGroup => new SellingPlanGroupService(invocationContext),
+            TranslatableResources.Store => new StoreService(invocationContext),
             _ => throw new ArgumentException($"Unsupported content type '{contentType}' was passed in ContentServiceFactory")
         };
     }
