@@ -33,11 +33,11 @@ public class ContentTests : TestBase
         var action = new ContentActions(InvocationContext, FileManager);
 		var contentType = new ContentTypeIdentifier
 		{
-			ContentType = TranslatableResources.PackingSlipTemplate
+			ContentType = TranslatableResources.PaymentGateway
 		};
 		var input = new DownloadContentRequest
 		{
-			ContentId = "gid://shopify/PackingSlipTemplate/4399956252",
+			ContentId = "gid://shopify/PaymentGateway/171033624903",
 			Locale = "en",
 			//MarketId = "gid://shopify/Market/94465523996"
         };
@@ -58,7 +58,7 @@ public class ContentTests : TestBase
 		var input = new UploadContentRequest
 		{
 			Content = new FileReference { Name = "test.html" },
-			Locale = "fr",
+			Locale = "uk",
 			//MarketId = "gid://shopify/Market/94465523996"
 		};
 

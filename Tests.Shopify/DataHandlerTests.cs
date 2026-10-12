@@ -31,7 +31,7 @@ public class DataHandlerTests : TestBase
     {
         var contentType = new ContentTypeIdentifier
         {
-            ContentType = TranslatableResources.StoreThemeSettingsDataSection
+            ContentType = TranslatableResources.PaymentGateway
         };
 
         await TestHandler<ContentDataHandler>(contentType);
@@ -132,4 +132,7 @@ public class DataHandlerTests : TestBase
     [TestMethod]
     public async Task PackingSlipTemplateDataHandler_ReturnsPackingSlipTemplates() 
         => await TestHandler<PackingSlipTemplateDataHandler>();
+    
+    [TestMethod]
+    public async Task PaymentGatewayDataHandler_ReturnsPaymentGateways() => await TestHandler<PaymentGatewayDataHandler>();
 }

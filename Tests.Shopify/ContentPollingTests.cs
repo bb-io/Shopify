@@ -1,4 +1,5 @@
-﻿using ShopifyTests.Base;
+﻿using Apps.Shopify.Constants;
+using ShopifyTests.Base;
 using Apps.Shopify.Polling;
 using Apps.Shopify.Polling.Models.Memory;
 using Apps.Shopify.Models.Request.Content;
@@ -16,10 +17,9 @@ public class ContentPollingTests : TestBase
 		var polling = new ContentPollingList(InvocationContext);
 		var digests = new Dictionary<string, string>
 		{
-			{ "gid://shopify/Menu/247055548700", "382569A684C6656594C038EC118EBB01D4356E3AD3E2D7CBA7117810F3BA58D3" },
-			{ "gid://shopify/Menu/247055581468", "0C51C2FEC556EA53B8BBE6C00058F0DD1CC0B3F96A6BEF0BECBC14F68F1D5391" },
-			{ "gid://shopify/Menu/255319539996", "7F8218301B671A04DBF2BA14BE7EDE204622141A0A7019E5327670061B28DBA5" },
-			{ "gid://shopify/Menu/275676037404", "2AFFF611EDA0DB3C79EE078916A118FBCFF6095311F30BE13BD603DA0F00BE89" }
+			{
+				"gid://shopify/PaymentGateway/171033624903", "before_payment_instructions:b0b10a317235fae75f779596ea76a42ab50e51f16b6c80be495e1ee030d4deef|message:2b3b7c4f195b0fce775ee72605c0964fa9006f31c4c826772bfc5e26377438c3|name:e04c8ae34c303c8b36be8dd65a2f45beb7376c97baa7a7211563dad339cc2dc5"
+			},
 		};
 		var memory = new DigestDateMemory
 		{
@@ -27,7 +27,7 @@ public class ContentPollingTests : TestBase
 			Digests = digests
 		};
         var request = new PollingEventRequest<DigestDateMemory> { Memory = memory };
-        var input = new PollUpdatedContentRequest { ContentTypes = ["Menu"] };
+        var input = new PollUpdatedContentRequest { ContentTypes = [TranslatableResources.PaymentGateway] };
 
         // Act
         var result = await polling.OnContentUpdated(request, input);
