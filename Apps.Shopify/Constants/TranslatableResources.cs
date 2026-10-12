@@ -27,6 +27,7 @@ public static class TranslatableResources
     public const string PackingSlipTemplate = "Packing slip template";
     public const string PaymentGateway = "Payment gateway";
     public const string SellingPlan = "Selling plan";
+    public const string SellingPlanGroup = "Selling plan group";
 
     private static readonly Dictionary<string, TranslatableResource> ApiTypes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -53,6 +54,7 @@ public static class TranslatableResources
         [PackingSlipTemplate] = TranslatableResource.PACKING_SLIP_TEMPLATE,
         [PaymentGateway] = TranslatableResource.PAYMENT_GATEWAY,
         [SellingPlan] = TranslatableResource.SELLING_PLAN,
+        [SellingPlanGroup] = TranslatableResource.SELLING_PLAN_GROUP,
     };
     
     private static readonly Dictionary<TranslatableResource, string> FriendlyNames = ApiTypes.ToDictionary(x => x.Value, x => x.Key);
@@ -80,6 +82,7 @@ public static class TranslatableResources
         PackingSlipTemplate,
         PaymentGateway,
         SellingPlan,
+        SellingPlanGroup,
     ];
 
     public static readonly List<string> SupportedPollingContentTypes = [
@@ -103,6 +106,7 @@ public static class TranslatableResources
         PackingSlipTemplate,
         PaymentGateway,
         SellingPlan,
+        SellingPlanGroup,
     ];
 
     public static bool TryGetApiType(string? contentType, out TranslatableResource apiType)

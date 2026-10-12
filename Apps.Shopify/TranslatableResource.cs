@@ -28,4 +28,5 @@ public enum TranslatableResource
     PACKING_SLIP_TEMPLATE,
     PAYMENT_GATEWAY,
     SELLING_PLAN,
+    SELLING_PLAN_GROUP,
 }

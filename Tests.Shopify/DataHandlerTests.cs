@@ -138,4 +138,8 @@ public class DataHandlerTests : TestBase
     
     [TestMethod]
     public async Task SellingPlanDataHandler_ReturnsSellingPlans() => await TestHandler<SellingPlanDataHandler>();
+    
+    [TestMethod]
+    public async Task SellingPlanGroupDataHandler_ReturnsSellingPlanGroups() 
+        => await TestHandler<SellingPlanGroupDataHandler>();
 }

@@ -15,7 +15,7 @@ public class ContentTests : TestBase
 		var action = new ContentActions(InvocationContext, FileManager);
 		var input = new SearchContentRequest
 		{
-			ContentTypes = [TranslatableResources.SellingPlan]
+			ContentTypes = [TranslatableResources.SellingPlanGroup]
         };
 
 		// Act
@@ -33,11 +33,11 @@ public class ContentTests : TestBase
         var action = new ContentActions(InvocationContext, FileManager);
 		var contentType = new ContentTypeIdentifier
 		{
-			ContentType = TranslatableResources.SellingPlan
+			ContentType = TranslatableResources.SellingPlanGroup
 		};
 		var input = new DownloadContentRequest
 		{
-			ContentId = "gid://shopify/SellingPlan/692190609735",
+			ContentId = "gid://shopify/SellingPlanGroup/78841119047",
 			Locale = "en",
 			//MarketId = "gid://shopify/Market/94465523996"
         };
