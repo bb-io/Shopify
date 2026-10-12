@@ -136,11 +136,48 @@ Other scopes that may be needed depending on desired actions are:
 - **Download store theme section group** Download content of a specific store theme section group
 - **Upload store theme section group** Upload content of a specific store theme section group
 
+### Store theme settings data sections
+
+> **Note**: These actions only support vintage themes.
+
+- **Search store theme settings data sections** Search store theme settings data sections with specific criteria
+- **Download store theme settings data section** Download content of a specific store theme settings data section
+- **Upload store theme settings data sections** Upload content of a specific store theme settings data section
+
+### Packing slip templates
+
+- **Search packing slip templates** Search packing slip templates with specific criteria
+- **Download packing slip template** Download content of a specific packing slip template
+- **Upload packing slip template** Upload content of a specific packing slip template
+
+### Payment gateways
+
+- **Search payment gateways** Search payment gateways with specific criteria
+- **Download payment gateway** Download content of a specific payment gateway
+- **Upload payment gateway** Upload content of a specific payment gateway
+
+### Selling plans
+
+> **Note**: Selling plans and selling plan groups are created by apps that support them, 
+> such as [Shopify Subscriptions](https://apps.shopify.com/shopify-subscriptions). 
+> Set them up before using the selling plans actions.
+
+- **Search selling plans** Search selling plans with specific criteria
+- **Download selling plan** Download content of a specific selling plan
+- **Upload selling plan** Upload content of a specific selling plan
+
+### Selling plan groups
+
+- **Search selling plan groups** Search selling plan groups with specific criteria
+- **Download selling plan group** Download content of a specific selling plan group
+- **Upload selling plan group** Upload content of a specific selling plan group
+
 ### Content
 
-> **Note**: These actions support the following content types: collection, metafield, article, blog, page, 
-> theme, product, menu, delivery method definition, email template, store theme JSON template, filter, 
-> media image, store theme app embed, metaobject, store theme locale content, store theme section group.
+> **Note**: These actions support the following content types: collection, metafield, article, blog, page, theme, product, 
+> menu, delivery method definition, email template, store theme JSON template, filter, media image, store theme app embed, 
+> metaobject, store theme locale content, store theme section group, store theme settings category, store theme settings data,
+> packing slip template, payment gateway, selling plan, selling plan group.
 
 - **Upload content** Upload content of a specific content type from a file
 - **Download content** Download content of a specific content type
@@ -174,8 +211,9 @@ Other scopes that may be needed depending on desired actions are:
 ### Content
 
 > **Note**: These events support the following content types: collection, article, blog, page, product, *menu, 
-> delivery method definition, email template, store theme JSON template, filter, media image, 
-> store theme app embed, metaobject, store theme locale content, store theme section group*.
+> delivery method definition, email template, store theme JSON template, filter, media image, store theme app embed, 
+> metaobject, store theme locale content, store theme section group, store theme settings category, 
+> packing slip template, store theme settings data, payment gateway, selling plan, selling plan group*.
 >
 > Shopify doesn't expose an update date for the content types in italic. The 'Updated at' output will always be empty for them.
 
