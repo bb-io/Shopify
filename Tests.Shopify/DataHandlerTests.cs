@@ -31,7 +31,7 @@ public class DataHandlerTests : TestBase
     {
         var contentType = new ContentTypeIdentifier
         {
-            ContentType = TranslatableResources.PaymentGateway
+            ContentType = TranslatableResources.SellingPlan
         };
 
         await TestHandler<ContentDataHandler>(contentType);
@@ -135,4 +135,7 @@ public class DataHandlerTests : TestBase
     
     [TestMethod]
     public async Task PaymentGatewayDataHandler_ReturnsPaymentGateways() => await TestHandler<PaymentGatewayDataHandler>();
+    
+    [TestMethod]
+    public async Task SellingPlanDataHandler_ReturnsSellingPlans() => await TestHandler<SellingPlanDataHandler>();
 }

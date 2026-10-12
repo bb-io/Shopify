@@ -15,7 +15,7 @@ public class ContentTests : TestBase
 		var action = new ContentActions(InvocationContext, FileManager);
 		var input = new SearchContentRequest
 		{
-			ContentTypes = [TranslatableResources.PackingSlipTemplate]
+			ContentTypes = [TranslatableResources.SellingPlan]
         };
 
 		// Act
@@ -33,11 +33,11 @@ public class ContentTests : TestBase
         var action = new ContentActions(InvocationContext, FileManager);
 		var contentType = new ContentTypeIdentifier
 		{
-			ContentType = TranslatableResources.PaymentGateway
+			ContentType = TranslatableResources.SellingPlan
 		};
 		var input = new DownloadContentRequest
 		{
-			ContentId = "gid://shopify/PaymentGateway/171033624903",
+			ContentId = "gid://shopify/SellingPlan/692190609735",
 			Locale = "en",
 			//MarketId = "gid://shopify/Market/94465523996"
         };
