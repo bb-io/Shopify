@@ -4,6 +4,6 @@ namespace Apps.Shopify.Models.Request.SellingPlan;
 
 public class SearchSellingPlansRequest
 {
-    [Display("Search plan name contains")]
+    [Display("Selling plan name contains")]
     public string? NameContains { get; set; }
 }
