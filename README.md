@@ -136,6 +136,12 @@ Other scopes that may be needed depending on desired actions are:
 - **Download store theme section group** Download content of a specific store theme section group
 - **Upload store theme section group** Upload content of a specific store theme section group
 
+### Store theme settings categories
+
+- **Search store theme settings categories** Search store theme settings categories with specific criteria
+- **Download store theme settings category** Download content of a specific store theme settings category
+- **Upload store theme settings category** Upload content of a specific store theme settings category
+
 ### Store theme settings data sections
 
 > **Note**: These actions only support vintage themes.
