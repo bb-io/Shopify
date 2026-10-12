@@ -182,8 +182,8 @@ Other scopes that may be needed depending on desired actions are:
 
 > **Note**: These actions support the following content types: collection, metafield, article, blog, page, theme, product, 
 > menu, delivery method definition, email template, store theme JSON template, filter, media image, store theme app embed, 
-> metaobject, store theme locale content, store theme section group, store theme settings category, store theme settings data,
-> packing slip template, payment gateway, selling plan, selling plan group.
+> metaobject, store theme locale content, store theme section group, store theme settings category, 
+> store theme settings data section, packing slip template, payment gateway, selling plan, selling plan group.
 
 - **Upload content** Upload content of a specific content type from a file
 - **Download content** Download content of a specific content type
@@ -219,7 +219,7 @@ Other scopes that may be needed depending on desired actions are:
 > **Note**: These events support the following content types: collection, article, blog, page, product, *menu, 
 > delivery method definition, email template, store theme JSON template, filter, media image, store theme app embed, 
 > metaobject, store theme locale content, store theme section group, store theme settings category, 
-> packing slip template, store theme settings data, payment gateway, selling plan, selling plan group*.
+> packing slip template, store theme settings data section, payment gateway, selling plan, selling plan group*.
 >
 > Shopify doesn't expose an update date for the content types in italic. The 'Updated at' output will always be empty for them.
 
