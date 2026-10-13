@@ -17,7 +17,7 @@ Shopify is a cloud-based e-commerce platform that enables users to create, custo
 Other scopes that may be needed depending on desired actions are: 
 `write_products`, `read_products`, `write_publications`, `read_publications`, `write_translations`, `read_translations`, 
 `read_themes`, `read_content`, `read_markets`, `read_metaobjects`, `read_metaobject_definitions`,
-`write_online_store_navigation`, `read_online_store_navigation`.
+`write_online_store_navigation`, `read_online_store_navigation`, `read_legal_policies`.
 5. Copy the store name from the store domain. For example, if your domain is `mystore.myshopify.com`, then the store name is `mystore`.
 6. In Blackbird, choose one of the supported connection methods:
 7. `Developer API key`: paste the `Admin API access token`.
@@ -29,6 +29,8 @@ Other scopes that may be needed depending on desired actions are:
 
 ### Store
 
+- **Download store** Download store's translatable content, such as the homepage title and meta description
+- **Upload store** Upload store's translatable content, such as the homepage title and meta description
 - **Get store locales information** Get primary and additional store locales
 - **Download store resources** Download content of all store resource type items
 - **Upload store resources** Upload content of all store resource type items
@@ -178,12 +180,31 @@ Other scopes that may be needed depending on desired actions are:
 - **Download selling plan group** Download content of a specific selling plan group
 - **Upload selling plan group** Upload content of a specific selling plan group
 
+### Store policies
+
+- **Search store policies** Search store policies with specific criteria
+- **Download store policy** Download content of a specific store policy
+- **Upload store policy** Upload content of a specific store policy
+
+### Article images
+
+- **Search article images** Search article images with specific criteria
+- **Download article image** Download content of a specific article image
+- **Upload article image** Upload content of a specific article image
+
+### Collection images
+
+- **Search collection images** Search collection images with specific criteria
+- **Download collection image** Download content of a specific collection image
+- **Upload collection image** Upload content of a specific collection image
+
 ### Content
 
 > **Note**: These actions support the following content types: collection, metafield, article, blog, page, theme, product, 
 > menu, delivery method definition, email template, store theme JSON template, filter, media image, store theme app embed, 
 > metaobject, store theme locale content, store theme section group, store theme settings category, 
-> store theme settings data section, packing slip template, payment gateway, selling plan, selling plan group.
+> store theme settings data section, packing slip template, payment gateway, selling plan, selling plan group, store,
+> store policy, article image, collection image.
 
 - **Upload content** Upload content of a specific content type from a file
 - **Download content** Download content of a specific content type
@@ -219,7 +240,8 @@ Other scopes that may be needed depending on desired actions are:
 > **Note**: These events support the following content types: collection, article, blog, page, product, *menu, 
 > delivery method definition, email template, store theme JSON template, filter, media image, store theme app embed, 
 > metaobject, store theme locale content, store theme section group, store theme settings category, 
-> packing slip template, store theme settings data section, payment gateway, selling plan, selling plan group*.
+> packing slip template, store theme settings data section, payment gateway, selling plan, selling plan group, store,
+> store policy, article image, collection image*.
 >
 > Shopify doesn't expose an update date for the content types in italic. The 'Updated at' output will always be empty for them.
 
