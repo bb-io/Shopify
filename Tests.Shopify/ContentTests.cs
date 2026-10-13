@@ -33,11 +33,11 @@ public class ContentTests : TestBase
         var action = new ContentActions(InvocationContext, FileManager);
 		var contentType = new ContentTypeIdentifier
 		{
-			ContentType = TranslatableResources.StorePolicy
+			ContentType = TranslatableResources.ArticleImage
 		};
 		var input = new DownloadContentRequest
 		{
-			ContentId = "gid://shopify/ShopPolicy/60155625799",
+			ContentId = "gid://shopify/ArticleImage/335944745287",
 			Locale = "en",
 			//MarketId = "gid://shopify/Market/94465523996"
         };
