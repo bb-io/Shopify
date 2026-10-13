@@ -14,7 +14,7 @@ public abstract class BaseTranslatableResourceContentService(InvocationContext i
         return DownloadTranslatableResource(input);
     }
 
-    public Task<SearchContentResponse> Search(SearchContentRequest input)
+    public virtual Task<SearchContentResponse> Search(SearchContentRequest input)
     {
         return SearchTranslatableResources(input);
     }

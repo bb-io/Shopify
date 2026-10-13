@@ -12,6 +12,7 @@ public static class TranslatableResources
     public const string Theme = "Theme";
     public const string Product = "Product";
     public const string Store = "Store";
+    public const string StorePolicy = "Store policy";
     public const string Menu = "Menu";
     public const string DeliveryMethodDefinition = "Delivery method definition";
     public const string EmailTemplate = "Email template";
@@ -39,6 +40,7 @@ public static class TranslatableResources
         [Theme] = TranslatableResource.ONLINE_STORE_THEME,
         [Product] = TranslatableResource.PRODUCT,
         [Store] = TranslatableResource.SHOP,
+        [StorePolicy] = TranslatableResource.SHOP_POLICY,
         [Menu] = TranslatableResource.MENU,
         [DeliveryMethodDefinition] = TranslatableResource.DELIVERY_METHOD_DEFINITION,
         [EmailTemplate] = TranslatableResource.EMAIL_TEMPLATE,
@@ -83,6 +85,8 @@ public static class TranslatableResources
         PaymentGateway,
         SellingPlan,
         SellingPlanGroup,
+        Store,
+        StorePolicy,
     ];
 
     public static readonly List<string> SupportedPollingContentTypes = [
@@ -107,6 +111,8 @@ public static class TranslatableResources
         PaymentGateway,
         SellingPlan,
         SellingPlanGroup,
+        Store,
+        StorePolicy,
     ];
 
     public static bool TryGetApiType(string? contentType, out TranslatableResource apiType)

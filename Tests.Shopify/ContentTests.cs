@@ -15,7 +15,7 @@ public class ContentTests : TestBase
 		var action = new ContentActions(InvocationContext, FileManager);
 		var input = new SearchContentRequest
 		{
-			ContentTypes = [TranslatableResources.Store]
+			ContentTypes = [TranslatableResources.StorePolicy]
         };
 
 		// Act
@@ -33,11 +33,11 @@ public class ContentTests : TestBase
         var action = new ContentActions(InvocationContext, FileManager);
 		var contentType = new ContentTypeIdentifier
 		{
-			ContentType = TranslatableResources.Store
+			ContentType = TranslatableResources.StorePolicy
 		};
 		var input = new DownloadContentRequest
 		{
-			ContentId = "gid://shopify/Shop/101665308999",
+			ContentId = "gid://shopify/ShopPolicy/60155625799",
 			Locale = "en",
 			//MarketId = "gid://shopify/Market/94465523996"
         };
@@ -51,7 +51,7 @@ public class ContentTests : TestBase
     }
 
 	[TestMethod]
-	public Task UploadContent_IsSuccess()
+	public async Task UploadContent_IsSuccess()
 	{
         // Arrange
         var action = new ContentActions(InvocationContext, FileManager);
@@ -63,6 +63,6 @@ public class ContentTests : TestBase
 		};
 
         // Act
-		return action.UploadContent(input);
+		await action.UploadContent(input);
     }
 }
