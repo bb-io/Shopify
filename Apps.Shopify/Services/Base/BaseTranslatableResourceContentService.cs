@@ -9,17 +9,17 @@ namespace Apps.Shopify.Services.Base;
 public abstract class BaseTranslatableResourceContentService(InvocationContext invocationContext) 
     : BaseContentService(invocationContext), IContentService, IDigestPollingContentService
 {
-    public Task<FileRecord> Download(DownloadContentRequest input)
+    public virtual Task<FileRecord> Download(DownloadContentRequest input)
     {
         return DownloadTranslatableResource(input);
     }
 
-    public virtual Task<SearchContentResponse> Search(SearchContentRequest input)
+    public virtual Task<SearchContentResponse> Search(SearchContentRequest input, bool firstPageOnly = false, CancellationToken token = default)
     {
-        return SearchTranslatableResources(input);
+        return SearchTranslatableResources(input, firstPageOnly, token);
     }
 
-    public Task Upload(UploadContentServiceRequest input)
+    public virtual Task Upload(UploadContentServiceRequest input)
     {
         return UploadTranslatableResource(input);
     }

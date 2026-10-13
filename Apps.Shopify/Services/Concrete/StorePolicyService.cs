@@ -14,10 +14,13 @@ public class StorePolicyService(InvocationContext invocationContext) : BaseTrans
 {
     protected override string ContentType => TranslatableResources.StorePolicy;
     
-    public override async Task<SearchContentResponse> Search(SearchContentRequest input)
+    public override async Task<SearchContentResponse> Search(
+        SearchContentRequest input, 
+        bool firstPageOnly = false, 
+        CancellationToken token = default)
     {
         var request = new GraphQLRequest(GraphQlQueries.ShopPolicies);
-        var result = await Client.ExecuteWithErrorHandling<StorePolicyOuterResponse>(request);
+        var result = await Client.ExecuteWithErrorHandling<StorePolicyOuterResponse>(request, token);
         var policies = result.Store.StorePolicies;
 
         if (!string.IsNullOrEmpty(input.NameContains))

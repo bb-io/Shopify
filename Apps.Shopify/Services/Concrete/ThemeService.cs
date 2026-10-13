@@ -45,9 +45,16 @@ public class ThemeService(InvocationContext invocationContext) : BaseContentServ
         return new FileRecord(html, MediaTypeNames.Text.Html, input.ContentId.GetFileName(metadata.MarketId));
     }
 
-    public async Task<SearchContentResponse> Search(SearchContentRequest input)
+    public async Task<SearchContentResponse> Search(
+        SearchContentRequest input, 
+        bool firstPageOnly = false, 
+        CancellationToken token = default)
     {
-        var response = await Client.Paginate<ThemeEntity, ThemesPaginationResponse>(GraphQlQueries.Themes, []);
+        var response = await Client.Paginate<ThemeEntity, ThemesPaginationResponse>(
+            GraphQlQueries.Themes, 
+            [],
+            firstPageOnly,
+            token);
 
         if (!string.IsNullOrEmpty(input.NameContains))
             response = response.Where(x => x.Name.Contains(input.NameContains, StringComparison.OrdinalIgnoreCase)).ToList();

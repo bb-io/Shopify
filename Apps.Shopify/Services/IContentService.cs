@@ -9,5 +9,5 @@ public interface IContentService
 {
     Task<FileRecord> Download(DownloadContentRequest input);
     Task Upload(UploadContentServiceRequest input);
-    Task<SearchContentResponse> Search(SearchContentRequest input);
+    Task<SearchContentResponse> Search(SearchContentRequest input, bool firstPageOnly = false, CancellationToken token = default);
 }

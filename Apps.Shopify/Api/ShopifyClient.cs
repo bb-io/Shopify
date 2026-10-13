@@ -81,7 +81,19 @@ public class ShopifyClient : GraphQLHttpClient
         return response;
     }
 
-    public async Task<List<T>> Paginate<T, TV>(
+    public Task<List<T>> Paginate<T, TV>(
+        string query, 
+        Dictionary<string, object> variables,
+        bool firstPageOnly = false,
+        CancellationToken cancellationToken = default)
+        where TV : IPaginationResponse<T>
+    {
+        return firstPageOnly
+            ? PaginateOnce<T, TV>(query, variables, cancellationToken)
+            : PaginateAll<T, TV>(query, variables, cancellationToken);
+    }
+    
+    private async Task<List<T>> PaginateAll<T, TV>(
         string query, 
         Dictionary<string, object> variables,
         CancellationToken cancellationToken = default)

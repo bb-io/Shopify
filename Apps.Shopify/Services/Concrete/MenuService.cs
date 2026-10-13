@@ -70,7 +70,10 @@ public class MenuService(InvocationContext invocationContext)
         await ResourceService.UpdateIdentifiedContent(items, null, input.MarketId);
     }
 
-    public async Task<SearchContentResponse> Search(SearchContentRequest input)
+    public async Task<SearchContentResponse> Search(
+        SearchContentRequest input, 
+        bool firstPageOnly = false, 
+        CancellationToken token = default)
     {
         string? query = new QueryBuilder()
             .AddContains("title", input.NameContains)
@@ -78,7 +81,9 @@ public class MenuService(InvocationContext invocationContext)
         
         var response = await Client.Paginate<MenuEntity, MenusPaginationResponse>(
             GraphQlQueries.Menus,
-            QueryHelper.QueryToDictionary(query));
+            QueryHelper.QueryToDictionary(query),
+            firstPageOnly,
+            token);
 
         var contentItems = response.Select(x => new ContentItemEntity(x.Id, ContentType, x.Title)).ToList();
         return new(contentItems);

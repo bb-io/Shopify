@@ -34,9 +34,12 @@ public abstract class BaseContentService(InvocationContext invocationContext) : 
         return ResourceService.UpdateResourceContent(input.ContentId, input.Locale, input.HtmlContent, input.MarketId);
     }
     
-    protected async Task<SearchContentResponse> SearchTranslatableResources(SearchContentRequest input)
+    protected async Task<SearchContentResponse> SearchTranslatableResources(
+        SearchContentRequest input,
+        bool firstPageOnly = false,
+        CancellationToken token = default)
     {
-        var translatableResources = await ListTranslatableResources();
+        var translatableResources = await ListTranslatableResources(firstPageOnly: firstPageOnly, token: token);
 
         var items = translatableResources
             .Where(x => x.HasContent() && x.MatchesSearch(input.NameContains))
@@ -80,7 +83,10 @@ public abstract class BaseContentService(InvocationContext invocationContext) : 
         return new(changed, current);
     }
     
-    protected Task<List<TranslatableResourceEntity>> ListTranslatableResources(TranslatableResource? resourceType = null)
+    protected Task<List<TranslatableResourceEntity>> ListTranslatableResources(
+        TranslatableResource? resourceType = null,
+        bool firstPageOnly = false,
+        CancellationToken token = default)
     {
         var variables = new Dictionary<string, object>
         {
@@ -89,6 +95,8 @@ public abstract class BaseContentService(InvocationContext invocationContext) : 
 
         return Client.Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
             GraphQlQueries.TranslatableResources,
-            variables);
+            variables,
+            firstPageOnly,
+            token);
     }
 }
