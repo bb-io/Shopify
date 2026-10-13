@@ -31,7 +31,7 @@ public class DataHandlerTests : TestBase
     {
         var contentType = new ContentTypeIdentifier
         {
-            ContentType = TranslatableResources.SellingPlan
+            ContentType = TranslatableResources.CollectionImage
         };
 
         await TestHandler<ContentDataHandler>(contentType);
@@ -142,4 +142,14 @@ public class DataHandlerTests : TestBase
     [TestMethod]
     public async Task SellingPlanGroupDataHandler_ReturnsSellingPlanGroups() 
         => await TestHandler<SellingPlanGroupDataHandler>();
+    
+    [TestMethod]
+    public async Task StorePolicyDataHandler_ReturnsStorePolicies() => await TestHandler<StorePolicyDataHandler>();
+    
+    [TestMethod]
+    public async Task ArticleImageDataHandler_ReturnsArticleImages() => await TestHandler<ArticleImageDataHandler>();
+    
+    [TestMethod]
+    public async Task CollectionImageDataHandler_ReturnsCollectionImages() 
+        => await TestHandler<CollectionImageDataHandler>();
 }

@@ -29,4 +29,6 @@ public enum TranslatableResource
     PAYMENT_GATEWAY,
     SELLING_PLAN,
     SELLING_PLAN_GROUP,
+    ARTICLE_IMAGE,
+    COLLECTION_IMAGE
 }

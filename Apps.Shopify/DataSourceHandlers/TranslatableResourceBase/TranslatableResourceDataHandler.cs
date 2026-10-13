@@ -16,9 +16,10 @@ public abstract class TranslatableResourceDataHandler(InvocationContext invocati
     {
         var variables = new Dictionary<string, object> { ["resourceType"] = ResourceType };
 
-        var response = await Client.PaginateOnce<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
+        var response = await Client.Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
             GraphQlQueries.TranslatableResources,
             variables,
+            firstPageOnly: true,
             cancellationToken);
 
         return response

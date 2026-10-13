@@ -79,7 +79,7 @@ public class BlogService(InvocationContext invocationContext)
         return new(items);
     }
 
-    public async Task<SearchContentResponse> Search(SearchContentRequest input)
+    public async Task<SearchContentResponse> Search(SearchContentRequest input, bool firstPageOnly = false, CancellationToken token = default)
     {
         string? query = new QueryBuilder()
             .AddContains("title", input.NameContains)
@@ -89,8 +89,9 @@ public class BlogService(InvocationContext invocationContext)
 
         var response = await Client.Paginate<BlogEntity, BlogsPaginationResponse>(
             GraphQlQueries.Blogs,
-            QueryHelper.QueryToDictionary(query)
-        );
+            QueryHelper.QueryToDictionary(query),
+            firstPageOnly,
+            token);
 
         var items = response.Select(x => new ContentItemEntity(x.Id, ContentType, x.Title)).ToList();
         return new(items);

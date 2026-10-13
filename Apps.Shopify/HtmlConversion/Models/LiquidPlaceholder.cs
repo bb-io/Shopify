@@ -19,11 +19,6 @@ public static class LiquidPlaceholder
     private static readonly Regex PlaceholderRegex = new($@"<span {CodeAttr}=""([^""]*)""></span>", RegexOptions.Compiled);
     private static readonly Regex LiquidRegex = new($@"(?:^\s*)?{LiquidTag}(?:\s*{LiquidTag})*(?:\s*$)?", RegexOptions.Compiled | RegexOptions.Singleline);
 
-    public static string Lock(string text)
-    {
-        return LiquidRegex.Replace(text, m => $"<span {CodeAttr}=\"{HttpUtility.HtmlEncode(m.Value)}\"></span>");
-    }
-    
     public static string LockHtml(string html)
     {
         html = LockTags(html);
@@ -53,6 +48,11 @@ public static class LiquidPlaceholder
 
             return before + HttpUtility.HtmlDecode(m.Groups["code"].Value) + after;
         });
+    }
+    
+    private static string Lock(string text)
+    {
+        return LiquidRegex.Replace(text, m => $"<span {CodeAttr}=\"{HttpUtility.HtmlEncode(m.Value)}\"></span>");
     }
     
     private static string LockTags(string html)

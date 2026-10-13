@@ -34,7 +34,7 @@ public static class HtmlConverterHelper
         {
             var node = doc.CreateElement(HtmlConstants.Div);
 
-            node.InnerHtml = LiquidPlaceholder.Lock(x.Value ?? string.Empty);
+            node.InnerHtml = LiquidPlaceholder.LockHtml(x.Value ?? string.Empty);
             node.SetAttributeValue(HtmlAttributeConstants.KeyAttr, x.Key);
             node.SetAttributeValue(HtmlAttributeConstants.DigestAttr, x.Digest);
             node.SetAttributeValue(HtmlAttributeConstants.ResourceAttr, x.Id);

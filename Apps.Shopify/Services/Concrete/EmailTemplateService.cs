@@ -4,7 +4,6 @@ using Apps.Shopify.Extensions;
 using Apps.Shopify.HtmlConversion.EmailTemplate;
 using Apps.Shopify.Models.Dto;
 using Apps.Shopify.Models.Request.Content;
-using Apps.Shopify.Models.Response.Content;
 using Apps.Shopify.Services.Base;
 using Apps.Shopify.Services.Models;
 using Blackbird.Applications.Sdk.Common.Invocation;
@@ -12,11 +11,11 @@ using Blackbird.Applications.Sdk.Common.Invocation;
 namespace Apps.Shopify.Services.Concrete;
 
 public class EmailTemplateService(InvocationContext invocationContext) 
-    : BaseContentService(invocationContext), IContentService, IDigestPollingContentService
+    : BaseTranslatableResourceContentService(invocationContext)
 {
     protected override string ContentType => TranslatableResources.EmailTemplate;
     
-    public async Task<FileRecord> Download(DownloadContentRequest input)
+    public override async Task<FileRecord> Download(DownloadContentRequest input)
     {
         var translatableContent = await ResourceService.GetTranslatableContent(
             input.ContentId, 
@@ -28,19 +27,9 @@ public class EmailTemplateService(InvocationContext invocationContext)
         return new FileRecord(htmlStream, MediaTypeNames.Text.Html, input.ContentId.GetFileName(input.MarketId));
     }
 
-    public Task Upload(UploadContentServiceRequest input)
+    public override Task Upload(UploadContentServiceRequest input)
     {
         var items = EmailTemplateHtmlConverter.ToJson(input.HtmlContent, input.Locale, input.MarketId);
         return ResourceService.UpdateIdentifiedContent(items, input.ContentId, input.MarketId);
-    }
-
-    public Task<SearchContentResponse> Search(SearchContentRequest input)
-    {
-        return SearchTranslatableResources(input);
-    }
-
-    public Task<DigestPollResult> PollUpdated(IReadOnlyDictionary<string, string> knownDigests, PollUpdatedContentRequest input)
-    {
-        return PollTranslatableResourceDigests(knownDigests, input);
     }
 }

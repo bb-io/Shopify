@@ -1,7 +1,6 @@
 ﻿using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
 using Apps.Shopify.HtmlConversion;
-using Apps.Shopify.Invocables;
 using Apps.Shopify.Models.Entities.Resource;
 using Apps.Shopify.Models.Identifiers;
 using Apps.Shopify.Models.Request.OnlineStore;
@@ -15,28 +14,59 @@ using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using GraphQL;
 using System.Net.Mime;
+using Apps.Shopify.Actions.Base;
 using Apps.Shopify.Extensions;
 using Apps.Shopify.HtmlConversion.Models;
+using Apps.Shopify.Models.Identifiers.Optional;
+using Apps.Shopify.Models.Request.Content;
+using Apps.Shopify.Models.Request.Store;
+using Apps.Shopify.Models.Response;
 
 namespace Apps.Shopify.Actions;
 
 [ActionList("Stores")]
 public class StoreActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
-    : ShopifyInvocable(invocationContext)
+    : BaseContentActions(invocationContext, fileManagementClient)
 {
+    protected override string ContentType => TranslatableResources.Store;
     private readonly TranslatableResourceService _translatableResourceService = new(invocationContext);
+    
+    [Action("Download store", Description = "Download store's translatable content, such as the homepage title and meta description")]
+    public async Task<FileResponse> DownloadStore(
+        [ActionParameter] LocaleIdentifier locale,
+        [ActionParameter] OutdatedOptionalIdentifier getContentRequest,
+        [ActionParameter] OptionalMarketIdentifier marketIdentifier)
+    {
+        var request = new DownloadContentRequest
+        {
+            ContentId = await GetStoreId(),
+            Locale = locale.Locale,
+            Outdated = getContentRequest.Outdated,
+            MarketId = marketIdentifier.MarketId
+        };
+
+        var file = await DownloadContent(request);
+        return new(file);
+    }
+    
+    [Action("Upload store", Description = "Upload store's translatable content, such as the homepage title and meta description")]
+    public async Task UploadStore(
+        [ActionParameter] UploadStoreRequest input,
+        [ActionParameter] NonPrimaryLocaleIdentifier locale,
+        [ActionParameter] OptionalMarketIdentifier marketIdentifier)
+    {
+        string storeId = await GetStoreId();
+        await UploadContent(input.File, storeId, locale.Locale, marketIdentifier.MarketId);
+    }
 
     [Action("Get store locales information", Description = "Get primary and additional store locales")]
     public async Task<StoreLocalesResponse> GetStoreLanguages()
     {
-        var request = new GraphQLRequest()
-        {
-            Query = GraphQlQueries.Locales
-        };
+        var request = new GraphQLRequest { Query = GraphQlQueries.Locales };
         var response = await Client.ExecuteWithErrorHandling<ShopLocalesResponse>(request);
 
         string primaryLocale = response.ShopLocales.First(x => x.Primary).Locale;
-        IEnumerable<string> otherLocales = response.ShopLocales.Where(x => x.Primary is false).Select(x => x.Locale);
+        IEnumerable<string> otherLocales = response.ShopLocales.Where(x => !x.Primary).Select(x => x.Locale);
         return new StoreLocalesResponse(primaryLocale, otherLocales);
     }
 
@@ -58,10 +88,7 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
         var contentEntities = resources.SelectMany(x =>
         {
             var content = x.GetTranslatableContent();
-            return content.Select(y => new IdentifiedContentEntity(y)
-            {
-                Id = x.ResourceId
-            });
+            return content.Select(y => new IdentifiedContentEntity(y) { Id = x.ResourceId });
         });
         
         var html = ShopifyHtmlConverter.ToHtml(contentEntities, metadata);
@@ -149,5 +176,15 @@ public class StoreActions(InvocationContext invocationContext, IFileManagementCl
         await _translatableResourceService.UpdateIdentifiedContent(content.MenuContentEntities?.ToList());
         await _translatableResourceService.UpdateIdentifiedContent(content.ShopContentEntities?.ToList());
         await _translatableResourceService.UpdateIdentifiedContent(content.ShopPolicyContentEntities?.ToList());
+    }
+    
+    // The search will always return one store. Makes sense since you can connect to only one store using any type of creds
+    private async Task<string> GetStoreId()
+    {
+        var stores = await ContentService.Search(new SearchContentRequest());
+        return stores.Items.FirstOrDefault()?.ContentId ?? 
+               throw new PluginMisconfigurationException(
+                   "The store has no translatable content. " +
+                   "Set the homepage title or meta description in Online Store -> Preferences first");
     }
 }

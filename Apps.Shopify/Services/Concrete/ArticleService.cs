@@ -48,7 +48,10 @@ public class ArticleService(InvocationContext invocationContext)
         return new(items);
     }
 
-    public async Task<SearchContentResponse> Search(SearchContentRequest input)
+    public async Task<SearchContentResponse> Search(
+        SearchContentRequest input, 
+        bool firstPageOnly = false, 
+        CancellationToken token = default)
     {
         string? query = new QueryBuilder()
             .AddDateRange("published_at", input.PublishedAfter, input.PublishedBefore)
@@ -58,8 +61,9 @@ public class ArticleService(InvocationContext invocationContext)
 
         var response = await Client.Paginate<ArticleEntity, ArticlesPaginationResponse>(
             GraphQlQueries.Articles,
-            QueryHelper.QueryToDictionary(query)
-        );
+            QueryHelper.QueryToDictionary(query),
+            firstPageOnly,
+            token);
 
         if (!string.IsNullOrEmpty(input.NameContains))
         {

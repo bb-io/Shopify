@@ -449,4 +449,6 @@ public static class GraphQlQueries
         }
       }
       """;
+    
+    public const string ShopPolicies = "query { shop { shopPolicies { id title } } }";
 }
