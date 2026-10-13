@@ -31,7 +31,7 @@ public class DataHandlerTests : TestBase
     {
         var contentType = new ContentTypeIdentifier
         {
-            ContentType = TranslatableResources.ArticleImage
+            ContentType = TranslatableResources.CollectionImage
         };
 
         await TestHandler<ContentDataHandler>(contentType);
@@ -148,4 +148,8 @@ public class DataHandlerTests : TestBase
     
     [TestMethod]
     public async Task ArticleImageDataHandler_ReturnsArticleImages() => await TestHandler<ArticleImageDataHandler>();
+    
+    [TestMethod]
+    public async Task CollectionImageDataHandler_ReturnsCollectionImages() 
+        => await TestHandler<CollectionImageDataHandler>();
 }

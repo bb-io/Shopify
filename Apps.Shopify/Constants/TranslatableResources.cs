@@ -30,6 +30,7 @@ public static class TranslatableResources
     public const string SellingPlan = "Selling plan";
     public const string SellingPlanGroup = "Selling plan group";
     public const string ArticleImage = "Article image";
+    public const string CollectionImage = "Collection image";
 
     private static readonly Dictionary<string, TranslatableResource> ApiTypes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -59,6 +60,7 @@ public static class TranslatableResources
         [SellingPlan] = TranslatableResource.SELLING_PLAN,
         [SellingPlanGroup] = TranslatableResource.SELLING_PLAN_GROUP,
         [ArticleImage] = TranslatableResource.ARTICLE_IMAGE,
+        [CollectionImage] = TranslatableResource.COLLECTION_IMAGE,
     };
     
     private static readonly Dictionary<TranslatableResource, string> FriendlyNames = ApiTypes.ToDictionary(x => x.Value, x => x.Key);
@@ -78,6 +80,7 @@ public static class TranslatableResources
         Filter,
         MediaImage,
         ArticleImage,
+        CollectionImage,
         StoreThemeAppEmbed,
         Metaobject,
         StoreThemeLocaleContent,
@@ -105,6 +108,7 @@ public static class TranslatableResources
         Filter,
         MediaImage,
         ArticleImage,
+        CollectionImage,
         StoreThemeAppEmbed,
         Metaobject,
         StoreThemeLocaleContent,

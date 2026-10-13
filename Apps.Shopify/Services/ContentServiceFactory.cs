@@ -37,6 +37,7 @@ public class ContentServiceFactory(InvocationContext invocationContext)
             TranslatableResources.Store => new StoreService(invocationContext),
             TranslatableResources.StorePolicy => new StorePolicyService(invocationContext),
             TranslatableResources.ArticleImage => new ArticleImageService(invocationContext),
+            TranslatableResources.CollectionImage => new CollectionImageService(invocationContext),
             _ => throw new ArgumentException($"Unsupported content type '{contentType}' was passed in ContentServiceFactory")
         };
     }

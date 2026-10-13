@@ -30,4 +30,5 @@ public enum TranslatableResource
     SELLING_PLAN,
     SELLING_PLAN_GROUP,
     ARTICLE_IMAGE,
+    COLLECTION_IMAGE
 }
