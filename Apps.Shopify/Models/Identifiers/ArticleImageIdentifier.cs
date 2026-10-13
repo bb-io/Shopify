@@ -6,6 +6,6 @@ namespace Apps.Shopify.Models.Identifiers;
 
 public class ArticleImageIdentifier
 {
-    [Display("Article image ID"), DataSource(typeof(ArticleDataHandler))]
+    [Display("Article image ID"), DataSource(typeof(ArticleImageDataHandler))]
     public string ArticleImageId { get; set; } = string.Empty;
 }
