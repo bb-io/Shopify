@@ -451,4 +451,24 @@ public static class GraphQlQueries
       """;
     
     public const string ShopPolicies = "query { shop { shopPolicies { id title } } }";
+    
+    public const string MetaobjectDefinitions =
+      """
+      query ($after: String, $limit: Int!) {
+        metaobjectDefinitions(first: $limit, after: $after) {
+          nodes { name type }
+          pageInfo { endCursor hasNextPage }
+        }
+      }
+      """;
+    
+    public const string MetaobjectsByType =
+      """
+      query ($type: String!, $after: String, $limit: Int!) {
+        metaobjects(type: $type, first: $limit, after: $after) {
+          nodes { id displayName }
+          pageInfo { endCursor hasNextPage }
+        }
+      }
+      """;
 }

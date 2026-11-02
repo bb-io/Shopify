@@ -109,7 +109,7 @@ public class ProductService(InvocationContext invocationContext)
         return new(items);
     }
 
-    public async Task Upload(UploadContentServiceRequest input)
+    public Task Upload(UploadContentServiceRequest input)
     {
         var dto = ShopifyHtmlConverter.ProductToJson(input.HtmlContent, input.Locale, input.MarketId);
 
@@ -127,7 +127,7 @@ public class ProductService(InvocationContext invocationContext)
         if (dto.OptionValuesContentEntities != null) 
             allItems.AddRange(dto.OptionValuesContentEntities);
 
-        await ResourceService.UpdateIdentifiedContent(allItems, null, input.MarketId);
+        return ResourceService.UpdateIdentifiedContent(allItems, null, input.MarketId);
     }
 
     private static IEnumerable<IdentifiedContentEntity> GetProductOptions(ProductEntity product)
