@@ -131,9 +131,10 @@ public static class ShopifyHtmlConverter
         doc.LoadHtml(file);
         
         var productContentNodes = doc.DocumentNode.Descendants()
-            .Where(x => x.Attributes[KeyAttr]?.Value != null && x.ParentNode.Name == "body");
+            .Where(x => x.Attributes[KeyAttr]?.Value != null && x.ParentNode.Name == "body")
+            .ToList();
 
-        if (!productContentNodes.Any())
+        if (productContentNodes.Count == 0)
             throw new PluginMisconfigurationException("Invalid product HTML: no product nodes with 'key' attribute found.");
 
         var metafieldContentNodes = doc.DocumentNode.Descendants()

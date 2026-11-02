@@ -16,13 +16,13 @@ public static class HtmlConverterHelper
     {
         return nodes?.Select(x => new IdentifiedContentRequest
         {
-            ResourceId = x.Attributes[HtmlAttributeConstants.ResourceAttr].Value,
+            ResourceId = x.Attributes[HtmlAttributeConstants.ResourceAttr]?.Value ?? string.Empty,
             Key = x.Attributes[HtmlAttributeConstants.KeyAttr].Value,
-            TranslatableContentDigest = x.Attributes[HtmlAttributeConstants.DigestAttr].Value,
+            TranslatableContentDigest = x.Attributes[HtmlAttributeConstants.DigestAttr]?.Value ?? string.Empty,
             Value = HttpUtility.HtmlDecode(LiquidPlaceholder.Unlock(x.InnerHtml)),
             Locale = locale,
             MarketId = marketId
-        }) ?? [];
+        }).ToList() ?? [];
     }
     
     public static void FillInIdentifiedContentEntities(
