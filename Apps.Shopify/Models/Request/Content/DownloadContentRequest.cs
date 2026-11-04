@@ -19,7 +19,7 @@ public class DownloadContentRequest : IDownloadContentInput
     [Display("Outdated", Description = "False by default")]
     public bool? Outdated { get; set; }
 
-    [Display("Include blog posts for downloaded blog")]
+    [Display("Include blog posts for downloaded blog", Description = "False by default")]
     public bool? IncludeBlogPosts { get; set; }
 
     [Display("Include product metafields")]
