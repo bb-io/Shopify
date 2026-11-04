@@ -6,4 +6,5 @@ public static class HtmlAttributeConstants
     public const string ResourceAttr = "resource";
     public const string TypeAttr = "type";
     public const string DigestAttr = "digest";
+    public const string FormatAttr = "format";
 }

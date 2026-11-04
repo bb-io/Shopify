@@ -19,7 +19,7 @@ public static class HtmlConverterHelper
             ResourceId = x.Attributes[HtmlAttributeConstants.ResourceAttr]?.Value ?? string.Empty,
             Key = x.Attributes[HtmlAttributeConstants.KeyAttr].Value,
             TranslatableContentDigest = x.Attributes[HtmlAttributeConstants.DigestAttr]?.Value ?? string.Empty,
-            Value = HttpUtility.HtmlDecode(LiquidPlaceholder.Unlock(x.InnerHtml)),
+            Value = GetValue(x),
             Locale = locale,
             MarketId = marketId
         }).ToList() ?? [];
@@ -33,13 +33,26 @@ public static class HtmlConverterHelper
         contentEntities.ToList().ForEach(x =>
         {
             var node = doc.CreateElement(HtmlConstants.Div);
+            bool isRichText = RichTextConverter.TryToHtml(x.Value, out var richTextHtml);
 
-            node.InnerHtml = LiquidPlaceholder.LockHtml(x.Value ?? string.Empty);
+            node.InnerHtml = LiquidPlaceholder.LockHtml(isRichText ? richTextHtml : x.Value ?? string.Empty);
             node.SetAttributeValue(HtmlAttributeConstants.KeyAttr, x.Key);
             node.SetAttributeValue(HtmlAttributeConstants.DigestAttr, x.Digest);
             node.SetAttributeValue(HtmlAttributeConstants.ResourceAttr, x.Id);
 
+            if (isRichText)
+                node.SetAttributeValue(HtmlAttributeConstants.FormatAttr, RichTextConverter.Format);
+            
             body.AppendChild(node);
         });
+    }
+    
+    private static string GetValue(HtmlNode node)
+    {
+        var html = LiquidPlaceholder.Unlock(node.InnerHtml);
+
+        return node.Attributes[HtmlAttributeConstants.FormatAttr]?.Value == RichTextConverter.Format
+            ? RichTextConverter.ToJson(html)
+            : HttpUtility.HtmlDecode(html);
     }
 }
