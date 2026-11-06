@@ -63,7 +63,7 @@ Other scopes that may be needed depending on desired actions are:
 
 ### Metafields
 
-- **Download metafields** Download metafield content of a specific product
+- **Download metafields** Download metafield content of a specific product. Optionally filter by **Name contains** to include only metafields whose definition name contains the text (case-insensitive). Leave empty to download all metafields.
 - **Upload metafields** Upload metafield content of a specific product
 - **Search metafield definitions** Search metafield definitions with specific criteria
 - **Get metafield** Get metafield details of a specific product

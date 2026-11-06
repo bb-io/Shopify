@@ -18,6 +18,9 @@ public class MetafieldEntity
     
     [Display("Compare digest")]
     public string CompareDigest { get; set; }
+
+    [Display("Definition")]
+    public MetafieldDefinitionEntity? Definition { get; set; }
     
     public override string ToString()
     {

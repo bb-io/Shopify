@@ -34,13 +34,15 @@ public class MetafieldActions(InvocationContext invocationContext, IFileManageme
         [ActionParameter] ProductIdentifier resourceRequest,
         [ActionParameter] LocaleIdentifier locale, 
         [ActionParameter] OutdatedOptionalIdentifier getContentRequest,
-        [ActionParameter] OptionalMarketIdentifier marketIdentifier)
+        [ActionParameter] OptionalMarketIdentifier marketIdentifier,
+        [ActionParameter, Display("Name contains")] string? nameContains = null)
     {
         var metafields = await _resourceService.GetProductMetafields(
             resourceRequest.ProductId,
             locale.Locale,
             getContentRequest.Outdated ?? false,
-            marketIdentifier.MarketId);
+            marketIdentifier.MarketId,
+            nameContains: nameContains);
 
         var metadata = new ShopifyMetadata
         {
