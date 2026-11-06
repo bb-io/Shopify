@@ -191,22 +191,27 @@ public class ProductService(InvocationContext invocationContext)
         bool outdated = false,
         string? market = null)
     {
-        var productMetaFields = await Client.Paginate<MetafieldEntity, ProductMetafieldsPaginationResponse>(
+        var productMetafields = await Client.Paginate<MetafieldEntity, ProductMetafieldsPaginationResponse>(
             GraphQlQueries.ProductMetaFields,
-            new Dictionary<string, object> { ["resourceId"] = productId }
-        );
+            new Dictionary<string, object> { ["resourceId"] = productId });
         
-        var metaFields = await ResourceService.ListTranslatableResources(
-            TranslatableResource.METAFIELD, 
-            locale, 
-            outdated,
-            market);
+        if (productMetafields.Count == 0)
+            return [];
+        
+        var variables = new Dictionary<string, object>
+        {
+            ["resourceIds"] = productMetafields.Select(x => x.Id).ToArray(),
+            ["locale"] = locale,
+            ["outdated"] = outdated
+        };
 
-        var resources = metaFields.Where(x => productMetaFields.Any(y => x.ResourceId == y.Id)).ToArray();
-        var content = resources.All(x => !x.Translations.Any())
-            ? resources.Select(x => (x.ResourceId, x.TranslatableContent.FirstOrDefault())).ToArray()
-            : resources.Select(x => (x.ResourceId, x.Translations.FirstOrDefault())).ToArray();
-
-        return content.Select(x => new IdentifiedContentEntity(x.Item2) { Id = x.ResourceId });
+        if (!string.IsNullOrEmpty(market))
+            variables["marketId"] = market;
+        
+        var resources = await Client.Paginate<TranslatableResourceEntity, TranslatableResourcesByIdsPaginationResponse>(
+            GraphQlQueries.TranslatableResourcesByIds,
+            variables);
+        
+        return resources.SelectMany(x => x.GetTranslatableContent().Select(y => new IdentifiedContentEntity(y) { Id = x.ResourceId }));
     }
 }
