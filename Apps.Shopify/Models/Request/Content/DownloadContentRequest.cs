@@ -22,8 +22,12 @@ public class DownloadContentRequest : IDownloadContentInput
     [Display("Include blog posts for downloaded blog", Description = "False by default")]
     public bool? IncludeBlogPosts { get; set; }
 
-    [Display("Include product metafields")]
+    [Display("Include all product metafields")]
     public bool? IncludeMetafields { get; set; }
+    
+    [Display("Product metafield keys", Description = "Download only these metafields")]
+    [DataSource(typeof(ProductMetafieldKeyDataHandler))]
+    public IEnumerable<string>? MetafieldKeys { get; set; }
 
     [Display("Include product options")]
     public bool? IncludeOptions { get; set; }

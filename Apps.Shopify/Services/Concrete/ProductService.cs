@@ -55,8 +55,9 @@ public class ProductService(InvocationContext invocationContext)
         var productContentEntities = productContent.TranslatableResource.GetTranslatableContent()
             .Select(x => new IdentifiedContentEntity(x) { Id = input.ContentId });
         
-        var metafieldContentEntities = input.IncludeMetafields is true
-            ? await GetProductMetafields(input.ContentId, input.Locale, input.Outdated ?? false, input.MarketId)
+        var metafieldKeys = input.IncludeMetafields is true ? null : input.MetafieldKeys?.ToHashSet();
+        var metafieldContentEntities = input.IncludeMetafields is true || metafieldKeys?.Count > 0
+            ? await GetProductMetafields(input.ContentId, input.Locale, input.Outdated ?? false, input.MarketId, metafieldKeys)
             : [];
 
         var optionsContentEntities = input.IncludeOptions is true ? GetProductOptions(productInfo) : [];
@@ -189,7 +190,8 @@ public class ProductService(InvocationContext invocationContext)
         string productId,
         string locale,
         bool outdated = false,
-        string? market = null)
+        string? market = null,
+        HashSet<string>? keys = null)
     {
         var productMetafields = await Client.Paginate<MetafieldEntity, ProductMetafieldsPaginationResponse>(
             GraphQlQueries.ProductMetaFields,
@@ -198,9 +200,17 @@ public class ProductService(InvocationContext invocationContext)
         if (productMetafields.Count == 0)
             return [];
         
+        var metafieldIds = productMetafields
+            .Where(x => keys is null || keys.Contains(x.ToString()))
+            .Select(x => x.Id)
+            .ToArray();
+        
+        if (metafieldIds.Length == 0)
+            return [];
+
         var variables = new Dictionary<string, object>
         {
-            ["resourceIds"] = productMetafields.Select(x => x.Id).ToArray(),
+            ["resourceIds"] = metafieldIds,
             ["locale"] = locale,
             ["outdated"] = outdated
         };
