@@ -11,6 +11,8 @@ using GraphQL;
 using System.Net.Mime;
 using Apps.Shopify.HtmlConversion.Models;
 using Apps.Shopify.Models.Dto;
+using Apps.Shopify.Models.Entities.Metafield;
+using Apps.Shopify.Models.Response.Metafield;
 using Apps.Shopify.Models.Response.Utility.TranslationError;
 
 namespace Apps.Shopify.Services;
@@ -170,7 +172,43 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
         };
         return Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
     }
+    
+    public async Task<IEnumerable<IdentifiedContentEntity>> GetProductMetafields(
+        string productId,
+        string locale,
+        bool outdated = false,
+        string? market = null,
+        HashSet<string>? keys = null)
+    {
+        var productMetafields = await Client.Paginate<MetafieldEntity, ProductMetafieldsPaginationResponse>(
+            GraphQlQueries.ProductMetaFields,
+            new Dictionary<string, object> { ["resourceId"] = productId });
+        
+        var metafieldIds = productMetafields
+            .Where(x => keys is null || keys.Contains(x.ToString()))
+            .Select(x => x.Id)
+            .ToArray();
+        
+        if (metafieldIds.Length == 0)
+            return [];
 
+        var variables = new Dictionary<string, object>
+        {
+            ["resourceIds"] = metafieldIds,
+            ["locale"] = locale,
+            ["outdated"] = outdated
+        };
+
+        if (!string.IsNullOrEmpty(market))
+            variables["marketId"] = market;
+        
+        var resources = await Client.Paginate<TranslatableResourceEntity, TranslatableResourcesByIdsPaginationResponse>(
+            GraphQlQueries.TranslatableResourcesByIds,
+            variables);
+        
+        return resources.SelectMany(x => x.GetTranslatableContent().Select(y => new IdentifiedContentEntity(y) { Id = x.ResourceId }));
+    }
+    
     private async Task<TranslatableResourceEntity> GetTranslatableResource(
         string resourceId,
         string locale,

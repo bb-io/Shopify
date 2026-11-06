@@ -1,13 +1,18 @@
+using System.Net.Mime;
 using Apps.Shopify.Actions.Base;
 using Apps.Shopify.Constants;
 using Apps.Shopify.Constants.GraphQL;
+using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
+using Apps.Shopify.HtmlConversion;
+using Apps.Shopify.HtmlConversion.Models;
+using Apps.Shopify.Models.Dto;
 using Apps.Shopify.Models.Entities.Metafield;
 using Apps.Shopify.Models.Identifiers;
 using Apps.Shopify.Models.Identifiers.Optional;
-using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.Metafield;
 using Apps.Shopify.Models.Response.Metafield;
+using Apps.Shopify.Services;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Exceptions;
@@ -21,6 +26,7 @@ namespace Apps.Shopify.Actions;
 public class MetafieldActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
     : BaseContentActions(invocationContext, fileManagementClient)
 {
+    private readonly TranslatableResourceService _resourceService = new(invocationContext);
     protected override string ContentType => TranslatableResources.Metafield;
 
     [Action("Download metafields", Description = "Download metafield content of a specific product")]
@@ -30,15 +36,22 @@ public class MetafieldActions(InvocationContext invocationContext, IFileManageme
         [ActionParameter] OutdatedOptionalIdentifier getContentRequest,
         [ActionParameter] OptionalMarketIdentifier marketIdentifier)
     {
-        var request = new DownloadContentRequest
+        var metafields = await _resourceService.GetProductMetafields(
+            resourceRequest.ProductId,
+            locale.Locale,
+            getContentRequest.Outdated ?? false,
+            marketIdentifier.MarketId);
+
+        var metadata = new ShopifyMetadata
         {
-            ContentId = resourceRequest.ProductId,
-            Locale = locale.Locale,
-            Outdated = getContentRequest.Outdated,
+            ContentType = ContentType.ToLower(),
             MarketId = marketIdentifier.MarketId
         };
+
+        var html = ShopifyHtmlConverter.ToHtml(metafields, metadata);
+        var fileRecord = new FileRecord(html, MediaTypeNames.Text.Html, resourceRequest.ProductId.GetFileName(marketIdentifier.MarketId));
         
-        var file = await DownloadContent(request);
+        var file = await fileManagementClient.UploadFileRecord(fileRecord);
         return new(file);
     }
 

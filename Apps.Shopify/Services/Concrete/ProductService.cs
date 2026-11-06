@@ -4,13 +4,11 @@ using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
 using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.Models.Entities.Content;
-using Apps.Shopify.Models.Entities.Metafield;
 using Apps.Shopify.Models.Entities.Product;
 using Apps.Shopify.Models.Entities.Resource;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.TranslatableResource;
 using Apps.Shopify.Models.Response.Content;
-using Apps.Shopify.Models.Response.Metafield;
 using Apps.Shopify.Models.Response.Product;
 using Apps.Shopify.Models.Response.TranslatableResource;
 using Blackbird.Applications.Sdk.Common.Exceptions;
@@ -57,7 +55,7 @@ public class ProductService(InvocationContext invocationContext)
         
         var metafieldKeys = input.IncludeMetafields is true ? null : input.MetafieldKeys?.ToHashSet();
         var metafieldContentEntities = input.IncludeMetafields is true || metafieldKeys?.Count > 0
-            ? await GetProductMetafields(input.ContentId, input.Locale, input.Outdated ?? false, input.MarketId, metafieldKeys)
+            ? await ResourceService.GetProductMetafields(input.ContentId, input.Locale, input.Outdated ?? false, input.MarketId, metafieldKeys)
             : [];
 
         var optionsContentEntities = input.IncludeOptions is true ? GetProductOptions(productInfo) : [];
@@ -185,44 +183,5 @@ public class ProductService(InvocationContext invocationContext)
         var response = await Client.ExecuteWithErrorHandling<ProductResponse>(request);
         return response.Product ?? throw new PluginMisconfigurationException(
             $"Could not find product {productId}. Please check the input");
-    }
-
-    private async Task<IEnumerable<IdentifiedContentEntity>?> GetProductMetafields(
-        string productId,
-        string locale,
-        bool outdated = false,
-        string? market = null,
-        HashSet<string>? keys = null)
-    {
-        var productMetafields = await Client.Paginate<MetafieldEntity, ProductMetafieldsPaginationResponse>(
-            GraphQlQueries.ProductMetaFields,
-            new Dictionary<string, object> { ["resourceId"] = productId });
-        
-        if (productMetafields.Count == 0)
-            return [];
-        
-        var metafieldIds = productMetafields
-            .Where(x => keys is null || keys.Contains(x.ToString()))
-            .Select(x => x.Id)
-            .ToArray();
-        
-        if (metafieldIds.Length == 0)
-            return [];
-
-        var variables = new Dictionary<string, object>
-        {
-            ["resourceIds"] = metafieldIds,
-            ["locale"] = locale,
-            ["outdated"] = outdated
-        };
-
-        if (!string.IsNullOrEmpty(market))
-            variables["marketId"] = market;
-        
-        var resources = await Client.Paginate<TranslatableResourceEntity, TranslatableResourcesByIdsPaginationResponse>(
-            GraphQlQueries.TranslatableResourcesByIds,
-            variables);
-        
-        return resources.SelectMany(x => x.GetTranslatableContent().Select(y => new IdentifiedContentEntity(y) { Id = x.ResourceId }));
     }
 }
