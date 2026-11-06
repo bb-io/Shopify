@@ -72,7 +72,8 @@ public class ProductService(InvocationContext invocationContext)
             OptionValuesContentEntities = optionValuesContentEntities,
         });
 
-        return new FileRecord(html, MediaTypeNames.Text.Html, input.ContentId.GetFileName(input.MarketId));
+        string fileName = input.ContentId.GetFileName(input.MarketId, productContent.TranslatableResource.GetName());
+        return new FileRecord(html, MediaTypeNames.Text.Html, fileName);
     }
 
     public async Task<ContentUpdatedResponse> PollUpdated(DateTime after, DateTime before, PollUpdatedContentRequest input)

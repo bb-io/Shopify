@@ -58,7 +58,8 @@ public class BlogService(InvocationContext invocationContext)
             blogPostTranslations,
             metadata);
 
-        return new FileRecord(html, MediaTypeNames.Text.Html, input.ContentId.GetFileName(metadata.MarketId));
+        string fileName = input.ContentId.GetFileName(metadata.MarketId, blog.TranslatableResource.GetName());
+        return new FileRecord(html, MediaTypeNames.Text.Html, fileName);
     }
 
     public async Task<ContentUpdatedResponse> PollUpdated(DateTime after, DateTime before, PollUpdatedContentRequest input)

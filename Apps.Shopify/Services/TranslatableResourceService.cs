@@ -22,10 +22,10 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
     
     public async Task<FileRecord> GetResourceContent(string resourceId, string locale, bool outdated, ShopifyMetadata metadata)
     {
-        var translatableContent = await GetTranslatableContent(resourceId, locale, outdated, metadata.MarketId);
-        var html = ShopifyHtmlConverter.ToHtml(translatableContent, metadata);
+        var resource = await GetTranslatableResource(resourceId, locale, outdated, metadata.MarketId);
+        var html = ShopifyHtmlConverter.ToHtml(ToIdentifiedContent(resource, resourceId), metadata);
 
-        return new FileRecord(html, MediaTypeNames.Text.Html, resourceId.GetFileName(metadata.MarketId));
+        return new FileRecord(html, MediaTypeNames.Text.Html, resourceId.GetFileName(metadata.MarketId, resource.GetName()));
     }
 
     public async Task<List<IdentifiedContentEntity>> GetTranslatableContent(
@@ -34,23 +34,8 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
         bool outdated,
         string? marketId)
     {
-        var request = new GraphQLRequest
-        {
-            Query = GraphQlQueries.TranslatableResourceTranslations,
-            Variables = new
-            {
-                resourceId,
-                locale,
-                outdated,
-                marketId
-            }
-        };
-        var response = await Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
-        return response.TranslatableResource.GetTranslatableContent()
-            .Select(x => new IdentifiedContentEntity(x)
-            {
-                Id = resourceId
-            }).ToList();
+        var resource = await GetTranslatableResource(resourceId, locale, outdated, marketId);
+        return ToIdentifiedContent(resource, resourceId);
     }
 
     public async Task UpdateResourceContent(string? resourceId, string locale, string htmlContent, string? marketId = null)
@@ -184,5 +169,29 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
             Variables = new { resourceId }
         };
         return Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
+    }
+
+    private async Task<TranslatableResourceEntity> GetTranslatableResource(
+        string resourceId,
+        string locale,
+        bool outdated,
+        string? marketId)
+    {
+        var request = new GraphQLRequest
+        {
+            Query = GraphQlQueries.TranslatableResourceTranslations,
+            Variables = new { resourceId, locale, outdated, marketId }
+        };
+
+        var response = await Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
+        return response.TranslatableResource ?? 
+               throw new PluginMisconfigurationException($"Could not find translatable content for {resourceId}. Please check the input");
+    }
+
+    private static List<IdentifiedContentEntity> ToIdentifiedContent(TranslatableResourceEntity resource, string resourceId)
+    {
+        return resource.GetTranslatableContent()
+            .Select(x => new IdentifiedContentEntity(x) { Id = resourceId })
+            .ToList();
     }
 }

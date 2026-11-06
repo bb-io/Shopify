@@ -58,8 +58,9 @@ public class MenuService(InvocationContext invocationContext)
             ContentType = ContentType
         };
         var htmlStream = ShopifyHtmlConverter.ToHtml(entities, metadata);
-        
-        return new FileRecord(htmlStream, MediaTypeNames.Text.Html, input.ContentId.GetFileName(input.MarketId));
+
+        string fileName = input.ContentId.GetFileName(input.MarketId, byId.GetValueOrDefault(input.ContentId)?.GetName());
+        return new FileRecord(htmlStream, MediaTypeNames.Text.Html, fileName);
     }
 
     public async Task Upload(UploadContentServiceRequest input)
