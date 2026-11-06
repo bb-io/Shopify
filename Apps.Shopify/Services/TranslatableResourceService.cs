@@ -178,7 +178,8 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
         string locale,
         bool outdated = false,
         string? market = null,
-        HashSet<string>? keys = null)
+        HashSet<string>? keys = null,
+        string? nameContains = null)
     {
         var productMetafields = await Client.Paginate<MetafieldEntity, ProductMetafieldsPaginationResponse>(
             GraphQlQueries.ProductMetaFields,
@@ -186,6 +187,8 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
         
         var metafieldIds = productMetafields
             .Where(x => keys is null || keys.Contains(x.ToString()))
+            .Where(x => string.IsNullOrEmpty(nameContains) ||
+                        x.Definition?.Name?.Contains(nameContains, StringComparison.OrdinalIgnoreCase) == true)
             .Select(x => x.Id)
             .ToArray();
         

@@ -205,6 +205,9 @@ public static class GraphQlQueries
               key
               value
               compareDigest
+              definition {
+                name
+              }
             }
             pageInfo {
               endCursor
