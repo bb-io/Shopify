@@ -37,9 +37,10 @@ public class ProductTests : TestBase
         var locale = new LocaleIdentifier { Locale = "en" };
         var input = new DownloadProductRequest
         {
-            IncludeMetafields = true,
-            IncludeOptions = true,
-            IncludeOptionValues = true
+            IncludeMetafields = false,
+            IncludeOptions = false,
+            IncludeOptionValues = false,
+            MetafieldKeys = ["custom.rtffsfsds"]
         };
         var outdated = new OutdatedOptionalIdentifier { Outdated = false };
         var marketId = new OptionalMarketIdentifier { };

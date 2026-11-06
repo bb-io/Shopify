@@ -4,13 +4,11 @@ using Apps.Shopify.Extensions;
 using Apps.Shopify.Helper;
 using Apps.Shopify.HtmlConversion;
 using Apps.Shopify.Models.Entities.Content;
-using Apps.Shopify.Models.Entities.Metafield;
 using Apps.Shopify.Models.Entities.Product;
 using Apps.Shopify.Models.Entities.Resource;
 using Apps.Shopify.Models.Request.Content;
 using Apps.Shopify.Models.Request.TranslatableResource;
 using Apps.Shopify.Models.Response.Content;
-using Apps.Shopify.Models.Response.Metafield;
 using Apps.Shopify.Models.Response.Product;
 using Apps.Shopify.Models.Response.TranslatableResource;
 using Blackbird.Applications.Sdk.Common.Exceptions;
@@ -55,8 +53,9 @@ public class ProductService(InvocationContext invocationContext)
         var productContentEntities = productContent.TranslatableResource.GetTranslatableContent()
             .Select(x => new IdentifiedContentEntity(x) { Id = input.ContentId });
         
-        var metafieldContentEntities = input.IncludeMetafields is true
-            ? await GetProductMetafields(input.ContentId, input.Locale, input.Outdated ?? false, input.MarketId)
+        var metafieldKeys = input.IncludeMetafields is true ? null : input.MetafieldKeys?.ToHashSet();
+        var metafieldContentEntities = input.IncludeMetafields is true || metafieldKeys?.Count > 0
+            ? await ResourceService.GetProductMetafields(input.ContentId, input.Locale, input.Outdated ?? false, input.MarketId, metafieldKeys)
             : [];
 
         var optionsContentEntities = input.IncludeOptions is true ? GetProductOptions(productInfo) : [];
@@ -71,7 +70,8 @@ public class ProductService(InvocationContext invocationContext)
             OptionValuesContentEntities = optionValuesContentEntities,
         });
 
-        return new FileRecord(html, MediaTypeNames.Text.Html, input.ContentId.GetFileName(input.MarketId));
+        string fileName = input.ContentId.GetFileName(input.MarketId, productContent.TranslatableResource.GetName());
+        return new FileRecord(html, MediaTypeNames.Text.Html, fileName);
     }
 
     public async Task<ContentUpdatedResponse> PollUpdated(DateTime after, DateTime before, PollUpdatedContentRequest input)
@@ -183,30 +183,5 @@ public class ProductService(InvocationContext invocationContext)
         var response = await Client.ExecuteWithErrorHandling<ProductResponse>(request);
         return response.Product ?? throw new PluginMisconfigurationException(
             $"Could not find product {productId}. Please check the input");
-    }
-
-    private async Task<IEnumerable<IdentifiedContentEntity>?> GetProductMetafields(
-        string productId,
-        string locale,
-        bool outdated = false,
-        string? market = null)
-    {
-        var productMetaFields = await Client.Paginate<MetafieldEntity, ProductMetafieldsPaginationResponse>(
-            GraphQlQueries.ProductMetaFields,
-            new Dictionary<string, object> { ["resourceId"] = productId }
-        );
-        
-        var metaFields = await ResourceService.ListTranslatableResources(
-            TranslatableResource.METAFIELD, 
-            locale, 
-            outdated,
-            market);
-
-        var resources = metaFields.Where(x => productMetaFields.Any(y => x.ResourceId == y.Id)).ToArray();
-        var content = resources.All(x => !x.Translations.Any())
-            ? resources.Select(x => (x.ResourceId, x.TranslatableContent.FirstOrDefault())).ToArray()
-            : resources.Select(x => (x.ResourceId, x.Translations.FirstOrDefault())).ToArray();
-
-        return content.Select(x => new IdentifiedContentEntity(x.Item2) { Id = x.ResourceId });
     }
 }

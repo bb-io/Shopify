@@ -45,16 +45,16 @@ public class TranslatableResourceEntity
         return singleLine.Length <= 50 ? singleLine : singleLine[..50] + "...";
     }
 
-    public string GetDisplayName()
+    public string? GetName()
     {
-        string[] displayNameKeys = ["title", "name", "label"];
-        
-        return displayNameKeys
-                   .Select(key => TranslatableContent.FirstOrDefault(t => t.Key == key)?.Value)
-                   .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value))
-               ?? GetDisplayNameFromId()
-               ?? ToString();
+        string[] nameKeys = ["title", "name", "label"];
+
+        return nameKeys
+            .Select(key => TranslatableContent.FirstOrDefault(t => t.Key == key)?.Value)
+            .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
     }
+
+    public string GetDisplayName() => GetName() ?? GetDisplayNameFromId() ?? ToString();
 
     public bool MatchesSearch(string? searchString)
     {

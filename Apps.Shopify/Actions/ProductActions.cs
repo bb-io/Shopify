@@ -78,7 +78,8 @@ public class ProductActions(InvocationContext invocationContext, IFileManagement
             IncludeOptionValues = input.IncludeOptionValues,
             Locale = locale.Locale,
             Outdated = getContentRequest.Outdated,
-            MarketId = marketIdentifier.MarketId
+            MarketId = marketIdentifier.MarketId,
+            MetafieldKeys = input.MetafieldKeys,
         };
 
         var file = await DownloadContent(request);
