@@ -100,7 +100,22 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
                 .ToArray();
 
             if (withDigest.Length == 0)
-                throw new PluginMisconfigurationException($"Could not resolve content digests for {id}. Nothing was uploaded");
+            {
+                if (id.StartsWith(
+                    "gid://shopify/ProductOptionValue/",
+                    StringComparison.Ordinal))
+                {
+                    InvocationContext.Logger?.LogWarning(
+                        $"[Shopify] Skipping translation for product option value '{id}'. " +
+                        "Shopify did not provide a source content digest.",
+                        Array.Empty<object>());
+
+                    continue;
+                }
+
+                throw new PluginMisconfigurationException(
+                    $"Could not resolve content digests for {id}. Nothing was uploaded");
+            }
 
             var validItems = withDigest
                 .Where(x => x.Value?.Trim() != sourceByKey.GetValueOrDefault(x.Key)?.Value?.Trim())
