@@ -127,6 +127,8 @@ public class ProductService(InvocationContext invocationContext)
         if (dto.OptionValuesContentEntities != null) 
             allItems.AddRange(dto.OptionValuesContentEntities);
 
+        allItems.RemoveAll(x => string.IsNullOrWhiteSpace(x.Value));
+
         return ResourceService.UpdateIdentifiedContent(allItems, null, input.MarketId);
     }
 
