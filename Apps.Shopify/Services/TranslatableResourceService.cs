@@ -21,7 +21,7 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
 {
     // Max 100 translation keys per mutation - do not change
     private const int MaxUpdateChunkSize = 100;
-    
+
     public async Task<FileRecord> GetResourceContent(string resourceId, string locale, bool outdated, ShopifyMetadata metadata)
     {
         var resource = await GetTranslatableResource(resourceId, locale, outdated, metadata.MarketId);
@@ -31,8 +31,8 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
     }
 
     public async Task<List<IdentifiedContentEntity>> GetTranslatableContent(
-        string resourceId, 
-        string locale, 
+        string resourceId,
+        string locale,
         bool outdated,
         string? marketId)
     {
@@ -50,11 +50,11 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
     }
 
     public async Task UpdateIdentifiedContent(
-        ICollection<IdentifiedContentRequest>? items, 
+        ICollection<IdentifiedContentRequest>? items,
         string? resourceId = null,
         string? marketId = null)
     {
-        if (items is null || items.Count == 0) 
+        if (items is null || items.Count == 0)
             return;
 
         if (!string.IsNullOrWhiteSpace(resourceId))
@@ -67,7 +67,7 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
                 item.ResourceId = resourceId;
             }
         }
-        
+
         if (!string.IsNullOrWhiteSpace(marketId))
         {
             foreach (var item in items)
@@ -86,44 +86,95 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
 
             var sourceContent = await GetResourceSourceContent(id);
             if (sourceContent.TranslatableResource is null)
-                throw new PluginMisconfigurationException($"Could not find source content for resource {id}. Please check the input");
-            
-            var sourceByKey = sourceContent.TranslatableResource.TranslatableContent
-                .GroupBy(x => x.Key)
-                .ToDictionary(g => g.Key, g => g.First());
-
-            foreach (var item in groupItems.Where(item => string.IsNullOrWhiteSpace(item.TranslatableContentDigest)))
-                item.TranslatableContentDigest = sourceByKey.GetValueOrDefault(item.Key)?.Digest ?? string.Empty;
-
-            var withDigest = groupItems
-                .Where(x => !string.IsNullOrWhiteSpace(x.TranslatableContentDigest))
-                .ToArray();
-
-            if (withDigest.Length == 0)
             {
-                if (id.StartsWith(
-                    "gid://shopify/ProductOptionValue/",
-                    StringComparison.Ordinal))
+
+                if (id.StartsWith("gid://shopify/Metaobject/", StringComparison.Ordinal))
                 {
                     InvocationContext.Logger?.LogWarning(
-                        $"[Shopify] Skipping translation for product option value '{id}'. " +
-                        "Shopify did not provide a source content digest.",
+                        $"[Shopify] Skipping metaobject '{id}'. Shopify returned no " +
+                        "translatable resource. The object may be missing, inaccessible, " +
+                        "or its definition may not allow translations.",
                         Array.Empty<object>());
-
                     continue;
                 }
 
                 throw new PluginMisconfigurationException(
-                    $"Could not resolve content digests for {id}. Nothing was uploaded");
+                    $"Could not find source content for resource {id}. Please check the input");
             }
 
-            var validItems = withDigest
-                .Where(x => x.Value?.Trim() != sourceByKey.GetValueOrDefault(x.Key)?.Value?.Trim())
-                .Select(x => new TranslatableResourceContentRequest(x))
-                .ToArray();
+            var sourceByKey = sourceContent.TranslatableResource.TranslatableContent
+                .GroupBy(x => x.Key)
+                .ToDictionary(g => g.Key, g => g.First());
 
-            if (validItems.Length == 0)
+
+            var validItems = new List<TranslatableResourceContentRequest>();
+            var skippedCount = 0;
+
+            foreach (var item in groupItems)
+            {
+                if (string.IsNullOrWhiteSpace(item.Value))
+                {
+                    InvocationContext.Logger?.LogWarning(
+                        $"[Shopify] Skipping blank translation. Resource: '{id}'; " +
+                        $"key: '{item.Key}'.",
+                        Array.Empty<object>());
+                    skippedCount++;
+                    continue;
+                }
+
+                // Theme and other translation keys may no longer exist in Shopify.
+                if (!sourceByKey.TryGetValue(item.Key, out var source))
+                {
+                    InvocationContext.Logger?.LogWarning(
+                        $"[Shopify] Skipping translation. Resource: '{id}'; " +
+                        $"key: '{item.Key}' is absent from Shopify's current " +
+                        "translatable content.",
+                        Array.Empty<object>());
+                    skippedCount++;
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(source.Digest))
+                {
+                    InvocationContext.Logger?.LogWarning(
+                        $"[Shopify] Skipping translation. Resource: '{id}'; " +
+                        $"key: '{item.Key}'. Shopify did not provide a source digest.",
+                        Array.Empty<object>());
+                    skippedCount++;
+                    continue;
+                }
+
+                if (!string.Equals(item.TranslatableContentDigest, source.Digest,
+                        StringComparison.Ordinal))
+                {
+                    InvocationContext.Logger?.LogWarning(
+                        $"[Shopify] Digest mismatch. Resource: '{id}'; " +
+                        $"key: '{item.Key}'; file digest: " +
+                        $"'{item.TranslatableContentDigest}'; Shopify digest: " +
+                        $"'{source.Digest}'. Using current Shopify digest.",
+                        Array.Empty<object>());
+                }
+
+                item.TranslatableContentDigest = source.Digest;
+
+                if (string.Equals(item.Value.Trim(), source.Value?.Trim(),
+                        StringComparison.Ordinal))
+                    continue;
+
+                validItems.Add(new TranslatableResourceContentRequest(item));
+            }
+
+            if (validItems.Count == 0)
+            {
+                if (skippedCount > 0)
+                {
+                    InvocationContext.Logger?.LogWarning(
+                        $"[Shopify] No translations uploaded for '{id}': " +
+                        $"{skippedCount} invalid or unsupported field(s) skipped.",
+                        Array.Empty<object>());
+                }
                 continue;
+            }
 
             foreach (var chunk in validItems.Chunk(MaxUpdateChunkSize))
             {
@@ -137,7 +188,7 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
                     }
                 };
                 var response = await Client.ExecuteWithErrorHandling<TranslationsRegisterResponse>(request);
-                
+
                 var errors = response.TranslationsRegister.UserErrors;
                 if (errors.Count > 0)
                     throw new PluginApplicationException($"Shopify rejected translations for {id}: {string.Join("; ", errors)}");
@@ -146,8 +197,8 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
     }
 
     public async Task<ICollection<TranslatableResourceEntity>> ListTranslatableResources(
-        TranslatableResource resourceType, 
-        string? locale = null, 
+        TranslatableResource resourceType,
+        string? locale = null,
         bool outdated = false,
         string? marketId = null)
     {
@@ -157,10 +208,10 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
             ["locale"] = locale ?? string.Empty,
             ["outdated"] = outdated
         };
-        
+
         if (!string.IsNullOrEmpty(marketId))
             variables["marketId"] = marketId;
-        
+
         return await Client.Paginate<TranslatableResourceEntity, TranslatableResourcePaginationResponse>(
             GraphQlQueries.TranslatableResourcesWithTranslations,
             variables);
@@ -187,7 +238,7 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
         };
         return Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
     }
-    
+
     public async Task<IEnumerable<IdentifiedContentEntity>> GetProductMetafields(
         string productId,
         string locale,
@@ -199,14 +250,14 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
         var productMetafields = await Client.Paginate<MetafieldEntity, ProductMetafieldsPaginationResponse>(
             GraphQlQueries.ProductMetaFields,
             new Dictionary<string, object> { ["resourceId"] = productId });
-        
+
         var metafieldIds = productMetafields
             .Where(x => keys is null || keys.Contains(x.ToString()))
             .Where(x => string.IsNullOrEmpty(nameContains) ||
                         x.Definition?.Name?.Contains(nameContains, StringComparison.OrdinalIgnoreCase) == true)
             .Select(x => x.Id)
             .ToArray();
-        
+
         if (metafieldIds.Length == 0)
             return [];
 
@@ -219,14 +270,14 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
 
         if (!string.IsNullOrEmpty(market))
             variables["marketId"] = market;
-        
+
         var resources = await Client.Paginate<TranslatableResourceEntity, TranslatableResourcesByIdsPaginationResponse>(
             GraphQlQueries.TranslatableResourcesByIds,
             variables);
-        
+
         return resources.SelectMany(x => x.GetTranslatableContent().Select(y => new IdentifiedContentEntity(y) { Id = x.ResourceId }));
     }
-    
+
     private async Task<TranslatableResourceEntity> GetTranslatableResource(
         string resourceId,
         string locale,
@@ -240,7 +291,7 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
         };
 
         var response = await Client.ExecuteWithErrorHandling<TranslatableResourceResponse>(request);
-        return response.TranslatableResource ?? 
+        return response.TranslatableResource ??
                throw new PluginMisconfigurationException($"Could not find translatable content for {resourceId}. Please check the input");
     }
 
