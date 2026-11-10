@@ -30,7 +30,10 @@ public static class HtmlConverterHelper
         HtmlNode body,
         IEnumerable<IdentifiedContentEntity> contentEntities)
     {
-        contentEntities.ToList().ForEach(x =>
+        contentEntities
+            .Where(x => x.Value?.StartsWith("gid://shopify/") is false)
+            .ToList()
+            .ForEach(x =>
         {
             var node = doc.CreateElement(HtmlConstants.Div);
             bool isRichText = RichTextConverter.TryToHtml(x.Value, out var richTextHtml);
