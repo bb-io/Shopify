@@ -18,4 +18,7 @@ public class DownloadProductRequest
     
     [Display("Include option values")]
     public bool? IncludeOptionValues { get; set; }
+    
+    [Display("Metafield name contains", Description = "Download only metafields whose name contains this text")]
+    public string? MetafieldNameContains { get; set; }
 }

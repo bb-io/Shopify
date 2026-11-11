@@ -15,9 +15,17 @@ public class TranslatableResourceEntity
 
     public IEnumerable<ContentEntity> GetTranslatableContent()
     {
-        return Translations.Any()
-            ? Translations
-            : TranslatableContent;
+        if (Translations?.Any() != true)
+            return TranslatableContent;
+
+        // Translations come without a digest. Take it from the source so stale uploads can be detected
+        var sourceDigests = TranslatableContent.DistinctBy(x => x.Key).ToDictionary(x => x.Key, x => x.Digest);
+        return Translations.Select(x => new ContentEntity
+        {
+            Key = x.Key,
+            Value = x.Value,
+            Digest = sourceDigests.GetValueOrDefault(x.Key) ?? string.Empty
+        });
     }
 
     public override string ToString()

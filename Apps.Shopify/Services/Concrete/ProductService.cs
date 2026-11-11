@@ -53,9 +53,18 @@ public class ProductService(InvocationContext invocationContext)
         var productContentEntities = productContent.TranslatableResource.GetTranslatableContent()
             .Select(x => new IdentifiedContentEntity(x) { Id = input.ContentId });
         
-        var metafieldKeys = input.IncludeMetafields is true ? null : input.MetafieldKeys?.ToHashSet();
-        var metafieldContentEntities = input.IncludeMetafields is true || metafieldKeys?.Count > 0
-            ? await ResourceService.GetProductMetafields(input.ContentId, input.Locale, input.Outdated ?? false, input.MarketId, metafieldKeys)
+        bool includeAll = input.IncludeMetafields is true;
+        var metafieldKeys = includeAll ? null : input.MetafieldKeys?.ToHashSet();
+        string? nameContains = includeAll ? null : input.MetafieldNameContains;
+        
+        var metafieldContentEntities = includeAll || metafieldKeys?.Count > 0 || !string.IsNullOrEmpty(nameContains)
+            ? await ResourceService.GetProductMetafields(
+                input.ContentId,
+                input.Locale,
+                input.Outdated ?? false,
+                input.MarketId,
+                metafieldKeys, 
+                nameContains)
             : [];
 
         var optionsContentEntities = input.IncludeOptions is true ? GetProductOptions(productInfo) : [];
@@ -116,7 +125,10 @@ public class ProductService(InvocationContext invocationContext)
         var allItems = new List<IdentifiedContentRequest>();
         var productItems = dto.ProductContentEntities.ToList();
         if (!string.IsNullOrWhiteSpace(input.ContentId))
-            foreach (var item in productItems) item.ResourceId = input.ContentId;
+        {
+            foreach (var item in productItems) 
+                item.SetResourceId(input.ContentId);
+        }
 
         allItems.AddRange(productItems);
 
@@ -126,8 +138,6 @@ public class ProductService(InvocationContext invocationContext)
             allItems.AddRange(dto.OptionsContentEntities);
         if (dto.OptionValuesContentEntities != null) 
             allItems.AddRange(dto.OptionValuesContentEntities);
-
-        allItems.RemoveAll(x => string.IsNullOrWhiteSpace(x.Value));
 
         return ResourceService.UpdateIdentifiedContent(allItems, null, input.MarketId);
     }

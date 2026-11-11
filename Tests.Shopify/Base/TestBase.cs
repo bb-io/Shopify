@@ -23,6 +23,12 @@ public class TestBase
         InvocationContext = new InvocationContext
         {
             AuthenticationCredentialsProviders = Creds,
+            Logger = new Logger("Debug")
+            {
+                LogError = (message, _) => Console.WriteLine($"ERROR: {message}"),
+                LogWarning = (message, _) => Console.WriteLine($"WARNING: {message}"),
+                LogInformation = (message, _) => Console.WriteLine($"INFO: {message}")
+            }
         };
 
         FileManager = new FileManager();

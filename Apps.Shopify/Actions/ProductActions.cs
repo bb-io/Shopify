@@ -80,6 +80,7 @@ public class ProductActions(InvocationContext invocationContext, IFileManagement
             Outdated = getContentRequest.Outdated,
             MarketId = marketIdentifier.MarketId,
             MetafieldKeys = input.MetafieldKeys,
+            MetafieldNameContains = input.MetafieldNameContains
         };
 
         var file = await DownloadContent(request);
