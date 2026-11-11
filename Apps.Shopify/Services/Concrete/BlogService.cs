@@ -111,7 +111,7 @@ public class BlogService(InvocationContext invocationContext)
         if (!string.IsNullOrWhiteSpace(input.ContentId))
         {
             foreach (var item in blogItems)
-                item.ResourceId = input.ContentId;
+                item.SetResourceId(input.ContentId);
         }
 
         var allContent = blogItems.Concat(blogPostItems).ToList();

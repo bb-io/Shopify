@@ -60,12 +60,7 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
         if (!string.IsNullOrWhiteSpace(resourceId))
         {
             foreach (var item in items)
-            {
-                if (item.ResourceId != resourceId)
-                    item.TranslatableContentDigest = string.Empty;
-
-                item.ResourceId = resourceId;
-            }
+                item.SetResourceId(resourceId);
         }
 
         if (!string.IsNullOrWhiteSpace(marketId))

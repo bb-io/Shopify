@@ -125,7 +125,10 @@ public class ProductService(InvocationContext invocationContext)
         var allItems = new List<IdentifiedContentRequest>();
         var productItems = dto.ProductContentEntities.ToList();
         if (!string.IsNullOrWhiteSpace(input.ContentId))
-            foreach (var item in productItems) item.ResourceId = input.ContentId;
+        {
+            foreach (var item in productItems) 
+                item.SetResourceId(input.ContentId);
+        }
 
         allItems.AddRange(productItems);
 
