@@ -53,9 +53,18 @@ public class ProductService(InvocationContext invocationContext)
         var productContentEntities = productContent.TranslatableResource.GetTranslatableContent()
             .Select(x => new IdentifiedContentEntity(x) { Id = input.ContentId });
         
-        var metafieldKeys = input.IncludeMetafields is true ? null : input.MetafieldKeys?.ToHashSet();
-        var metafieldContentEntities = input.IncludeMetafields is true || metafieldKeys?.Count > 0
-            ? await ResourceService.GetProductMetafields(input.ContentId, input.Locale, input.Outdated ?? false, input.MarketId, metafieldKeys)
+        bool includeAll = input.IncludeMetafields is true;
+        var metafieldKeys = includeAll ? null : input.MetafieldKeys?.ToHashSet();
+        string? nameContains = includeAll ? null : input.MetafieldNameContains;
+        
+        var metafieldContentEntities = includeAll || metafieldKeys?.Count > 0 || !string.IsNullOrEmpty(nameContains)
+            ? await ResourceService.GetProductMetafields(
+                input.ContentId,
+                input.Locale,
+                input.Outdated ?? false,
+                input.MarketId,
+                metafieldKeys, 
+                nameContains)
             : [];
 
         var optionsContentEntities = input.IncludeOptions is true ? GetProductOptions(productInfo) : [];

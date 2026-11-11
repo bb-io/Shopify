@@ -37,4 +37,7 @@ public class DownloadContentRequest : IDownloadContentInput
 
     [Display("Asset keys", Description = "Specific store assets to translate"), DataSource(typeof(AssetThemeDataHandler))]
     public IEnumerable<string>? AssetKeys { get; set; }
+    
+    [Display("Product metafield name contains", Description = "Download only product metafields whose name contains this text")]
+    public string? MetafieldNameContains { get; set; }
 }
