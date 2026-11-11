@@ -74,12 +74,13 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
                 item.MarketId = marketId;
         }
 
-        foreach (var group in items.GroupBy(x => x.ResourceId))
+        var toUpload = items.Where(x => !string.IsNullOrWhiteSpace(x.Value)).ToList();
+        if (toUpload.Any(x => string.IsNullOrWhiteSpace(x.ResourceId)))
+            throw new PluginMisconfigurationException("Content ID is missing. Please provide it in the input");
+        
+        foreach (var group in toUpload.GroupBy(x => x.ResourceId))
         {
             string id = group.Key;
-            if (string.IsNullOrWhiteSpace(id))
-                throw new PluginMisconfigurationException("Content ID is missing. Please provide it in the input");
-
             var sourceContent = await GetResourceSourceContent(id);
             if (sourceContent.TranslatableResource is null)
             {
@@ -97,7 +98,7 @@ public class TranslatableResourceService(InvocationContext invocationContext) : 
             foreach (var item in group)
             {
                 var source = sourceByKey.GetValueOrDefault(item.Key);
-                if (string.IsNullOrWhiteSpace(item.Value) || item.Value.Trim() == source?.Value?.Trim())
+                if (item.Value?.Trim() == source?.Value?.Trim())
                     continue;
 
                 string? skipReason = GetSkipReason(item, source);
