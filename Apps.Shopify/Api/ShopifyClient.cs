@@ -15,20 +15,16 @@ namespace Apps.Shopify.Api;
 
 public class ShopifyClient : GraphQLHttpClient
 {
-    private const int TokenRequestRetryCount = 3;
+    private const int RetryCount = 3;
     private const int BaseBackoffSeconds = 1;
     private const int MaxBackoffSeconds = 8;
 
-    private static readonly AsyncRetryPolicy<HttpResponseMessage> TokenRetryPolicy = Policy
-        .Handle<HttpRequestException>()
-        .OrResult<HttpResponseMessage>(response => IsTransientStatusCode(response.StatusCode))
-        .WaitAndRetryAsync(TokenRequestRetryCount,
-            (retryAttempt, outcome, _) => GetRetryDelay(retryAttempt, outcome.Result),
-            (outcome, _, _, _) =>
-            {
-                outcome.Result?.Dispose();
-                return Task.CompletedTask;
-            });
+    private static readonly AsyncRetryPolicy RetryPolicy = Policy
+        .Handle<HttpRequestException>(ex => ex.StatusCode is null || IsTransientStatusCode(ex.StatusCode.Value))
+        .Or<GraphQLHttpRequestException>(response => IsTransientStatusCode(response.StatusCode))
+        .WaitAndRetryAsync(RetryCount,
+            (retryAttempt, exception, _) => GetRetryDelay(retryAttempt, (exception as GraphQLHttpRequestException)?.ResponseHeaders?.RetryAfter?.Delta),
+            (_, _, _, _) => Task.CompletedTask);
 
     public ShopifyClient(AuthenticationCredentialsProvider[] creds, string? endpoint = default) : base(
         endpoint ?? GenerateApiUrl(creds, ApiConstants.ApiVersion),
@@ -41,16 +37,7 @@ public class ShopifyClient : GraphQLHttpClient
     public async Task<T> ExecuteWithErrorHandling<T>(GraphQLRequest request,
         CancellationToken cancellationToken = default)
     {
-        GraphQLResponse<T>? response = null;
-
-        try
-        {
-            response = await SendQueryAsync<T>(request, cancellationToken);
-        }
-        catch (HttpRequestException ex)
-        {
-            throw new PluginApplicationException(FormatHttpErrorMessage("GraphQL request", ex));
-        }
+        var response = await SendWithRetry<T>(request, cancellationToken);
 
         if (response?.Errors is not null && response.Errors.Any())
         {
@@ -64,16 +51,7 @@ public class ShopifyClient : GraphQLHttpClient
     public async Task<GraphQLResponse<JObject>> ExecuteWithErrorHandling(GraphQLRequest request,
         CancellationToken cancellationToken = default)
     {
-        GraphQLResponse<JObject> response;
-
-        try
-        {
-            response = await SendQueryAsync<JObject>(request, cancellationToken);
-        }
-        catch (HttpRequestException ex)
-        {
-            throw new PluginApplicationException(FormatHttpErrorMessage("GraphQL request", ex));
-        }
+        var response = await SendWithRetry<JObject>(request, cancellationToken);
 
         if (response.Errors is not null && response.Errors.Any())
             throw new PluginApplicationException(string.Join(';', response.Errors.Select(x => x.Message)));
@@ -177,7 +155,7 @@ public class ShopifyClient : GraphQLHttpClient
         if (IsTransientStatusCode(response.StatusCode))
             throw new PluginApplicationException(
                 $"Shopify is temporarily unavailable ({(int)response.StatusCode} {response.ReasonPhrase}) " +
-                $"and the access token could not be retrieved after {TokenRequestRetryCount + 1} attempts. Please try again later.");
+                $"and the access token could not be retrieved after {RetryCount + 1} attempts. Please try again later.");
 
         var responseContent = await response.Content.ReadAsStringAsync();
 
@@ -199,7 +177,7 @@ public class ShopifyClient : GraphQLHttpClient
     {
         try
         {
-            return await TokenRetryPolicy.ExecuteAsync(async () =>
+            return await RetryPolicy.ExecuteAsync(async () =>
             {
                 using var request = CreateTokenRequest(storeName, clientId, clientSecret);
                 return await httpClient.SendAsync(request);
@@ -210,10 +188,26 @@ public class ShopifyClient : GraphQLHttpClient
             throw new PluginApplicationException(FormatHttpErrorMessage("token request", ex));
         }
     }
-
-    private static TimeSpan GetRetryDelay(int retryAttempt, HttpResponseMessage? response)
+    
+    private async Task<GraphQLResponse<T>> SendWithRetry<T>(GraphQLRequest request, CancellationToken cancellationToken)
     {
-        var retryAfter = response?.Headers.RetryAfter?.Delta;
+        try
+        {
+            return await RetryPolicy.ExecuteAsync(ct => SendQueryAsync<T>(request, ct), cancellationToken);
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new PluginApplicationException(FormatHttpErrorMessage("GraphQL request", ex));
+        }
+        catch (GraphQLHttpRequestException ex)
+        {
+            throw new PluginApplicationException(
+                $"Shopify request failed after {RetryCount + 1} attempts: {(int)ex.StatusCode} {ex.StatusCode}. Please try again later");
+        }
+    }
+
+    private static TimeSpan GetRetryDelay(int retryAttempt, TimeSpan? retryAfter)
+    {
         if (retryAfter > TimeSpan.Zero)
             return retryAfter.Value;
 
