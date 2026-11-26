@@ -57,6 +57,7 @@ public class ArticleService(InvocationContext invocationContext)
             .AddDateRange("published_at", input.PublishedAfter, input.PublishedBefore)
             .AddDateRange("created_at", input.CreatedAfter, input.CreatedBefore)
             .AddDateRange("updated_at", input.UpdatedAfter, input.UpdatedBefore)
+            .AddPublishedStatus(input.IsPublished)
             .Build();
 
         var response = await Client.Paginate<ArticleEntity, ArticlesPaginationResponse>(

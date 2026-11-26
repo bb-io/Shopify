@@ -45,6 +45,13 @@ public class QueryBuilder
 
         return this;
     }
+    
+    public QueryBuilder AddPublishedStatus(bool? published)
+    {
+        return published is null
+            ? this
+            : AddEquals("published_status", published.Value ? "published" : "unpublished");
+    }
 
     public string? Build()
     {

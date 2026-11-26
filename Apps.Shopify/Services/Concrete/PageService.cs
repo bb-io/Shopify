@@ -49,6 +49,7 @@ public class PageService(InvocationContext invocationContext)
             .AddDateRange("updated_at", input.UpdatedAfter, input.UpdatedBefore)
             .AddDateRange("created_at", input.CreatedAfter, input.CreatedBefore)
             .AddDateRange("published_at", input.PublishedAfter, input.PublishedBefore)
+            .AddPublishedStatus(input.IsPublished)
             .Build();
 
         var response = await Client.Paginate<PageEntity, PagesPaginationResponse>(
