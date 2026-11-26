@@ -32,6 +32,10 @@ public class SearchContentRequest : ICreatedDateFilter, IUpdatedDateFilter, IPub
     [Display("Created before")]
     public DateTime? CreatedBefore { get; set; }
 
+    [Display("Is published", 
+        Description = "True - published only, false - unpublished only. Applies to products, collections, pages and articles")]
+    public bool? IsPublished { get; set; }
+
     public void Validate()
     {
         this.ValidateDates();

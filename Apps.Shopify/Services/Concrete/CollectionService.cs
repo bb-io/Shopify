@@ -44,6 +44,7 @@ public class CollectionService(InvocationContext invocationContext)
         string? query = new QueryBuilder()
             .AddContains("title", input.NameContains)
             .AddDateRange("updated_at", input.UpdatedAfter, input.UpdatedBefore)
+            .AddPublishedStatus(input.IsPublished)
             .Build();
 
         var response = await Client.Paginate<CollectionEntity, CollectionsPaginationResponse>(
