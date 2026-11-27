@@ -16,7 +16,7 @@ using Apps.Shopify.Services.Models;
 
 namespace Apps.Shopify.Services.Concrete;
 
-public class ThemeService(InvocationContext invocationContext) : BaseContentService(invocationContext), IContentService
+public partial class ThemeService(InvocationContext invocationContext) : BaseContentService(invocationContext), IContentService
 {
     protected override string ContentType => TranslatableResources.Theme;
 
