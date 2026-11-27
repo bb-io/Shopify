@@ -16,7 +16,7 @@ public class UpdatePrimaryLocaleContentRequest
     [Display("Expected primary locale")]
     public string? ExpectedPrimaryLocale { get; set; }
 
-    [Display("Dry run")]
+    [Display("Dry run", Description = "True by default. Set to false to update content.")]
     public bool? DryRun { get; set; } = true;
 
     [Display("Validate source digest")]
