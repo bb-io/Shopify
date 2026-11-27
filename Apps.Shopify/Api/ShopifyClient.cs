@@ -26,8 +26,8 @@ public class ShopifyClient : GraphQLHttpClient
             (retryAttempt, exception, _) => GetRetryDelay(retryAttempt, (exception as GraphQLHttpRequestException)?.ResponseHeaders?.RetryAfter?.Delta),
             (_, _, _, _) => Task.CompletedTask);
 
-    public ShopifyClient(AuthenticationCredentialsProvider[] creds, string? endpoint = default) : base(
-        endpoint ?? GenerateApiUrl(creds, ApiConstants.ApiVersion),
+    public ShopifyClient(AuthenticationCredentialsProvider[] creds, string? endpoint = default, string? apiVersion = default) : base(
+        endpoint ?? GenerateApiUrl(creds, apiVersion ?? ApiConstants.ApiVersion),
         new NewtonsoftJsonSerializer())
     {
         var token = ResolveAccessToken(creds);

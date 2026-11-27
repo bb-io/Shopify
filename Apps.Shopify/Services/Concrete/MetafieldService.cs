@@ -4,7 +4,7 @@ using Blackbird.Applications.Sdk.Common.Invocation;
 
 namespace Apps.Shopify.Services.Concrete;
 
-public class MetafieldService(InvocationContext invocationContext) : BaseTranslatableResourceContentService(invocationContext)
+public partial class MetafieldService(InvocationContext invocationContext) : BaseTranslatableResourceContentService(invocationContext)
 {
     protected override string ContentType => TranslatableResources.Metafield;
 }

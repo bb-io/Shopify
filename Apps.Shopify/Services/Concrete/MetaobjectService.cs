@@ -10,7 +10,7 @@ using Blackbird.Applications.Sdk.Common.Invocation;
 
 namespace Apps.Shopify.Services.Concrete;
 
-public class MetaobjectService(InvocationContext invocationContext) : BaseTranslatableResourceContentService(invocationContext)
+public partial class MetaobjectService(InvocationContext invocationContext) : BaseTranslatableResourceContentService(invocationContext)
 {
     protected override string ContentType => TranslatableResources.Metaobject;
     

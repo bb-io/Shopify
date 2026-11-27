@@ -21,6 +21,20 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
 {
     private readonly ContentServiceFactory _factory = new(invocationContext);
 
+    [Action("Update primary locale content", Description = "Patch original store content from a translated file. Dry run is enabled by default")]
+    public async Task<UpdatePrimaryLocaleContentResponse> UpdatePrimaryLocaleContent(
+        [ActionParameter] UpdatePrimaryLocaleContentRequest input)
+    {
+        var html = await fileManagementClient.DownloadHtml(input.Content);
+        var contentType = input.ContentType ?? ShopifyHtmlConverter.ExtractContentTypeFromHtml(html)
+            ?? throw new PluginMisconfigurationException("Content type is missing. Provide it or include it in the file");
+        var service = _factory.GetContentService(contentType) as IPrimaryLocaleContentService
+            ?? throw new PluginMisconfigurationException($"Primary locale updates are unsupported for '{contentType}'");
+        using var client = new Apps.Shopify.Api.ShopifyClient(Creds, apiVersion: PrimaryLocaleUpdateContext.ApiVersion);
+        var context = new PrimaryLocaleUpdateContext(input, request => client.ExecuteWithErrorHandling<Newtonsoft.Json.Linq.JObject>(request));
+        return await context.Run(html, TranslatableResources.Normalize(contentType), service);
+    }
+
     [BlueprintActionDefinition(BlueprintAction.UploadContent)]
     [Action("Upload content", Description = "Upload content of a specific content type from a file")]
     public async Task UploadContent([ActionParameter] UploadContentRequest input)

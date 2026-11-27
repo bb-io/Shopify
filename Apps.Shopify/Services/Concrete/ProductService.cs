@@ -21,7 +21,7 @@ using Apps.Shopify.Services.Models;
 
 namespace Apps.Shopify.Services.Concrete;
 
-public class ProductService(InvocationContext invocationContext)
+public partial class ProductService(InvocationContext invocationContext)
     : BaseContentService(invocationContext), IContentService, IPollingContentService
 {
     protected override string ContentType => TranslatableResources.Product;
